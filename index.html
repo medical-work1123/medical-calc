@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>医療計算ツール</title>
+  <style>
+    :root {
+      --primary: #1a6fb5;
+      --primary-light: #e8f0fa;
+      --accent: #0d9488;
+      --accent-light: #e6f7f5;
+      --warn: #b45309;
+      --warn-light: #fef3c7;
+      --danger: #dc2626;
+      --danger-light: #fee2e2;
+      --surface: #ffffff;
+      --bg: #f1f5f9;
+      --border: #e2e8f0;
+      --text: #1e293b;
+      --muted: #64748b;
+      --radius: 16px;
+      --shadow: 0 2px 12px rgba(0,0,0,0.08);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Yu Gothic', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 0 0 40px;
+    }
+
+    header {
+      background: var(--primary);
+      color: #fff;
+      padding: 20px 24px 16px;
+      box-shadow: 0 2px 8px rgba(26,111,181,0.3);
+    }
+
+    header h1 {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    header p {
+      font-size: 13px;
+      opacity: 0.8;
+      margin-top: 4px;
+    }
+
+    nav {
+      display: flex;
+      background: #fff;
+      border-bottom: 1px solid var(--border);
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    nav button {
+      flex: 1;
+      min-width: 100px;
+      padding: 14px 8px;
+      border: none;
+      background: none;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--muted);
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
+    nav button.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+    }
+
+    main {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 24px 16px;
+    }
+
+    .section { display: none; }
+    .section.active { display: block; }
+
+    .card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+
+    .card-title {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card-title .badge {
+      font-size: 11px;
+      font-weight: 600;
+      background: var(--primary-light);
+      color: var(--primary);
+      padding: 2px 8px;
+      border-radius: 99px;
+    }
+
+    .formula-box {
+      background: var(--primary-light);
+      border-left: 4px solid var(--primary);
+      border-radius: 8px;
+      padding: 10px 14px;
+      margin-bottom: 20px;
+      font-size: 13px;
+      color: var(--primary);
+      line-height: 1.6;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .form-row.single { grid-template-columns: 1fr; }
+    .form-row.triple { grid-template-columns: 1fr 1fr 1fr; }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--muted);
+    }
+
+    .input-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    input[type="number"] {
+      width: 100%;
+      padding: 12px 48px 12px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      font-size: 16px;
+      color: var(--text);
+      background: #fff;
+      -webkit-appearance: none;
+      appearance: none;
+      transition: border-color 0.2s;
+    }
+
+    input[type="number"]:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(26,111,181,0.12);
+    }
+
+    .unit {
+      position: absolute;
+      right: 12px;
+      font-size: 12px;
+      color: var(--muted);
+      pointer-events: none;
+      font-weight: 600;
+    }
+
+    .radio-group {
+      display: flex;
+      gap: 10px;
+    }
+
+    .radio-btn {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 12px;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--muted);
+      background: #fff;
+      transition: all 0.2s;
+      user-select: none;
+    }
+
+    .radio-btn input { display: none; }
+
+    .radio-btn.selected {
+      border-color: var(--primary);
+      background: var(--primary-light);
+      color: var(--primary);
+    }
+
+    .calc-btn {
+      width: 100%;
+      padding: 16px;
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 16px;
+      transition: background 0.2s, transform 0.1s;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .calc-btn:active { transform: scale(0.98); background: #1558a0; }
+
+    .result-card {
+      border-radius: 14px;
+      padding: 20px;
+      margin-top: 16px;
+      display: none;
+    }
+
+    .result-card.show { display: block; }
+
+    .result-card.normal  { background: var(--accent-light); border: 2px solid var(--accent); }
+    .result-card.warn    { background: var(--warn-light);   border: 2px solid var(--warn); }
+    .result-card.danger  { background: var(--danger-light); border: 2px solid var(--danger); }
+    .result-card.info    { background: var(--primary-light); border: 2px solid var(--primary); }
+
+    .result-label {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 6px;
+    }
+
+    .result-card.normal  .result-label { color: var(--accent); }
+    .result-card.warn    .result-label { color: var(--warn); }
+    .result-card.danger  .result-label { color: var(--danger); }
+    .result-card.info    .result-label { color: var(--primary); }
+
+    .result-value {
+      font-size: 36px;
+      font-weight: 800;
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+
+    .result-card.normal  .result-value { color: var(--accent); }
+    .result-card.warn    .result-value { color: var(--warn); }
+    .result-card.danger  .result-value { color: var(--danger); }
+    .result-card.info    .result-value { color: var(--primary); }
+
+    .result-interp {
+      font-size: 14px;
+      font-weight: 600;
+      margin-top: 4px;
+    }
+
+    .result-card.normal  .result-interp { color: #065f46; }
+    .result-card.warn    .result-interp { color: #92400e; }
+    .result-card.danger  .result-interp { color: #991b1b; }
+    .result-card.info    .result-interp { color: #1e3a5f; }
+
+    .result-note {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 8px;
+      line-height: 1.5;
+    }
+
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 16px 0;
+    }
+
+    .ref-table {
+      width: 100%;
+      font-size: 13px;
+      border-collapse: collapse;
+    }
+
+    .ref-table th {
+      text-align: left;
+      font-weight: 700;
+      color: var(--muted);
+      padding: 6px 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .ref-table td {
+      padding: 8px 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .ref-table tr:last-child td { border-bottom: none; }
+
+    .tag {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 99px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .tag-normal  { background: #d1fae5; color: #065f46; }
+    .tag-mild    { background: #fef3c7; color: #92400e; }
+    .tag-mod     { background: #fed7aa; color: #9a3412; }
+    .tag-severe  { background: #fecaca; color: #991b1b; }
+    .tag-danger  { background: #fee2e2; color: #7f1d1d; }
+    .tag-pre     { background: #e0e7ff; color: #3730a3; }
+    .tag-intra   { background: #ede9fe; color: #5b21b6; }
+
+    .error-msg {
+      display: none;
+      color: var(--danger);
+      font-size: 13px;
+      font-weight: 600;
+      margin-top: 8px;
+      padding: 10px 14px;
+      background: var(--danger-light);
+      border-radius: 8px;
+    }
+
+    .error-msg.show { display: block; }
+
+    .reset-btn {
+      background: none;
+      border: 1.5px solid var(--border);
+      color: var(--muted);
+      border-radius: 10px;
+      padding: 12px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 8px;
+      transition: all 0.2s;
+    }
+
+    .reset-btn:active { background: var(--bg); }
+
+    @media (max-width: 420px) {
+      .form-row { grid-template-columns: 1fr; }
+      .form-row.triple { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>医療計算ツール</h1>
+  <p>BMI / クレアチニンクリアランス / FENa</p>
+</header>
+
+<nav>
+  <button class="active" onclick="showTab('bmi', this)">BMI</button>
+  <button onclick="showTab('ccr', this)">CCr (CG式)</button>
+  <button onclick="showTab('fena', this)">FENa</button>
+</nav>
+
+<main>
+
+  <!-- ===== BMI ===== -->
+  <div id="tab-bmi" class="section active">
+    <div class="card">
+      <div class="card-title">
+        BMI 計算
+        <span class="badge">Body Mass Index</span>
+      </div>
+      <div class="formula-box">
+        BMI = 体重 (kg) ÷ 身長 (m)²
+      </div>
+
+      <div class="form-row">
+        <div class="field">
+          <label>身長</label>
+          <div class="input-wrap">
+            <input type="number" id="bmi-height" placeholder="170" min="50" max="250" inputmode="decimal">
+            <span class="unit">cm</span>
+          </div>
+        </div>
+        <div class="field">
+          <label>体重</label>
+          <div class="input-wrap">
+            <input type="number" id="bmi-weight" placeholder="65" min="1" max="300" inputmode="decimal">
+            <span class="unit">kg</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="error-msg" id="bmi-error">身長と体重を正しく入力してください。</div>
+
+      <button class="calc-btn" onclick="calcBMI()">計算する</button>
+      <button class="reset-btn" onclick="resetSection('bmi')">リセット</button>
+
+      <div class="result-card" id="bmi-result">
+        <div class="result-label">BMI</div>
+        <div class="result-value" id="bmi-val">—</div>
+        <div class="result-interp" id="bmi-interp"></div>
+        <div class="result-note" id="bmi-note"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">判定基準（日本肥満学会）</div>
+      <table class="ref-table">
+        <tr><th>BMI</th><th>分類</th></tr>
+        <tr><td>&lt; 18.5</td><td><span class="tag tag-mild">低体重</span></td></tr>
+        <tr><td>18.5 〜 24.9</td><td><span class="tag tag-normal">普通体重</span></td></tr>
+        <tr><td>25.0 〜 29.9</td><td><span class="tag tag-mild">肥満1度</span></td></tr>
+        <tr><td>30.0 〜 34.9</td><td><span class="tag tag-mod">肥満2度</span></td></tr>
+        <tr><td>35.0 〜 39.9</td><td><span class="tag tag-severe">肥満3度</span></td></tr>
+        <tr><td>≥ 40.0</td><td><span class="tag tag-danger">肥満4度</span></td></tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- ===== CCr ===== -->
+  <div id="tab-ccr" class="section">
+    <div class="card">
+      <div class="card-title">
+        CCr 計算
+        <span class="badge">Cockcroft-Gault</span>
+      </div>
+      <div class="formula-box">
+        CCr = (140 − 年齢) × 体重 (kg)<br>
+        　　　　÷ (72 × 血清Cr (mg/dL))<br>
+        　　　　× 0.85（女性の場合）
+      </div>
+
+      <div class="form-row">
+        <div class="field">
+          <label>年齢</label>
+          <div class="input-wrap">
+            <input type="number" id="ccr-age" placeholder="65" min="1" max="120" inputmode="numeric">
+            <span class="unit">歳</span>
+          </div>
+        </div>
+        <div class="field">
+          <label>体重</label>
+          <div class="input-wrap">
+            <input type="number" id="ccr-weight" placeholder="60" min="1" max="300" inputmode="decimal">
+            <span class="unit">kg</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="field">
+          <label>血清クレアチニン</label>
+          <div class="input-wrap">
+            <input type="number" id="ccr-scr" placeholder="1.0" min="0.01" max="30" inputmode="decimal">
+            <span class="unit">mg/dL</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="field" style="margin-bottom: 0;">
+        <label>性別</label>
+        <div class="radio-group" style="margin-top: 5px;">
+          <label class="radio-btn selected" id="ccr-male-btn">
+            <input type="radio" name="ccr-sex" value="male" checked onchange="selectSex('ccr', this)">
+            男性
+          </label>
+          <label class="radio-btn" id="ccr-female-btn">
+            <input type="radio" name="ccr-sex" value="female" onchange="selectSex('ccr', this)">
+            女性
+          </label>
+        </div>
+      </div>
+
+      <div class="error-msg" id="ccr-error">すべての項目を正しく入力してください。</div>
+
+      <button class="calc-btn" onclick="calcCCr()">計算する</button>
+      <button class="reset-btn" onclick="resetSection('ccr')">リセット</button>
+
+      <div class="result-card" id="ccr-result">
+        <div class="result-label">CCr</div>
+        <div class="result-value" id="ccr-val">—</div>
+        <div class="result-interp" id="ccr-interp"></div>
+        <div class="result-note" id="ccr-note"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">腎機能ステージ（CKD分類）</div>
+      <table class="ref-table">
+        <tr><th>GFR / CCr</th><th>ステージ</th><th>評価</th></tr>
+        <tr><td>≥ 90</td><td>G1</td><td><span class="tag tag-normal">正常〜高値</span></td></tr>
+        <tr><td>60 〜 89</td><td>G2</td><td><span class="tag tag-normal">正常〜軽度低下</span></td></tr>
+        <tr><td>45 〜 59</td><td>G3a</td><td><span class="tag tag-mild">軽度〜中等度低下</span></td></tr>
+        <tr><td>30 〜 44</td><td>G3b</td><td><span class="tag tag-mod">中等度〜高度低下</span></td></tr>
+        <tr><td>15 〜 29</td><td>G4</td><td><span class="tag tag-severe">高度低下</span></td></tr>
+        <tr><td>&lt; 15</td><td>G5</td><td><span class="tag tag-danger">腎不全</span></td></tr>
+      </table>
+      <div class="result-note" style="margin-top: 10px;">
+        ※ Cockcroft-Gault式は実体重を使用。浮腫・肥満がある場合は補正体重の使用を検討。<br>
+        ※ CKDの確定診断には3か月以上の評価が必要。
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== FENa ===== -->
+  <div id="tab-fena" class="section">
+    <div class="card">
+      <div class="card-title">
+        FENa 計算
+        <span class="badge">尿中Na排泄率</span>
+      </div>
+      <div class="formula-box">
+        FENa (%) = (尿Na × 血清Cr) ÷ (血清Na × 尿Cr) × 100
+      </div>
+
+      <div style="margin-bottom: 12px;">
+        <div style="font-size: 13px; font-weight: 700; color: var(--muted); margin-bottom: 8px;">尿検査</div>
+        <div class="form-row">
+          <div class="field">
+            <label>尿中 Na</label>
+            <div class="input-wrap">
+              <input type="number" id="fena-una" placeholder="20" min="0" max="300" inputmode="decimal">
+              <span class="unit">mEq/L</span>
+            </div>
+          </div>
+          <div class="field">
+            <label>尿中 Cr</label>
+            <div class="input-wrap">
+              <input type="number" id="fena-ucr" placeholder="80" min="0.1" max="1000" inputmode="decimal">
+              <span class="unit">mg/dL</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div>
+        <div style="font-size: 13px; font-weight: 700; color: var(--muted); margin-bottom: 8px;">血液検査</div>
+        <div class="form-row">
+          <div class="field">
+            <label>血清 Na</label>
+            <div class="input-wrap">
+              <input type="number" id="fena-sna" placeholder="138" min="100" max="180" inputmode="decimal">
+              <span class="unit">mEq/L</span>
+            </div>
+          </div>
+          <div class="field">
+            <label>血清 Cr</label>
+            <div class="input-wrap">
+              <input type="number" id="fena-scr" placeholder="2.0" min="0.01" max="30" inputmode="decimal">
+              <span class="unit">mg/dL</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="error-msg" id="fena-error">すべての項目を正しく入力してください。</div>
+
+      <button class="calc-btn" onclick="calcFENa()">計算する</button>
+      <button class="reset-btn" onclick="resetSection('fena')">リセット</button>
+
+      <div class="result-card" id="fena-result">
+        <div class="result-label">FENa</div>
+        <div class="result-value" id="fena-val">—</div>
+        <div class="result-interp" id="fena-interp"></div>
+        <div class="result-note" id="fena-note"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">FENa の解釈</div>
+      <table class="ref-table">
+        <tr><th>FENa (%)</th><th>示唆される病態</th></tr>
+        <tr><td>&lt; 1%</td><td><span class="tag tag-pre">腎前性（脱水・心不全など）</span></td></tr>
+        <tr><td>1 〜 2%</td><td><span class="tag tag-mild">境界域（解釈注意）</span></td></tr>
+        <tr><td>≥ 2%</td><td><span class="tag tag-intra">腎性（ATN など）</span></td></tr>
+      </table>
+      <div class="result-note" style="margin-top: 10px;">
+        ※ 利尿薬使用中は FEUrea（&lt;35% で腎前性）を参考にする。<br>
+        ※ 造影剤腎症・ミオグロビン尿・急性尿路閉塞では偽陰性になりうる。<br>
+        ※ あくまで補助指標。臨床所見と合わせて総合判断すること。
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+  function showTab(name, btn) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-' + name).classList.add('active');
+    btn.classList.add('active');
+  }
+
+  function selectSex(prefix, radio) {
+    document.getElementById(prefix + '-male-btn').classList.toggle('selected', radio.value === 'male');
+    document.getElementById(prefix + '-female-btn').classList.toggle('selected', radio.value === 'female');
+  }
+
+  function showError(id, show) {
+    document.getElementById(id).classList.toggle('show', show);
+  }
+
+  function getVal(id) {
+    return parseFloat(document.getElementById(id).value);
+  }
+
+  function isValid(v) { return !isNaN(v) && v > 0; }
+
+  // ===== BMI =====
+  function calcBMI() {
+    const h = getVal('bmi-height');
+    const w = getVal('bmi-weight');
+
+    if (!isValid(h) || !isValid(w) || h < 50 || h > 250) {
+      showError('bmi-error', true);
+      document.getElementById('bmi-result').classList.remove('show');
+      return;
+    }
+    showError('bmi-error', false);
+
+    const bmi = w / Math.pow(h / 100, 2);
+    const el = document.getElementById('bmi-result');
+    const valEl = document.getElementById('bmi-val');
+    const interpEl = document.getElementById('bmi-interp');
+    const noteEl = document.getElementById('bmi-note');
+
+    valEl.textContent = bmi.toFixed(1);
+
+    let cls, interp, note;
+    if (bmi < 18.5) {
+      cls = 'warn'; interp = '低体重';
+      note = '栄養状態の評価を検討してください。';
+    } else if (bmi < 25) {
+      cls = 'normal'; interp = '普通体重';
+      note = `標準体重 (BMI=22): ${(22 * Math.pow(h/100, 2)).toFixed(1)} kg`;
+    } else if (bmi < 30) {
+      cls = 'warn'; interp = '肥満1度';
+      note = `目標体重 (BMI=25): ${(25 * Math.pow(h/100, 2)).toFixed(1)} kg`;
+    } else if (bmi < 35) {
+      cls = 'warn'; interp = '肥満2度';
+      note = `目標体重 (BMI=25): ${(25 * Math.pow(h/100, 2)).toFixed(1)} kg`;
+    } else if (bmi < 40) {
+      cls = 'danger'; interp = '肥満3度';
+      note = '高度肥満。内科的・外科的治療の検討を。';
+    } else {
+      cls = 'danger'; interp = '肥満4度';
+      note = '超高度肥満。専門的介入が必要です。';
+    }
+
+    el.className = 'result-card show ' + cls;
+    interpEl.textContent = interp;
+    noteEl.textContent = note;
+  }
+
+  // ===== CCr =====
+  function calcCCr() {
+    const age = getVal('ccr-age');
+    const wt  = getVal('ccr-weight');
+    const scr = getVal('ccr-scr');
+    const isFemale = document.querySelector('input[name="ccr-sex"]:checked').value === 'female';
+
+    if (!isValid(age) || !isValid(wt) || !isValid(scr) || age > 120) {
+      showError('ccr-error', true);
+      document.getElementById('ccr-result').classList.remove('show');
+      return;
+    }
+    showError('ccr-error', false);
+
+    let ccr = (140 - age) * wt / (72 * scr);
+    if (isFemale) ccr *= 0.85;
+    ccr = Math.max(ccr, 0);
+
+    const el = document.getElementById('ccr-result');
+    const valEl = document.getElementById('ccr-val');
+    const interpEl = document.getElementById('ccr-interp');
+    const noteEl = document.getElementById('ccr-note');
+
+    valEl.textContent = ccr.toFixed(1) + ' mL/min';
+
+    let cls, interp, note;
+    if (ccr >= 90) {
+      cls = 'normal'; interp = 'G1：正常〜高値';
+      note = '明らかな腎機能低下なし。';
+    } else if (ccr >= 60) {
+      cls = 'normal'; interp = 'G2：正常〜軽度低下';
+      note = '蛋白尿などの合併に注意。';
+    } else if (ccr >= 45) {
+      cls = 'warn'; interp = 'G3a：軽度〜中等度低下';
+      note = '腎毒性薬剤の用量調整を検討。貧血・骨代謝異常の評価を。';
+    } else if (ccr >= 30) {
+      cls = 'warn'; interp = 'G3b：中等度〜高度低下';
+      note = 'NSAIDs・造影剤の慎重投与。腎臓専門医への紹介を検討。';
+    } else if (ccr >= 15) {
+      cls = 'danger'; interp = 'G4：高度低下';
+      note = '腎代替療法の準備・教育を検討。腎臓専門医へ紹介。';
+    } else {
+      cls = 'danger'; interp = 'G5：腎不全';
+      note = '腎代替療法（透析・移植）の適応を検討。';
+    }
+
+    el.className = 'result-card show ' + cls;
+    interpEl.textContent = interp;
+    noteEl.textContent = (isFemale ? '女性補正（×0.85）適用済み。' : '') + note;
+  }
+
+  // ===== FENa =====
+  function calcFENa() {
+    const una = getVal('fena-una');
+    const ucr = getVal('fena-ucr');
+    const sna = getVal('fena-sna');
+    const scr = getVal('fena-scr');
+
+    if (!isValid(una) || !isValid(ucr) || !isValid(sna) || !isValid(scr)) {
+      showError('fena-error', true);
+      document.getElementById('fena-result').classList.remove('show');
+      return;
+    }
+    showError('fena-error', false);
+
+    const fena = (una * scr) / (sna * ucr) * 100;
+
+    const el = document.getElementById('fena-result');
+    const valEl = document.getElementById('fena-val');
+    const interpEl = document.getElementById('fena-interp');
+    const noteEl = document.getElementById('fena-note');
+
+    valEl.textContent = fena.toFixed(2) + ' %';
+
+    let cls, interp, note;
+    if (fena < 1) {
+      cls = 'info'; interp = '腎前性を示唆 (< 1%)';
+      note = '脱水・心不全・肝不全・敗血症初期などを考慮。利尿薬使用がなければ腎前性を強く示唆。';
+    } else if (fena < 2) {
+      cls = 'warn'; interp = '境界域 (1〜2%)';
+      note = '腎前性・腎性いずれも否定できない。臨床所見・経過と総合して判断。';
+    } else {
+      cls = 'danger'; interp = '腎性を示唆 (≥ 2%)';
+      note = '急性尿細管壊死（ATN）などを考慮。ただし利尿薬使用中は偽高値に注意。';
+    }
+
+    el.className = 'result-card show ' + cls;
+    interpEl.textContent = interp;
+    noteEl.textContent = note;
+  }
+
+  // ===== Reset =====
+  function resetSection(prefix) {
+    const section = document.getElementById('tab-' + prefix);
+    section.querySelectorAll('input[type="number"]').forEach(i => i.value = '');
+    const radios = section.querySelectorAll('input[type="radio"]');
+    radios.forEach((r, i) => { r.checked = i === 0; });
+    if (prefix === 'ccr') {
+      document.getElementById('ccr-male-btn').classList.add('selected');
+      document.getElementById('ccr-female-btn').classList.remove('selected');
+    }
+    section.querySelectorAll('.result-card').forEach(c => c.classList.remove('show'));
+    section.querySelectorAll('.error-msg').forEach(e => e.classList.remove('show'));
+  }
+
+  // Enter key support
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+      const active = document.querySelector('.section.active');
+      if (active) active.querySelector('.calc-btn')?.click();
+    }
+  });
+</script>
+</body>
+</html>
