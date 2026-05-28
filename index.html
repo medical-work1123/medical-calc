@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="内科計算">
+<title>内科 計算ツール</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F5F4F0;
+    --surface: #FFFFFF;
+    --surface2: #EDECE8;
+    --border: rgba(0,0,0,0.09);
+    --border2: rgba(0,0,0,0.15);
+    --text: #1A1A18;
+    --text2: #6B6B66;
+    --text3: #9A9A94;
+    --accent: #1B4F72;
+    --accent-light: #EAF1F8;
+    --accent-border: #A8C4D8;
+    --success: #1A5C3A;
+    --success-bg: #EAF4EE;
+    --warn: #7A4F00;
+    --warn-bg: #FDF4E3;
+    --danger: #8B1A1A;
+    --danger-bg: #FCEAEA;
+    --radius: 12px;
+    --radius-sm: 8px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  /* Header */
+  .app-header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 20px 14px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .app-header h1 {
+    font-size: 18px;
+    font-weight: 500;
+    color: var(--text);
+    letter-spacing: -0.3px;
+  }
+  .app-header p {
+    font-size: 12px;
+    color: var(--text3);
+    margin-top: 2px;
+  }
+
+  /* Tab bar — iOS-style bottom */
+  .tab-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0; right: 0;
+    background: rgba(255,255,255,0.95);
+    backdrop-filter: blur(12px);
+    border-top: 1px solid var(--border);
+    display: flex;
+    padding-bottom: env(safe-area-inset-bottom);
+    z-index: 100;
+  }
+  .tab-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px 4px 8px;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    color: var(--text3);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    gap: 4px;
+    transition: color 0.15s;
+  }
+  .tab-item .icon {
+    font-size: 22px;
+    line-height: 1;
+  }
+  .tab-item.active { color: var(--accent); }
+  .tab-item.active .icon { transform: translateY(-1px); }
+
+  /* Main content */
+  .main {
+    padding: 20px 16px calc(80px + env(safe-area-inset-bottom));
+    max-width: 680px;
+    margin: 0 auto;
+  }
+
+  /* Sections */
+  .section { display: none; }
+  .section.active { display: block; }
+
+  /* Section title */
+  .section-title {
+    font-size: 22px;
+    font-weight: 500;
+    color: var(--text);
+    letter-spacing: -0.5px;
+    margin-bottom: 4px;
+  }
+  .section-subtitle {
+    font-size: 13px;
+    color: var(--text3);
+    margin-bottom: 20px;
+    font-family: 'DM Mono', monospace;
+  }
+
+  /* Card */
+  .card {
+    background: var(--surface);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    padding: 20px;
+    box-shadow: var(--shadow);
+    margin-bottom: 12px;
+  }
+
+  /* Fields */
+  .field { margin-bottom: 16px; }
+  .field:last-child { margin-bottom: 0; }
+  .field label {
+    display: block;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text2);
+    margin-bottom: 7px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .field input, .field select {
+    width: 100%;
+    padding: 13px 14px;
+    border: 1px solid var(--border2);
+    border-radius: var(--radius-sm);
+    font-size: 17px;
+    font-family: 'DM Sans', sans-serif;
+    background: var(--surface);
+    color: var(--text);
+    appearance: none;
+    -webkit-appearance: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .field input:focus, .field select:focus {
+    outline: none;
+    border-color: var(--accent-border);
+    box-shadow: 0 0 0 3px var(--accent-light);
+  }
+  .field input::placeholder { color: var(--text3); }
+  .field select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%236B6B66' d='M6 8L0 0h12z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 36px;
+  }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  /* Sex toggle */
+  .sex-toggle { display: flex; gap: 8px; }
+  .sex-btn {
+    flex: 1;
+    padding: 12px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border2);
+    background: var(--surface);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    color: var(--text2);
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: center;
+  }
+  .sex-btn.active {
+    background: var(--accent-light);
+    border-color: var(--accent-border);
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  /* Divider */
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 18px 0;
+  }
+
+  /* Result */
+  .result-area { display: none; }
+  .result-area.show { display: block; }
+  .result-main {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .result-number {
+    font-size: 42px;
+    font-weight: 300;
+    color: var(--text);
+    letter-spacing: -2px;
+    font-family: 'DM Mono', monospace;
+  }
+  .result-unit {
+    font-size: 15px;
+    color: var(--text3);
+    font-family: 'DM Mono', monospace;
+  }
+  .result-badge {
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: 100px;
+    font-size: 13px;
+    font-weight: 500;
+  }
+  .badge-normal { background: var(--success-bg); color: var(--success); }
+  .badge-warn { background: var(--warn-bg); color: var(--warn); }
+  .badge-danger { background: var(--danger-bg); color: var(--danger); }
+
+  /* Sub results */
+  .sub-results { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+  .sub-card {
+    background: var(--surface2);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+  }
+  .sub-label { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+  .sub-value { font-size: 22px; font-weight: 300; font-family: 'DM Mono', monospace; color: var(--text); }
+  .sub-unit { font-size: 12px; color: var(--text3); }
+
+  /* Formula */
+  .formula {
+    background: var(--surface2);
+    border-radius: var(--radius-sm);
+    padding: 10px 14px;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--text3);
+    line-height: 1.6;
+  }
+
+  /* Info note */
+  .info-note {
+    background: var(--accent-light);
+    border: 1px solid var(--accent-border);
+    border-radius: var(--radius-sm);
+    padding: 10px 14px;
+    font-size: 12px;
+    color: var(--accent);
+    margin-top: 10px;
+    line-height: 1.6;
+  }
+
+  /* CKD stage */
+  .ckd-stages { margin-top: 12px; }
+  .ckd-stage {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+  }
+  .ckd-stage:last-child { border-bottom: none; }
+  .ckd-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .ckd-stage.current { font-weight: 500; color: var(--text); }
+  .ckd-stage:not(.current) { color: var(--text3); }
+
+  /* Clear button */
+  .clear-btn {
+    width: 100%;
+    padding: 12px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border2);
+    background: transparent;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: var(--text3);
+    cursor: pointer;
+    margin-top: 8px;
+    transition: all 0.15s;
+  }
+  .clear-btn:active { background: var(--surface2); }
+</style>
+</head>
+<body>
+
+<div class="app-header">
+  <h1>内科 計算ツール</h1>
+  <p>BMI・CCr・FENa</p>
+</div>
+
+<div class="main">
+
+  <!-- BMI -->
+  <div id="sec-bmi" class="section active">
+    <div class="section-title">BMI</div>
+    <div class="section-subtitle">Body Mass Index</div>
+    <div class="card">
+      <div class="grid-2">
+        <div class="field">
+          <label>身長</label>
+          <input type="number" id="bmi-h" inputmode="decimal" placeholder="cm" oninput="calcBMI()">
+        </div>
+        <div class="field">
+          <label>体重</label>
+          <input type="number" id="bmi-w" inputmode="decimal" placeholder="kg" oninput="calcBMI()">
+        </div>
+      </div>
+      <div class="divider"></div>
+      <div class="result-area" id="bmi-res">
+        <div class="sub-results">
+          <div class="sub-card">
+            <div class="sub-label">BMI</div>
+            <div class="sub-value" id="bmi-val">—</div>
+          </div>
+          <div class="sub-card">
+            <div class="sub-label">標準体重</div>
+            <div class="sub-value" id="bmi-ideal">— <span class="sub-unit">kg</span></div>
+          </div>
+        </div>
+        <div id="bmi-badge"></div>
+      </div>
+      <div class="formula">
+        BMI = 体重(kg) ÷ 身長(m)²<br>
+        標準体重 = 身長(m)² × 22
+      </div>
+      <button class="clear-btn" onclick="clearSection('bmi')">クリア</button>
+    </div>
+  </div>
+
+  <!-- CCr -->
+  <div id="sec-ccr" class="section">
+    <div class="section-title">CCr</div>
+    <div class="section-subtitle">Cockcroft-Gault 式</div>
+    <div class="card">
+      <div class="grid-2">
+        <div class="field">
+          <label>年齢</label>
+          <input type="number" id="ccr-age" inputmode="numeric" placeholder="歳" oninput="calcCCr()">
+        </div>
+        <div class="field">
+          <label>体重</label>
+          <input type="number" id="ccr-wt" inputmode="decimal" placeholder="kg" oninput="calcCCr()">
+        </div>
+      </div>
+      <div class="field">
+        <label>血清クレアチニン</label>
+        <input type="number" id="ccr-cr" inputmode="decimal" placeholder="mg/dL" step="0.01" oninput="calcCCr()">
+      </div>
+      <div class="field">
+        <label>性別</label>
+        <div class="sex-toggle">
+          <button class="sex-btn active" id="ccr-male" onclick="setSex('ccr','male')">男性</button>
+          <button class="sex-btn" id="ccr-female" onclick="setSex('ccr','female')">女性</button>
+        </div>
+      </div>
+      <div class="divider"></div>
+      <div class="result-area" id="ccr-res">
+        <div class="result-main">
+          <div class="result-number" id="ccr-val">—</div>
+          <div class="result-unit">mL/min</div>
+        </div>
+        <div id="ccr-badge" style="margin-bottom:12px;"></div>
+        <div class="ckd-stages" id="ccr-stages"></div>
+      </div>
+      <div class="formula">
+        CCr = [(140－年齢) × 体重] ÷ [72 × Cr]<br>
+        女性の場合 × 0.85
+      </div>
+      <button class="clear-btn" onclick="clearSection('ccr')">クリア</button>
+    </div>
+  </div>
+
+  <!-- FENa -->
+  <div id="sec-fena" class="section">
+    <div class="section-title">FENa</div>
+    <div class="section-subtitle">Fractional Excretion of Sodium</div>
+    <div class="card">
+      <div class="grid-2">
+        <div class="field">
+          <label>尿中 Na</label>
+          <input type="number" id="una" inputmode="decimal" placeholder="mEq/L" oninput="calcFENa()">
+        </div>
+        <div class="field">
+          <label>血清 Na</label>
+          <input type="number" id="sna" inputmode="decimal" placeholder="mEq/L" oninput="calcFENa()">
+        </div>
+        <div class="field">
+          <label>尿中 Cr</label>
+          <input type="number" id="ucr" inputmode="decimal" placeholder="mg/dL" oninput="calcFENa()">
+        </div>
+        <div class="field">
+          <label>血清 Cr</label>
+          <input type="number" id="scr" inputmode="decimal" placeholder="mg/dL" step="0.01" oninput="calcFENa()">
+        </div>
+      </div>
+      <div class="divider"></div>
+      <div class="result-area" id="fena-res">
+        <div class="result-main">
+          <div class="result-number" id="fena-val">—</div>
+          <div class="result-unit">%</div>
+        </div>
+        <div id="fena-badge" style="margin-bottom:12px;"></div>
+        <div id="fena-note"></div>
+      </div>
+      <div class="formula">
+        FENa(%) = (尿Na × 血清Cr) ÷ (血清Na × 尿Cr) × 100
+      </div>
+      <button class="clear-btn" onclick="clearSection('fena')">クリア</button>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<!-- Bottom tab bar -->
+<nav class="tab-bar">
+  <button class="tab-item active" id="tab-bmi" onclick="switchTab('bmi')">
+    <span class="icon">⚖️</span>
+    BMI
+  </button>
+  <button class="tab-item" id="tab-ccr" onclick="switchTab('ccr')">
+    <span class="icon">🫘</span>
+    CCr
+  </button>
+  <button class="tab-item" id="tab-fena" onclick="switchTab('fena')">
+    <span class="icon">💧</span>
+    FENa
+  </button>
+</nav>
+
+<script>
+var ccrSex = 'male';
+
+function switchTab(name) {
+  ['bmi','ccr','fena'].forEach(function(n) {
+    document.getElementById('sec-'+n).classList.toggle('active', n===name);
+    document.getElementById('tab-'+n).classList.toggle('active', n===name);
+  });
+}
+
+function setSex(calc, sex) {
+  ccrSex = sex;
+  document.getElementById(calc+'-male').classList.toggle('active', sex==='male');
+  document.getElementById(calc+'-female').classList.toggle('active', sex==='female');
+  calcCCr();
+}
+
+function badge(cls, text) {
+  return '<span class="result-badge badge-'+cls+'">'+text+'</span>';
+}
+
+function calcBMI() {
+  var h = parseFloat(document.getElementById('bmi-h').value);
+  var w = parseFloat(document.getElementById('bmi-w').value);
+  var res = document.getElementById('bmi-res');
+  if (!h || !w || h<=0 || w<=0) { res.classList.remove('show'); return; }
+  var hm = h/100;
+  var bmi = w/(hm*hm);
+  var ideal = hm*hm*22;
+  res.classList.add('show');
+  document.getElementById('bmi-val').textContent = bmi.toFixed(1);
+  document.getElementById('bmi-ideal').innerHTML = ideal.toFixed(1)+' <span class="sub-unit">kg</span>';
+  var b, t;
+  if (bmi < 18.5) { b='warn'; t='低体重（<18.5）'; }
+  else if (bmi < 25) { b='normal'; t='普通体重（18.5–25.0）'; }
+  else if (bmi < 30) { b='warn'; t='肥満1度（25.0–30.0）'; }
+  else { b='danger'; t='肥満2度以上（≥30.0）'; }
+  document.getElementById('bmi-badge').innerHTML = badge(b, t);
+}
+
+function calcCCr() {
+  var age = parseFloat(document.getElementById('ccr-age').value);
+  var wt = parseFloat(document.getElementById('ccr-wt').value);
+  var cr = parseFloat(document.getElementById('ccr-cr').value);
+  var res = document.getElementById('ccr-res');
+  if (!age||!wt||!cr||cr<=0) { res.classList.remove('show'); return; }
+  var ccr = ((140-age)*wt)/(72*cr);
+  if (ccrSex==='female') ccr *= 0.85;
+  res.classList.add('show');
+  document.getElementById('ccr-val').textContent = ccr.toFixed(1);
+
+  var stages = [
+    { label:'G1 正常〜高値', min:90, max:Infinity, col:'#1A5C3A' },
+    { label:'G2 軽度低下', min:60, max:90, col:'#3A7D44' },
+    { label:'G3a 軽〜中等度低下', min:45, max:60, col:'#B8860B' },
+    { label:'G3b 中〜高度低下', min:30, max:45, col:'#CC7000' },
+    { label:'G4 高度低下', min:15, max:30, col:'#CC3300' },
+    { label:'G5 腎不全', min:0, max:15, col:'#8B1A1A' }
+  ];
+  var current = stages.find(function(s){ return ccr>=s.min && ccr<s.max; });
+  var b, t;
+  if (ccr >= 60) { b='normal'; t='CKD G1–2（60以上）'; }
+  else if (ccr >= 30) { b='warn'; t='CKD G3（30–60）— 薬剤用量確認を'; }
+  else { b='danger'; t='CKD G4–5（30未満）— 高度腎機能低下'; }
+  document.getElementById('ccr-badge').innerHTML = badge(b, t);
+
+  var html = stages.map(function(s){
+    var isCurrent = s === current;
+    return '<div class="ckd-stage'+(isCurrent?' current':'')+'">'+
+      '<div class="ckd-dot" style="background:'+s.col+';'+(isCurrent?'width:10px;height:10px;':'')+'">'+'</div>'+
+      '<span>'+s.label+'</span>'+
+      (isCurrent ? ' <span style="margin-left:auto;font-family:\'DM Mono\',monospace;font-size:12px;color:'+s.col+'">← 現在</span>' : '')+
+      '</div>';
+  }).join('');
+  document.getElementById('ccr-stages').innerHTML = html;
+}
+
+function calcFENa() {
+  var uNa = parseFloat(document.getElementById('una').value);
+  var sNa = parseFloat(document.getElementById('sna').value);
+  var uCr = parseFloat(document.getElementById('ucr').value);
+  var sCr = parseFloat(document.getElementById('scr').value);
+  var res = document.getElementById('fena-res');
+  if (!uNa||!sNa||!uCr||!sCr||sNa<=0||uCr<=0) { res.classList.remove('show'); return; }
+  var fena = (uNa*sCr)/(sNa*uCr)*100;
+  res.classList.add('show');
+  document.getElementById('fena-val').textContent = fena.toFixed(2);
+  var b, t, note;
+  if (fena < 1) {
+    b='warn'; t='FENa < 1%：腎前性を示唆';
+    note='<div class="info-note">Na再吸収が亢進しています。脱水・心不全・肝硬変など腎前性AKIを疑ってください。</div>';
+  } else {
+    b='danger'; t='FENa ≥ 1%：腎性を示唆';
+    note='<div class="info-note">尿細管でのNa再吸収が低下しています。ATN・腎毒性薬剤・閉塞後利尿などを考慮してください。</div>';
+  }
+  document.getElementById('fena-badge').innerHTML = badge(b, t);
+  document.getElementById('fena-note').innerHTML = note;
+}
+
+function clearSection(name) {
+  if (name==='bmi') {
+    document.getElementById('bmi-h').value='';
+    document.getElementById('bmi-w').value='';
+    document.getElementById('bmi-res').classList.remove('show');
+  } else if (name==='ccr') {
+    document.getElementById('ccr-age').value='';
+    document.getElementById('ccr-wt').value='';
+    document.getElementById('ccr-cr').value='';
+    document.getElementById('ccr-res').classList.remove('show');
+  } else if (name==='fena') {
+    document.getElementById('una').value='';
+    document.getElementById('sna').value='';
+    document.getElementById('ucr').value='';
+    document.getElementById('scr').value='';
+    document.getElementById('fena-res').classList.remove('show');
+  }
+}
+</script>
+</body>
+</html>
