@@ -1,1192 +1,952 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-  <title>医療計算ツール</title>
-  <style>
-    :root {
-      --primary: #1a6fb5;
-      --primary-light: #e8f0fa;
-      --accent: #0d9488;
-      --accent-light: #e6f7f5;
-      --warn: #b45309;
-      --warn-light: #fef3c7;
-      --danger: #dc2626;
-      --danger-light: #fee2e2;
-      --surface: #ffffff;
-      --bg: #f1f5f9;
-      --border: #e2e8f0;
-      --text: #1e293b;
-      --muted: #64748b;
-      --radius: 16px;
-      --shadow: 0 2px 12px rgba(0,0,0,0.08);
-    }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Yu Gothic', sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      padding: 0 0 40px;
-    }
-
-    header {
-      background: var(--primary);
-      color: #fff;
-      padding: 20px 24px 16px;
-      box-shadow: 0 2px 8px rgba(26,111,181,0.3);
-    }
-
-    header h1 {
-      font-size: 22px;
-      font-weight: 700;
-      letter-spacing: 0.02em;
-    }
-
-    header p {
-      font-size: 13px;
-      opacity: 0.8;
-      margin-top: 4px;
-    }
-
-    nav {
-      display: flex;
-      background: #fff;
-      border-bottom: 1px solid var(--border);
-      overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
-    }
-
-    nav button {
-      flex: 1;
-      min-width: 100px;
-      padding: 14px 8px;
-      border: none;
-      background: none;
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--muted);
-      cursor: pointer;
-      border-bottom: 3px solid transparent;
-      transition: all 0.2s;
-      white-space: nowrap;
-    }
-
-    nav button.active {
-      color: var(--primary);
-      border-bottom-color: var(--primary);
-    }
-
-    main {
-      max-width: 680px;
-      margin: 0 auto;
-      padding: 24px 16px;
-    }
-
-    .section { display: none; }
-    .section.active { display: block; }
-
-    .card {
-      background: var(--surface);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      padding: 24px;
-      margin-bottom: 20px;
-    }
-
-    .card-title {
-      font-size: 17px;
-      font-weight: 700;
-      color: var(--primary);
-      margin-bottom: 6px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .card-title .badge {
-      font-size: 11px;
-      font-weight: 600;
-      background: var(--primary-light);
-      color: var(--primary);
-      padding: 2px 8px;
-      border-radius: 99px;
-    }
-
-    .formula-box {
-      background: var(--primary-light);
-      border-left: 4px solid var(--primary);
-      border-radius: 8px;
-      padding: 10px 14px;
-      margin-bottom: 20px;
-      font-size: 13px;
-      color: var(--primary);
-      line-height: 1.6;
-    }
-
-    .form-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin-bottom: 12px;
-    }
-
-    .form-row.single { grid-template-columns: 1fr; }
-    .form-row.triple { grid-template-columns: 1fr 1fr 1fr; }
-
-    .field {
-      display: flex;
-      flex-direction: column;
-      gap: 5px;
-    }
-
-    label {
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--muted);
-    }
-
-    .input-wrap {
-      position: relative;
-      display: flex;
-      align-items: center;
-    }
-
-    input[type="number"] {
-      width: 100%;
-      padding: 12px 48px 12px 14px;
-      border: 1.5px solid var(--border);
-      border-radius: 10px;
-      font-size: 16px;
-      color: var(--text);
-      background: #fff;
-      -webkit-appearance: none;
-      appearance: none;
-      transition: border-color 0.2s;
-    }
-
-    input[type="number"]:focus {
-      outline: none;
-      border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(26,111,181,0.12);
-    }
-
-    .unit {
-      position: absolute;
-      right: 12px;
-      font-size: 12px;
-      color: var(--muted);
-      pointer-events: none;
-      font-weight: 600;
-    }
-
-    .radio-group {
-      display: flex;
-      gap: 10px;
-    }
-
-    .radio-btn {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      padding: 12px;
-      border: 1.5px solid var(--border);
-      border-radius: 10px;
-      cursor: pointer;
-      font-size: 15px;
-      font-weight: 600;
-      color: var(--muted);
-      background: #fff;
-      transition: all 0.2s;
-      user-select: none;
-    }
-
-    .radio-btn input { display: none; }
-
-    .radio-btn.selected {
-      border-color: var(--primary);
-      background: var(--primary-light);
-      color: var(--primary);
-    }
-
-    .calc-btn {
-      width: 100%;
-      padding: 16px;
-      background: var(--primary);
-      color: #fff;
-      border: none;
-      border-radius: 12px;
-      font-size: 16px;
-      font-weight: 700;
-      cursor: pointer;
-      margin-top: 16px;
-      transition: background 0.2s, transform 0.1s;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    .calc-btn:active { transform: scale(0.98); background: #1558a0; }
-
-    .result-card {
-      border-radius: 14px;
-      padding: 20px;
-      margin-top: 16px;
-      display: none;
-    }
-
-    .result-card.show { display: block; }
-
-    .result-card.normal  { background: var(--accent-light); border: 2px solid var(--accent); }
-    .result-card.warn    { background: var(--warn-light);   border: 2px solid var(--warn); }
-    .result-card.danger  { background: var(--danger-light); border: 2px solid var(--danger); }
-    .result-card.info    { background: var(--primary-light); border: 2px solid var(--primary); }
-
-    .result-label {
-      font-size: 12px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      margin-bottom: 6px;
-    }
-
-    .result-card.normal  .result-label { color: var(--accent); }
-    .result-card.warn    .result-label { color: var(--warn); }
-    .result-card.danger  .result-label { color: var(--danger); }
-    .result-card.info    .result-label { color: var(--primary); }
-
-    .result-value {
-      font-size: 36px;
-      font-weight: 800;
-      line-height: 1;
-      margin-bottom: 6px;
-    }
-
-    .result-card.normal  .result-value { color: var(--accent); }
-    .result-card.warn    .result-value { color: var(--warn); }
-    .result-card.danger  .result-value { color: var(--danger); }
-    .result-card.info    .result-value { color: var(--primary); }
-
-    .result-interp {
-      font-size: 14px;
-      font-weight: 600;
-      margin-top: 4px;
-    }
-
-    .result-card.normal  .result-interp { color: #065f46; }
-    .result-card.warn    .result-interp { color: #92400e; }
-    .result-card.danger  .result-interp { color: #991b1b; }
-    .result-card.info    .result-interp { color: #1e3a5f; }
-
-    .result-note {
-      font-size: 12px;
-      color: var(--muted);
-      margin-top: 8px;
-      line-height: 1.5;
-    }
-
-    .divider {
-      height: 1px;
-      background: var(--border);
-      margin: 16px 0;
-    }
-
-    .ref-table {
-      width: 100%;
-      font-size: 13px;
-      border-collapse: collapse;
-    }
-
-    .ref-table th {
-      text-align: left;
-      font-weight: 700;
-      color: var(--muted);
-      padding: 6px 8px;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .ref-table td {
-      padding: 8px 8px;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .ref-table tr:last-child td { border-bottom: none; }
-
-    .tag {
-      display: inline-block;
-      padding: 2px 8px;
-      border-radius: 99px;
-      font-size: 11px;
-      font-weight: 700;
-    }
-
-    .tag-normal  { background: #d1fae5; color: #065f46; }
-    .tag-mild    { background: #fef3c7; color: #92400e; }
-    .tag-mod     { background: #fed7aa; color: #9a3412; }
-    .tag-severe  { background: #fecaca; color: #991b1b; }
-    .tag-danger  { background: #fee2e2; color: #7f1d1d; }
-    .tag-pre     { background: #e0e7ff; color: #3730a3; }
-    .tag-intra   { background: #ede9fe; color: #5b21b6; }
-
-    .error-msg {
-      display: none;
-      color: var(--danger);
-      font-size: 13px;
-      font-weight: 600;
-      margin-top: 8px;
-      padding: 10px 14px;
-      background: var(--danger-light);
-      border-radius: 8px;
-    }
-
-    .error-msg.show { display: block; }
-
-    .reset-btn {
-      background: none;
-      border: 1.5px solid var(--border);
-      color: var(--muted);
-      border-radius: 10px;
-      padding: 12px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      width: 100%;
-      margin-top: 8px;
-      transition: all 0.2s;
-    }
-
-    .reset-btn:active { background: var(--bg); }
-
-    @media (max-width: 420px) {
-      .form-row { grid-template-columns: 1fr; }
-      .form-row.triple { grid-template-columns: 1fr 1fr; }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>医療計算ツール</title>
+<style>
+:root{--p:#1a6fb5;--pl:#e8f0fa;--a:#0d9488;--al:#e6f7f5;--w:#b45309;--wl:#fef3c7;--d:#dc2626;--dl:#fee2e2;--bg:#f1f5f9;--sur:#fff;--bdr:#e2e8f0;--tx:#1e293b;--mu:#64748b;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans','Yu Gothic',sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;padding-bottom:40px;}
+header{background:var(--p);color:#fff;padding:14px 20px 12px;box-shadow:0 2px 8px rgba(26,111,181,.3);}
+header h1{font-size:20px;font-weight:700;}
+header p{font-size:12px;opacity:.75;margin-top:2px;}
+.cat-nav{display:flex;background:#154f8a;overflow-x:auto;-webkit-overflow-scrolling:touch;}
+.cat-nav button{flex:1;min-width:72px;padding:10px 6px;border:none;background:none;color:rgba(255,255,255,.65);font-size:13px;font-weight:700;cursor:pointer;border-bottom:3px solid transparent;transition:all .2s;white-space:nowrap;}
+.cat-nav button.active{color:#fff;border-bottom-color:#7dd3fc;background:rgba(255,255,255,.1);}
+.sub-nav{display:flex;background:#fff;border-bottom:1px solid var(--bdr);overflow-x:auto;-webkit-overflow-scrolling:touch;}
+.sub-nav button{flex-shrink:0;padding:10px 14px;border:none;background:none;color:var(--mu);font-size:13px;font-weight:600;cursor:pointer;border-bottom:3px solid transparent;transition:all .2s;white-space:nowrap;}
+.sub-nav button.active{color:var(--p);border-bottom-color:var(--p);}
+main{max-width:680px;margin:0 auto;padding:20px 16px;}
+.section{display:none;}.section.active{display:block;}
+.card{background:#fff;border-radius:16px;box-shadow:0 2px 12px rgba(0,0,0,.08);padding:20px;margin-bottom:16px;}
+.card-title{font-size:16px;font-weight:700;color:var(--p);margin-bottom:6px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.badge{font-size:11px;font-weight:600;background:var(--pl);color:var(--p);padding:2px 8px;border-radius:99px;}
+.formula-box{background:var(--pl);border-left:4px solid var(--p);border-radius:8px;padding:10px 14px;margin-bottom:16px;font-size:13px;color:var(--p);line-height:1.7;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;}
+.form-row.s1{grid-template-columns:1fr;}.form-row.s3{grid-template-columns:1fr 1fr 1fr;}
+.field{display:flex;flex-direction:column;gap:4px;}
+.field label{font-size:12px;font-weight:600;color:var(--mu);}
+.input-wrap{position:relative;display:flex;align-items:center;}
+input[type=number]{width:100%;padding:11px 44px 11px 12px;border:1.5px solid var(--bdr);border-radius:10px;font-size:16px;color:var(--tx);background:#fff;-webkit-appearance:none;appearance:none;transition:border-color .2s;}
+input[type=number]:focus{outline:none;border-color:var(--p);box-shadow:0 0 0 3px rgba(26,111,181,.1);}
+.unit{position:absolute;right:9px;font-size:11px;color:var(--mu);pointer-events:none;font-weight:600;}
+.radio-group{display:flex;gap:8px;}
+.rbtn{flex:1;display:flex;align-items:center;justify-content:center;gap:5px;padding:10px;border:1.5px solid var(--bdr);border-radius:10px;cursor:pointer;font-size:14px;font-weight:600;color:var(--mu);background:#fff;transition:all .2s;user-select:none;}
+.rbtn input{display:none;}
+.rbtn.sel{border-color:var(--p);background:var(--pl);color:var(--p);}
+.chk-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border:1.5px solid var(--bdr);border-radius:10px;margin-bottom:7px;cursor:pointer;transition:all .2s;user-select:none;}
+.chk-item.sel{border-color:var(--p);background:var(--pl);}
+.chk-item input{display:none;}
+.chk-box{width:20px;height:20px;border:2px solid var(--bdr);border-radius:5px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:13px;}
+.chk-item.sel .chk-box{background:var(--p);border-color:var(--p);color:#fff;}
+.chk-lbl{font-size:14px;font-weight:500;}
+.calc-btn{width:100%;padding:14px;background:var(--p);color:#fff;border:none;border-radius:12px;font-size:16px;font-weight:700;cursor:pointer;margin-top:12px;transition:background .2s,transform .1s;-webkit-tap-highlight-color:transparent;}
+.calc-btn:active{transform:scale(.98);background:#1558a0;}
+.reset-btn{background:none;border:1.5px solid var(--bdr);color:var(--mu);border-radius:10px;padding:10px;font-size:14px;font-weight:600;cursor:pointer;width:100%;margin-top:7px;transition:all .2s;}
+.reset-btn:active{background:var(--bg);}
+.rc{border-radius:14px;padding:16px;margin-top:12px;display:none;}
+.rc.show{display:block;}
+.rc.ok{background:var(--al);border:2px solid var(--a);}
+.rc.wn{background:var(--wl);border:2px solid var(--w);}
+.rc.ng{background:var(--dl);border:2px solid var(--d);}
+.rc.inf{background:var(--pl);border:2px solid var(--p);}
+.rl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px;}
+.rc.ok .rl{color:var(--a);}.rc.wn .rl{color:var(--w);}.rc.ng .rl{color:var(--d);}.rc.inf .rl{color:var(--p);}
+.rv{font-size:34px;font-weight:800;line-height:1;margin-bottom:4px;}
+.rc.ok .rv{color:var(--a);}.rc.wn .rv{color:var(--w);}.rc.ng .rv{color:var(--d);}.rc.inf .rv{color:var(--p);}
+.ri{font-size:14px;font-weight:600;margin-top:4px;}
+.rc.ok .ri{color:#065f46;}.rc.wn .ri{color:#92400e;}.rc.ng .ri{color:#991b1b;}.rc.inf .ri{color:#1e3a5f;}
+.rn{font-size:12px;color:var(--mu);margin-top:7px;line-height:1.6;white-space:pre-line;}
+.multi-rc{display:none;gap:10px;margin-top:12px;}
+.multi-rc.show{display:grid;grid-template-columns:1fr 1fr;}
+.multi-rc .rc{display:block;margin-top:0;}
+.divider{height:1px;background:var(--bdr);margin:12px 0;}
+.sh{font-size:12px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;}
+.ref-table{width:100%;font-size:13px;border-collapse:collapse;}
+.ref-table th{text-align:left;font-weight:700;color:var(--mu);padding:6px 8px;border-bottom:1px solid var(--bdr);}
+.ref-table td{padding:7px 8px;border-bottom:1px solid var(--bdr);}
+.ref-table tr:last-child td{border-bottom:none;}
+.tag{display:inline-block;padding:2px 8px;border-radius:99px;font-size:11px;font-weight:700;}
+.t-ok{background:#d1fae5;color:#065f46;}.t-ld{background:#fef3c7;color:#92400e;}.t-md{background:#fed7aa;color:#9a3412;}.t-sv{background:#fecaca;color:#991b1b;}.t-dg{background:#fee2e2;color:#7f1d1d;}.t-bl{background:#e0e7ff;color:#3730a3;}.t-pu{background:#ede9fe;color:#5b21b6;}
+.err{display:none;color:var(--d);font-size:13px;font-weight:600;margin-top:7px;padding:9px 12px;background:var(--dl);border-radius:8px;}
+.err.show{display:block;}
+.criteria-row{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;}
+.cr-item{display:flex;align-items:center;gap:5px;padding:6px 10px;border-radius:8px;font-size:12px;font-weight:600;}
+.cr-ok{background:#d1fae5;color:#065f46;}.cr-ng{background:#fee2e2;color:#991b1b;}
+@media(max-width:440px){.form-row{grid-template-columns:1fr;}.form-row.s3{grid-template-columns:1fr 1fr;}.multi-rc.show{grid-template-columns:1fr;}}
+</style>
 </head>
 <body>
-
 <header>
   <h1>医療計算ツール</h1>
-  <p>BMI / CCr / FENa / MELD / MDF / GAHS</p>
+  <p>腎臓・肝臓・糖尿病・脂質異常症・電解質</p>
 </header>
-
-<nav>
-  <button class="active" onclick="showTab('bmi', this)">BMI</button>
-  <button onclick="showTab('ccr', this)">CCr (CG式)</button>
-  <button onclick="showTab('fena', this)">FENa</button>
-  <button onclick="showTab('meld', this)">MELD</button>
-  <button onclick="showTab('mdf', this)">MDF</button>
-  <button onclick="showTab('gahs', this)">GAHS</button>
+<nav class="cat-nav" id="cat-nav">
+  <button onclick="selectCat('kidney',this)" class="active">腎臓</button>
+  <button onclick="selectCat('liver',this)">肝臓</button>
+  <button onclick="selectCat('diabetes',this)">糖尿病</button>
+  <button onclick="selectCat('lipid',this)">脂質異常症</button>
+  <button onclick="selectCat('electrolyte',this)">電解質</button>
 </nav>
-
+<nav class="sub-nav" id="sub-nav"></nav>
 <main>
 
-  <!-- ===== BMI ===== -->
-  <div id="tab-bmi" class="section active">
-    <div class="card">
-      <div class="card-title">
-        BMI 計算
-        <span class="badge">Body Mass Index</span>
-      </div>
-      <div class="formula-box">
-        BMI = 体重 (kg) ÷ 身長 (m)²
-      </div>
-
-      <div class="form-row">
-        <div class="field">
-          <label>身長</label>
-          <div class="input-wrap">
-            <input type="number" id="bmi-height" placeholder="170" min="50" max="250" inputmode="decimal">
-            <span class="unit">cm</span>
-          </div>
-        </div>
-        <div class="field">
-          <label>体重</label>
-          <div class="input-wrap">
-            <input type="number" id="bmi-weight" placeholder="65" min="1" max="300" inputmode="decimal">
-            <span class="unit">kg</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="error-msg" id="bmi-error">身長と体重を正しく入力してください。</div>
-
-      <button class="calc-btn" onclick="calcBMI()">計算する</button>
-      <button class="reset-btn" onclick="resetSection('bmi')">リセット</button>
-
-      <div class="result-card" id="bmi-result">
-        <div class="result-label">BMI</div>
-        <div class="result-value" id="bmi-val">—</div>
-        <div class="result-interp" id="bmi-interp"></div>
-        <div class="result-note" id="bmi-note"></div>
+<!-- ========== 腎臓 ========== -->
+<div id="tab-ccr" class="section active">
+  <div class="card">
+    <div class="card-title">CCr 計算<span class="badge">Cockcroft-Gault</span></div>
+    <div class="formula-box">CCr = (140−年齢)×体重 / (72×血清Cr)<br>× 0.85（女性）</div>
+    <div class="form-row">
+      <div class="field"><label>年齢</label><div class="input-wrap"><input type="number" id="ccr-age" placeholder="65" min="1" max="120" inputmode="numeric"><span class="unit">歳</span></div></div>
+      <div class="field"><label>体重</label><div class="input-wrap"><input type="number" id="ccr-wt" placeholder="60" min="1" max="300" inputmode="decimal"><span class="unit">kg</span></div></div>
+    </div>
+    <div class="form-row s1">
+      <div class="field"><label>血清クレアチニン</label><div class="input-wrap"><input type="number" id="ccr-scr" placeholder="1.0" min="0.01" max="30" inputmode="decimal"><span class="unit">mg/dL</span></div></div>
+    </div>
+    <div class="field"><label>性別</label>
+      <div class="radio-group" style="margin-top:5px">
+        <label class="rbtn sel" id="ccr-m"><input type="radio" name="ccr-sex" value="male" checked onchange="rsel('ccr-m','ccr-f')">男性</label>
+        <label class="rbtn" id="ccr-f"><input type="radio" name="ccr-sex" value="female" onchange="rsel('ccr-f','ccr-m')">女性</label>
       </div>
     </div>
+    <div class="err" id="ccr-err">すべての項目を正しく入力してください。</div>
+    <button class="calc-btn" onclick="calcCCr()">計算する</button>
+    <button class="reset-btn" onclick="rst('ccr')">リセット</button>
+    <div class="rc" id="ccr-rc"><div class="rl">CCr</div><div class="rv" id="ccr-rv"></div><div class="ri" id="ccr-ri"></div><div class="rn" id="ccr-rn"></div></div>
+  </div>
+  <div class="card">
+    <div class="card-title">腎機能ステージ（CKD）</div>
+    <table class="ref-table"><tr><th>CCr/GFR</th><th>ステージ</th><th>評価</th></tr>
+    <tr><td>≥90</td><td>G1</td><td><span class="tag t-ok">正常〜高値</span></td></tr>
+    <tr><td>60〜89</td><td>G2</td><td><span class="tag t-ok">軽度低下</span></td></tr>
+    <tr><td>45〜59</td><td>G3a</td><td><span class="tag t-ld">軽〜中等度低下</span></td></tr>
+    <tr><td>30〜44</td><td>G3b</td><td><span class="tag t-md">中〜高度低下</span></td></tr>
+    <tr><td>15〜29</td><td>G4</td><td><span class="tag t-sv">高度低下</span></td></tr>
+    <tr><td>&lt;15</td><td>G5</td><td><span class="tag t-dg">腎不全</span></td></tr></table>
+    <p class="rn" style="margin-top:8px">※浮腫・肥満では補正体重の使用を検討。CKD確定には3か月以上の評価が必要。</p>
+  </div>
+</div>
 
-    <div class="card">
-      <div class="card-title">判定基準（日本肥満学会）</div>
-      <table class="ref-table">
-        <tr><th>BMI</th><th>分類</th></tr>
-        <tr><td>&lt; 18.5</td><td><span class="tag tag-mild">低体重</span></td></tr>
-        <tr><td>18.5 〜 24.9</td><td><span class="tag tag-normal">普通体重</span></td></tr>
-        <tr><td>25.0 〜 29.9</td><td><span class="tag tag-mild">肥満1度</span></td></tr>
-        <tr><td>30.0 〜 34.9</td><td><span class="tag tag-mod">肥満2度</span></td></tr>
-        <tr><td>35.0 〜 39.9</td><td><span class="tag tag-severe">肥満3度</span></td></tr>
-        <tr><td>≥ 40.0</td><td><span class="tag tag-danger">肥満4度</span></td></tr>
-      </table>
+<div id="tab-fena" class="section">
+  <div class="card">
+    <div class="card-title">FENa 計算<span class="badge">尿中Na排泄率</span></div>
+    <div class="formula-box">FENa(%) = (尿Na×血清Cr) / (血清Na×尿Cr) × 100</div>
+    <div class="sh">尿検査</div>
+    <div class="form-row">
+      <div class="field"><label>尿中 Na</label><div class="input-wrap"><input type="number" id="fena-una" placeholder="20" min="0" max="300" inputmode="decimal"><span class="unit">mEq/L</span></div></div>
+      <div class="field"><label>尿中 Cr</label><div class="input-wrap"><input type="number" id="fena-ucr" placeholder="80" min="0.1" max="1000" inputmode="decimal"><span class="unit">mg/dL</span></div></div>
+    </div>
+    <div class="divider"></div>
+    <div class="sh">血液検査</div>
+    <div class="form-row">
+      <div class="field"><label>血清 Na</label><div class="input-wrap"><input type="number" id="fena-sna" placeholder="138" min="100" max="180" inputmode="decimal"><span class="unit">mEq/L</span></div></div>
+      <div class="field"><label>血清 Cr</label><div class="input-wrap"><input type="number" id="fena-scr" placeholder="2.0" min="0.01" max="30" inputmode="decimal"><span class="unit">mg/dL</span></div></div>
+    </div>
+    <div class="err" id="fena-err">すべての項目を正しく入力してください。</div>
+    <button class="calc-btn" onclick="calcFENa()">計算する</button>
+    <button class="reset-btn" onclick="rst('fena')">リセット</button>
+    <div class="rc" id="fena-rc"><div class="rl">FENa</div><div class="rv" id="fena-rv"></div><div class="ri" id="fena-ri"></div><div class="rn" id="fena-rn"></div></div>
+  </div>
+  <div class="card">
+    <div class="card-title">FENa の解釈</div>
+    <table class="ref-table"><tr><th>FENa</th><th>示唆される病態</th></tr>
+    <tr><td>&lt;1%</td><td><span class="tag t-bl">腎前性（脱水・心不全など）</span></td></tr>
+    <tr><td>1〜2%</td><td><span class="tag t-ld">境界域</span></td></tr>
+    <tr><td>≥2%</td><td><span class="tag t-pu">腎性（ATNなど）</span></td></tr></table>
+    <p class="rn" style="margin-top:8px">※利尿薬使用中はFEUrea(&lt;35%で腎前性)を参考に。<br>※造影剤腎症・ミオグロビン尿では偽陰性になりうる。</p>
+  </div>
+</div>
+
+<!-- ========== 肝臓 ========== -->
+<div id="tab-meld" class="section">
+  <div class="card">
+    <div class="card-title">MELD スコア<span class="badge">末期肝疾患モデル</span></div>
+    <div class="formula-box">MELD = 3.78×ln(Bil) + 11.2×ln(INR) + 9.57×ln(Cr) + 6.43<br>※Bil・Cr下限1.0、Cr上限4.0（透析中は4.0固定）</div>
+    <div class="form-row">
+      <div class="field"><label>血清ビリルビン</label><div class="input-wrap"><input type="number" id="meld-bil" placeholder="2.0" min="0.1" max="100" inputmode="decimal"><span class="unit">mg/dL</span></div></div>
+      <div class="field"><label>INR</label><div class="input-wrap"><input type="number" id="meld-inr" placeholder="1.5" min="0.1" max="20" inputmode="decimal"><span class="unit">—</span></div></div>
+    </div>
+    <div class="form-row s1">
+      <div class="field"><label>血清クレアチニン</label><div class="input-wrap"><input type="number" id="meld-cr" placeholder="1.0" min="0.1" max="30" inputmode="decimal"><span class="unit">mg/dL</span></div></div>
+    </div>
+    <div class="field"><label>週2回以上の透析</label>
+      <div class="radio-group" style="margin-top:5px">
+        <label class="rbtn sel" id="meld-nd"><input type="radio" name="meld-dial" value="no" checked onchange="rsel('meld-nd','meld-yd')">なし</label>
+        <label class="rbtn" id="meld-yd"><input type="radio" name="meld-dial" value="yes" onchange="rsel('meld-yd','meld-nd')">あり (Cr=4.0固定)</label>
+      </div>
+    </div>
+    <div class="err" id="meld-err">すべての項目を正しく入力してください。</div>
+    <button class="calc-btn" onclick="calcMELD()">計算する</button>
+    <button class="reset-btn" onclick="rst('meld')">リセット</button>
+    <div class="rc" id="meld-rc"><div class="rl">MELD スコア</div><div class="rv" id="meld-rv"></div><div class="ri" id="meld-ri"></div><div class="rn" id="meld-rn"></div></div>
+  </div>
+  <div class="card">
+    <div class="card-title">MELD と 90日死亡率</div>
+    <table class="ref-table"><tr><th>スコア</th><th>90日死亡率</th><th>重症度</th></tr>
+    <tr><td>&lt;10</td><td>約2%</td><td><span class="tag t-ok">軽症</span></td></tr>
+    <tr><td>10〜19</td><td>約6%</td><td><span class="tag t-ld">中等症</span></td></tr>
+    <tr><td>20〜29</td><td>約20%</td><td><span class="tag t-md">重症</span></td></tr>
+    <tr><td>30〜39</td><td>約53%</td><td><span class="tag t-sv">高度重症</span></td></tr>
+    <tr><td>≥40</td><td>約71%</td><td><span class="tag t-dg">最重症</span></td></tr></table>
+    <p class="rn" style="margin-top:8px">※スコア≥15で肝移植の恩恵が大きいとされる。</p>
+  </div>
+</div>
+
+<div id="tab-mdf" class="section">
+  <div class="card">
+    <div class="card-title">MDF スコア<span class="badge">Maddrey判別関数</span></div>
+    <div class="formula-box">MDF = 4.6 × (患者PT − 対照PT) + 血清ビリルビン(mg/dL)</div>
+    <div class="form-row">
+      <div class="field"><label>患者 PT</label><div class="input-wrap"><input type="number" id="mdf-ptp" placeholder="18.0" min="1" max="120" inputmode="decimal"><span class="unit">秒</span></div></div>
+      <div class="field"><label>対照 PT（正常値）</label><div class="input-wrap"><input type="number" id="mdf-ptc" placeholder="12.0" min="1" max="30" inputmode="decimal"><span class="unit">秒</span></div></div>
+    </div>
+    <div class="form-row s1">
+      <div class="field"><label>血清ビリルビン</label><div class="input-wrap"><input type="number" id="mdf-bil" placeholder="8.0" min="0.1" max="100" inputmode="decimal"><span class="unit">mg/dL</span></div></div>
+    </div>
+    <div class="err" id="mdf-err">すべての項目を正しく入力してください。</div>
+    <button class="calc-btn" onclick="calcMDF()">計算する</button>
+    <button class="reset-btn" onclick="rst('mdf')">リセット</button>
+    <div class="rc" id="mdf-rc"><div class="rl">MDF スコア</div><div class="rv" id="mdf-rv"></div><div class="ri" id="mdf-ri"></div><div class="rn" id="mdf-rn"></div></div>
+  </div>
+  <div class="card">
+    <div class="card-title">MDF の解釈</div>
+    <table class="ref-table"><tr><th>MDF</th><th>重症度</th><th>方針</th></tr>
+    <tr><td>&lt;32</td><td><span class="tag t-ok">軽〜中等症</span></td><td>支持療法（禁酒・栄養）</td></tr>
+    <tr><td>≥32</td><td><span class="tag t-dg">重症</span></td><td>ステロイド検討（禁忌確認）</td></tr></table>
+    <p class="rn" style="margin-top:8px">※ステロイド禁忌（活動性感染・消化管出血）を必ず除外。<br>※Lille スコアで7日後に治療反応を評価すること。</p>
+  </div>
+</div>
+
+<div id="tab-gahs" class="section">
+  <div class="card">
+    <div class="card-title">GAHS スコア<span class="badge">Glasgow Alcoholic Hepatitis</span></div>
+    <div class="formula-box">年齢・WBC・尿素・INR・ビリルビン の5項目スコア（5〜12点）</div>
+    <div class="form-row">
+      <div class="field"><label>年齢</label><div class="input-wrap"><input type="number" id="gahs-age" placeholder="52" min="1" max="120" inputmode="numeric"><span class="unit">歳</span></div></div>
+      <div class="field"><label>WBC</label><div class="input-wrap"><input type="number" id="gahs-wbc" placeholder="16" min="0.1" max="200" inputmode="decimal"><span class="unit">×10⁹/L</span></div></div>
+    </div>
+    <div class="form-row">
+      <div class="field"><label>尿素窒素</label><div class="input-wrap"><input type="number" id="gahs-urea" placeholder="6.0" min="0.1" max="100" inputmode="decimal"><span class="unit">mmol/L</span></div></div>
+      <div class="field"><label>INR</label><div class="input-wrap"><input type="number" id="gahs-inr" placeholder="1.8" min="0.1" max="20" inputmode="decimal"><span class="unit">—</span></div></div>
+    </div>
+    <div class="form-row s1">
+      <div class="field"><label>血清ビリルビン</label><div class="input-wrap"><input type="number" id="gahs-bil" placeholder="200" min="1" max="2000" inputmode="decimal"><span class="unit">μmol/L</span></div></div>
+    </div>
+    <div class="err" id="gahs-err">すべての項目を正しく入力してください。</div>
+    <button class="calc-btn" onclick="calcGAHS()">計算する</button>
+    <button class="reset-btn" onclick="rst('gahs')">リセット</button>
+    <div class="rc" id="gahs-rc"><div class="rl">GAHS スコア</div><div class="rv" id="gahs-rv"></div><div class="ri" id="gahs-ri"></div><div class="rn" id="gahs-rn"></div></div>
+  </div>
+  <div class="card">
+    <div class="card-title">GAHS 採点基準</div>
+    <table class="ref-table"><tr><th>項目</th><th>1点</th><th>2点</th><th>3点</th></tr>
+    <tr><td>年齢</td><td>&lt;50歳</td><td>≥50歳</td><td>—</td></tr>
+    <tr><td>WBC(×10⁹/L)</td><td>&lt;15</td><td>≥15</td><td>—</td></tr>
+    <tr><td>尿素(mmol/L)</td><td>&lt;5</td><td>≥5</td><td>—</td></tr>
+    <tr><td>INR</td><td>&lt;1.5</td><td>1.5〜2.0</td><td>&gt;2.0</td></tr>
+    <tr><td>Bil(μmol/L)</td><td>&lt;125</td><td>125〜250</td><td>&gt;250</td></tr></table>
+    <div class="divider"></div>
+    <table class="ref-table"><tr><th>スコア</th><th>28日生存率</th><th>84日生存率</th></tr>
+    <tr><td>≤8</td><td>約87%</td><td>約79%</td></tr>
+    <tr><td>≥9</td><td>約46%</td><td>約40%</td></tr></table>
+    <p class="rn" style="margin-top:8px">※尿素がmg/dLの場合は÷2.8でmmol/Lに換算。</p>
+  </div>
+</div>
+
+<div id="tab-jas" class="section">
+  <div class="card">
+    <div class="card-title">JAS 診断スコア<span class="badge">アルコール性肝炎</span></div>
+    <div class="formula-box">日本肝臓学会 アルコール性肝炎診断基準（必須3項目＋参考項目）</div>
+    <div class="sh">飲酒歴（必須）</div>
+    <div class="form-row">
+      <div class="field"><label>飲酒量</label><div class="input-wrap"><input type="number" id="jas-alc" placeholder="80" min="0" max="500" inputmode="decimal"><span class="unit">g/日</span></div></div>
+      <div class="field"><label>飲酒継続年数</label><div class="input-wrap"><input type="number" id="jas-yr" placeholder="10" min="0" max="80" inputmode="numeric"><span class="unit">年</span></div></div>
+    </div>
+    <div class="field" style="margin-bottom:10px"><label>性別</label>
+      <div class="radio-group" style="margin-top:5px">
+        <label class="rbtn sel" id="jas-m"><input type="radio" name="jas-sex" value="male" checked onchange="rsel('jas-m','jas-f')">男性（基準≥60g）</label>
+        <label class="rbtn" id="jas-f"><input type="radio" name="jas-sex" value="female" onchange="rsel('jas-f','jas-m')">女性（基準≥40g）</label>
+      </div>
+    </div>
+    <div class="sh">肝酵素（必須）</div>
+    <div class="form-row">
+      <div class="field"><label>AST</label><div class="input-wrap"><input type="number" id="jas-ast" placeholder="120" min="0" max="5000" inputmode="numeric"><span class="unit">IU/L</span></div></div>
+      <div class="field"><label>ALT</label><div class="input-wrap"><input type="number" id="jas-alt" placeholder="55" min="0" max="3000" inputmode="numeric"><span class="unit">IU/L</span></div></div>
+    </div>
+    <div class="sh">参考検査値</div>
+    <div class="form-row">
+      <div class="field"><label>総ビリルビン</label><div class="input-wrap"><input type="number" id="jas-bil" placeholder="3.5" min="0" max="50" inputmode="decimal"><span class="unit">mg/dL</span></div></div>
+      <div class="field"><label>WBC</label><div class="input-wrap"><input type="number" id="jas-wbc" placeholder="14000" min="0" max="100000" inputmode="numeric"><span class="unit">/μL</span></div></div>
+    </div>
+    <div class="form-row">
+      <div class="field"><label>γ-GTP</label><div class="input-wrap"><input type="number" id="jas-ggt" placeholder="150" min="0" max="5000" inputmode="numeric"><span class="unit">IU/L</span></div></div>
+      <div class="field"><label>MCV</label><div class="input-wrap"><input type="number" id="jas-mcv" placeholder="102" min="50" max="150" inputmode="numeric"><span class="unit">fL</span></div></div>
+    </div>
+    <div class="sh">症状・所見（参考）</div>
+    <label class="chk-item" id="jas-fever-btn" onclick="toggleChk('jas-fever-btn')"><input type="checkbox" id="jas-fever"><div class="chk-box">✓</div><span class="chk-lbl">発熱（≥38°C）</span></label>
+    <label class="chk-item" id="jas-pain-btn" onclick="toggleChk('jas-pain-btn')"><input type="checkbox" id="jas-pain"><div class="chk-box">✓</div><span class="chk-lbl">右季肋部痛・肝圧痛</span></label>
+    <label class="chk-item" id="jas-hep-btn" onclick="toggleChk('jas-hep-btn')"><input type="checkbox" id="jas-hep"><div class="chk-box">✓</div><span class="chk-lbl">肝腫大</span></label>
+    <div class="err" id="jas-err">飲酒量・年数・AST・ALT を入力してください。</div>
+    <button class="calc-btn" onclick="calcJAS()">診断基準を確認</button>
+    <button class="reset-btn" onclick="rst('jas')">リセット</button>
+    <div class="rc" id="jas-rc"><div class="rl">JAS 判定</div><div class="rv" id="jas-rv"></div><div class="ri" id="jas-ri"></div><div class="rn" id="jas-rn"></div></div>
+  </div>
+  <div class="card">
+    <div class="card-title">アルコール性肝炎 診断基準（JSH）</div>
+    <table class="ref-table"><tr><th colspan="2">必須条件（全3項目が必要）</th></tr>
+    <tr><td>①飲酒歴</td><td>男性≥60g/日 または 女性≥40g/日 を5年以上</td></tr>
+    <tr><td>②酵素パターン</td><td>AST&gt;ALT かつ AST/ALT比≥2</td></tr>
+    <tr><td>③ALT上限</td><td>ALT≤300 IU/L</td></tr>
+    <tr><th colspan="2">参考条件（3項目以上で確定）</th></tr>
+    <tr><td colspan="2">発熱・右季肋部痛・黄疸(T-Bil≥2)・白血球増多(≥12000)・GGT高値・MCV高値(≥100)・肝腫大</td></tr></table>
+  </div>
+</div>
+
+<!-- ========== 糖尿病 ========== -->
+<div id="tab-bmi" class="section">
+  <div class="card">
+    <div class="card-title">BMI 計算<span class="badge">Body Mass Index</span></div>
+    <div class="formula-box">BMI = 体重(kg) / 身長(m)²</div>
+    <div class="form-row">
+      <div class="field"><label>身長</label><div class="input-wrap"><input type="number" id="bmi-h" placeholder="170" min="50" max="250" inputmode="decimal"><span class="unit">cm</span></div></div>
+      <div class="field"><label>体重</label><div class="input-wrap"><input type="number" id="bmi-w" placeholder="65" min="1" max="300" inputmode="decimal"><span class="unit">kg</span></div></div>
+    </div>
+    <div class="err" id="bmi-err">身長と体重を正しく入力してください。</div>
+    <button class="calc-btn" onclick="calcBMI()">計算する</button>
+    <button class="reset-btn" onclick="rst('bmi')">リセット</button>
+    <div class="rc" id="bmi-rc"><div class="rl">BMI</div><div class="rv" id="bmi-rv"></div><div class="ri" id="bmi-ri"></div><div class="rn" id="bmi-rn"></div></div>
+  </div>
+  <div class="card">
+    <div class="card-title">BMI 判定基準（日本肥満学会）</div>
+    <table class="ref-table"><tr><th>BMI</th><th>分類</th></tr>
+    <tr><td>&lt;18.5</td><td><span class="tag t-ld">低体重</span></td></tr>
+    <tr><td>18.5〜24.9</td><td><span class="tag t-ok">普通体重</span></td></tr>
+    <tr><td>25〜29.9</td><td><span class="tag t-ld">肥満1度</span></td></tr>
+    <tr><td>30〜34.9</td><td><span class="tag t-md">肥満2度</span></td></tr>
+    <tr><td>35〜39.9</td><td><span class="tag t-sv">肥満3度</span></td></tr>
+    <tr><td>≥40</td><td><span class="tag t-dg">肥満4度</span></td></tr></table>
+  </div>
+</div>
+
+<div id="tab-homa" class="section">
+  <div class="card">
+    <div class="card-title">HOMA-IR / HOMA-β<span class="badge">インスリン抵抗性・β細胞機能</span></div>
+    <div class="formula-box">HOMA-IR = IRI(μU/mL) × FPG(mg/dL) / 405<br>HOMA-β = 360 × IRI / (FPG − 63) (%)</div>
+    <div class="form-row">
+      <div class="field"><label>空腹時血糖 (FPG)</label><div class="input-wrap"><input type="number" id="homa-fpg" placeholder="110" min="50" max="600" inputmode="decimal"><span class="unit">mg/dL</span></div></div>
+      <div class="field"><label>空腹時インスリン (IRI)</label><div class="input-wrap"><input type="number" id="homa-iri" placeholder="8" min="0.1" max="300" inputmode="decimal"><span class="unit">μU/mL</span></div></div>
+    </div>
+    <div class="err" id="homa-err">空腹時血糖（>63）とインスリンを入力してください。</div>
+    <button class="calc-btn" onclick="calcHOMA()">計算する</button>
+    <button class="reset-btn" onclick="rst('homa')">リセット</button>
+    <div class="multi-rc" id="homa-multi">
+      <div class="rc" id="homa-ir-rc"><div class="rl">HOMA-IR</div><div class="rv" id="homa-ir-rv"></div><div class="ri" id="homa-ir-ri"></div><div class="rn" id="homa-ir-rn"></div></div>
+      <div class="rc" id="homa-b-rc"><div class="rl">HOMA-β</div><div class="rv" id="homa-b-rv"></div><div class="ri" id="homa-b-ri"></div><div class="rn" id="homa-b-rn"></div></div>
     </div>
   </div>
-
-  <!-- ===== CCr ===== -->
-  <div id="tab-ccr" class="section">
-    <div class="card">
-      <div class="card-title">
-        CCr 計算
-        <span class="badge">Cockcroft-Gault</span>
-      </div>
-      <div class="formula-box">
-        CCr = (140 − 年齢) × 体重 (kg)<br>
-        　　　　÷ (72 × 血清Cr (mg/dL))<br>
-        　　　　× 0.85（女性の場合）
-      </div>
-
-      <div class="form-row">
-        <div class="field">
-          <label>年齢</label>
-          <div class="input-wrap">
-            <input type="number" id="ccr-age" placeholder="65" min="1" max="120" inputmode="numeric">
-            <span class="unit">歳</span>
-          </div>
-        </div>
-        <div class="field">
-          <label>体重</label>
-          <div class="input-wrap">
-            <input type="number" id="ccr-weight" placeholder="60" min="1" max="300" inputmode="decimal">
-            <span class="unit">kg</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="form-row">
-        <div class="field">
-          <label>血清クレアチニン</label>
-          <div class="input-wrap">
-            <input type="number" id="ccr-scr" placeholder="1.0" min="0.01" max="30" inputmode="decimal">
-            <span class="unit">mg/dL</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="field" style="margin-bottom: 0;">
-        <label>性別</label>
-        <div class="radio-group" style="margin-top: 5px;">
-          <label class="radio-btn selected" id="ccr-male-btn">
-            <input type="radio" name="ccr-sex" value="male" checked onchange="selectSex('ccr', this)">
-            男性
-          </label>
-          <label class="radio-btn" id="ccr-female-btn">
-            <input type="radio" name="ccr-sex" value="female" onchange="selectSex('ccr', this)">
-            女性
-          </label>
-        </div>
-      </div>
-
-      <div class="error-msg" id="ccr-error">すべての項目を正しく入力してください。</div>
-
-      <button class="calc-btn" onclick="calcCCr()">計算する</button>
-      <button class="reset-btn" onclick="resetSection('ccr')">リセット</button>
-
-      <div class="result-card" id="ccr-result">
-        <div class="result-label">CCr</div>
-        <div class="result-value" id="ccr-val">—</div>
-        <div class="result-interp" id="ccr-interp"></div>
-        <div class="result-note" id="ccr-note"></div>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-title">腎機能ステージ（CKD分類）</div>
-      <table class="ref-table">
-        <tr><th>GFR / CCr</th><th>ステージ</th><th>評価</th></tr>
-        <tr><td>≥ 90</td><td>G1</td><td><span class="tag tag-normal">正常〜高値</span></td></tr>
-        <tr><td>60 〜 89</td><td>G2</td><td><span class="tag tag-normal">正常〜軽度低下</span></td></tr>
-        <tr><td>45 〜 59</td><td>G3a</td><td><span class="tag tag-mild">軽度〜中等度低下</span></td></tr>
-        <tr><td>30 〜 44</td><td>G3b</td><td><span class="tag tag-mod">中等度〜高度低下</span></td></tr>
-        <tr><td>15 〜 29</td><td>G4</td><td><span class="tag tag-severe">高度低下</span></td></tr>
-        <tr><td>&lt; 15</td><td>G5</td><td><span class="tag tag-danger">腎不全</span></td></tr>
-      </table>
-      <div class="result-note" style="margin-top: 10px;">
-        ※ Cockcroft-Gault式は実体重を使用。浮腫・肥満がある場合は補正体重の使用を検討。<br>
-        ※ CKDの確定診断には3か月以上の評価が必要。
-      </div>
-    </div>
+  <div class="card">
+    <div class="card-title">HOMA 判定基準</div>
+    <table class="ref-table"><tr><th>指標</th><th>値</th><th>評価</th></tr>
+    <tr><td>HOMA-IR</td><td>&lt;1.6</td><td><span class="tag t-ok">正常</span></td></tr>
+    <tr><td>HOMA-IR</td><td>1.6〜2.5</td><td><span class="tag t-ld">要観察</span></td></tr>
+    <tr><td>HOMA-IR</td><td>≥2.5</td><td><span class="tag t-dg">インスリン抵抗性</span></td></tr>
+    <tr><td>HOMA-β</td><td>≥100%</td><td><span class="tag t-ok">β細胞機能良好</span></td></tr>
+    <tr><td>HOMA-β</td><td>40〜99%</td><td><span class="tag t-ld">軽度低下</span></td></tr>
+    <tr><td>HOMA-β</td><td>&lt;40%</td><td><span class="tag t-dg">高度低下</span></td></tr></table>
+    <p class="rn" style="margin-top:8px">※空腹時（少なくとも8時間以上絶食後）の採血が必要。<br>※インスリン製剤使用中・β細胞抗体陽性例では評価不可。</p>
   </div>
+</div>
 
-  <!-- ===== FENa ===== -->
-  <div id="tab-fena" class="section">
-    <div class="card">
-      <div class="card-title">
-        FENa 計算
-        <span class="badge">尿中Na排泄率</span>
-      </div>
-      <div class="formula-box">
-        FENa (%) = (尿Na × 血清Cr) ÷ (血清Na × 尿Cr) × 100
-      </div>
-
-      <div style="margin-bottom: 12px;">
-        <div style="font-size: 13px; font-weight: 700; color: var(--muted); margin-bottom: 8px;">尿検査</div>
-        <div class="form-row">
-          <div class="field">
-            <label>尿中 Na</label>
-            <div class="input-wrap">
-              <input type="number" id="fena-una" placeholder="20" min="0" max="300" inputmode="decimal">
-              <span class="unit">mEq/L</span>
-            </div>
-          </div>
-          <div class="field">
-            <label>尿中 Cr</label>
-            <div class="input-wrap">
-              <input type="number" id="fena-ucr" placeholder="80" min="0.1" max="1000" inputmode="decimal">
-              <span class="unit">mg/dL</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="divider"></div>
-
-      <div>
-        <div style="font-size: 13px; font-weight: 700; color: var(--muted); margin-bottom: 8px;">血液検査</div>
-        <div class="form-row">
-          <div class="field">
-            <label>血清 Na</label>
-            <div class="input-wrap">
-              <input type="number" id="fena-sna" placeholder="138" min="100" max="180" inputmode="decimal">
-              <span class="unit">mEq/L</span>
-            </div>
-          </div>
-          <div class="field">
-            <label>血清 Cr</label>
-            <div class="input-wrap">
-              <input type="number" id="fena-scr" placeholder="2.0" min="0.01" max="30" inputmode="decimal">
-              <span class="unit">mg/dL</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="error-msg" id="fena-error">すべての項目を正しく入力してください。</div>
-
-      <button class="calc-btn" onclick="calcFENa()">計算する</button>
-      <button class="reset-btn" onclick="resetSection('fena')">リセット</button>
-
-      <div class="result-card" id="fena-result">
-        <div class="result-label">FENa</div>
-        <div class="result-value" id="fena-val">—</div>
-        <div class="result-interp" id="fena-interp"></div>
-        <div class="result-note" id="fena-note"></div>
-      </div>
+<div id="tab-cpr" class="section">
+  <div class="card">
+    <div class="card-title">CPR インデックス<span class="badge">β細胞分泌能</span></div>
+    <div class="formula-box">CPRindex = 空腹時CPR(ng/mL) × 100 / 空腹時血糖(mg/dL)</div>
+    <div class="form-row">
+      <div class="field"><label>空腹時血糖 (FPG)</label><div class="input-wrap"><input type="number" id="cpr-fpg" placeholder="130" min="50" max="600" inputmode="decimal"><span class="unit">mg/dL</span></div></div>
+      <div class="field"><label>空腹時 CPR</label><div class="input-wrap"><input type="number" id="cpr-cpr" placeholder="1.5" min="0.01" max="50" inputmode="decimal"><span class="unit">ng/mL</span></div></div>
     </div>
-
-    <div class="card">
-      <div class="card-title">FENa の解釈</div>
-      <table class="ref-table">
-        <tr><th>FENa (%)</th><th>示唆される病態</th></tr>
-        <tr><td>&lt; 1%</td><td><span class="tag tag-pre">腎前性（脱水・心不全など）</span></td></tr>
-        <tr><td>1 〜 2%</td><td><span class="tag tag-mild">境界域（解釈注意）</span></td></tr>
-        <tr><td>≥ 2%</td><td><span class="tag tag-intra">腎性（ATN など）</span></td></tr>
-      </table>
-      <div class="result-note" style="margin-top: 10px;">
-        ※ 利尿薬使用中は FEUrea（&lt;35% で腎前性）を参考にする。<br>
-        ※ 造影剤腎症・ミオグロビン尿・急性尿路閉塞では偽陰性になりうる。<br>
-        ※ あくまで補助指標。臨床所見と合わせて総合判断すること。
-      </div>
-    </div>
+    <div class="err" id="cpr-err">空腹時血糖とCPRを正しく入力してください。</div>
+    <button class="calc-btn" onclick="calcCPR()">計算する</button>
+    <button class="reset-btn" onclick="rst('cpr')">リセット</button>
+    <div class="rc" id="cpr-rc"><div class="rl">CPR インデックス</div><div class="rv" id="cpr-rv"></div><div class="ri" id="cpr-ri"></div><div class="rn" id="cpr-rn"></div></div>
   </div>
-
-
-  <!-- ===== MELD ===== -->
-  <div id="tab-meld" class="section">
-    <div class="card">
-      <div class="card-title">
-        MELD スコア
-        <span class="badge">末期肝疾患モデル</span>
-      </div>
-      <div class="formula-box">
-        MELD = 3.78×ln(Bil) + 11.2×ln(INR) + 9.57×ln(Cr) + 6.43<br>
-        ※ Bil・Cr の下限 1.0、Cr の上限 4.0（透析中は 4.0 固定）
-      </div>
-
-      <div class="form-row">
-        <div class="field">
-          <label>血清ビリルビン</label>
-          <div class="input-wrap">
-            <input type="number" id="meld-bil" placeholder="2.0" min="0.1" max="100" inputmode="decimal">
-            <span class="unit">mg/dL</span>
-          </div>
-        </div>
-        <div class="field">
-          <label>INR</label>
-          <div class="input-wrap">
-            <input type="number" id="meld-inr" placeholder="1.5" min="0.1" max="20" inputmode="decimal">
-            <span class="unit" style="right:10px;">—</span>
-          </div>
-        </div>
-      </div>
-      <div class="form-row">
-        <div class="field">
-          <label>血清クレアチニン</label>
-          <div class="input-wrap">
-            <input type="number" id="meld-cr" placeholder="1.0" min="0.1" max="30" inputmode="decimal">
-            <span class="unit">mg/dL</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="field" style="margin-bottom:0;">
-        <label>週2回以上の透析</label>
-        <div class="radio-group" style="margin-top:5px;">
-          <label class="radio-btn selected" id="meld-nodial-btn">
-            <input type="radio" name="meld-dial" value="no" checked onchange="selectRadio('meld','dial',this)">
-            なし
-          </label>
-          <label class="radio-btn" id="meld-yesdial-btn">
-            <input type="radio" name="meld-dial" value="yes" onchange="selectRadio('meld','dial',this)">
-            あり（Cr=4.0 固定）
-          </label>
-        </div>
-      </div>
-
-      <div class="error-msg" id="meld-error">すべての項目を正しく入力してください。</div>
-
-      <button class="calc-btn" onclick="calcMELD()">計算する</button>
-      <button class="reset-btn" onclick="resetSection('meld')">リセット</button>
-
-      <div class="result-card" id="meld-result">
-        <div class="result-label">MELD スコア</div>
-        <div class="result-value" id="meld-val">—</div>
-        <div class="result-interp" id="meld-interp"></div>
-        <div class="result-note" id="meld-note"></div>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-title">MELD と 90日死亡率</div>
-      <table class="ref-table">
-        <tr><th>MELD</th><th>90日死亡率（目安）</th><th>重症度</th></tr>
-        <tr><td>&lt; 10</td><td>約 2%</td><td><span class="tag tag-normal">軽症</span></td></tr>
-        <tr><td>10 〜 19</td><td>約 6%</td><td><span class="tag tag-mild">中等症</span></td></tr>
-        <tr><td>20 〜 29</td><td>約 20%</td><td><span class="tag tag-mod">重症</span></td></tr>
-        <tr><td>30 〜 39</td><td>約 53%</td><td><span class="tag tag-severe">高度重症</span></td></tr>
-        <tr><td>≥ 40</td><td>約 71%</td><td><span class="tag tag-danger">最重症</span></td></tr>
-      </table>
-      <div class="result-note" style="margin-top:10px;">
-        ※ 肝移植の優先順位付けに使用される。スコア≥15で移植恩恵が大きいとされる。<br>
-        ※ 急性肝不全・肝細胞癌・原疾患によって例外規定あり。
-      </div>
-    </div>
+  <div class="card">
+    <div class="card-title">CPRindex 判定基準</div>
+    <table class="ref-table"><tr><th>CPRindex</th><th>評価</th></tr>
+    <tr><td>≥1.2</td><td><span class="tag t-ok">β細胞機能保持（インスリン非依存型）</span></td></tr>
+    <tr><td>0.8〜1.19</td><td><span class="tag t-ld">境界域</span></td></tr>
+    <tr><td>&lt;0.8</td><td><span class="tag t-dg">β細胞機能低下（インスリン導入検討）</span></td></tr></table>
+    <p class="rn" style="margin-top:8px">※CPRindex&lt;0.8はインスリン依存状態の可能性が高い。<br>※24時間尿中CPR（＜20μg/日）も参考にする。</p>
   </div>
+</div>
 
-  <!-- ===== MDF ===== -->
-  <div id="tab-mdf" class="section">
-    <div class="card">
-      <div class="card-title">
-        MDF スコア
-        <span class="badge">Maddrey 判別関数</span>
-      </div>
-      <div class="formula-box">
-        MDF = 4.6 × (患者PT − 対照PT) + 血清ビリルビン (mg/dL)<br>
-        ※ PT の単位は秒、対照PT の正常値は施設ごとに確認
-      </div>
-
-      <div class="form-row">
-        <div class="field">
-          <label>患者 PT</label>
-          <div class="input-wrap">
-            <input type="number" id="mdf-pt-patient" placeholder="18.0" min="1" max="120" inputmode="decimal">
-            <span class="unit">秒</span>
-          </div>
-        </div>
-        <div class="field">
-          <label>対照 PT（正常値）</label>
-          <div class="input-wrap">
-            <input type="number" id="mdf-pt-control" placeholder="12.0" min="1" max="30" inputmode="decimal">
-            <span class="unit">秒</span>
-          </div>
-        </div>
-      </div>
-      <div class="form-row single">
-        <div class="field">
-          <label>血清ビリルビン</label>
-          <div class="input-wrap">
-            <input type="number" id="mdf-bil" placeholder="8.0" min="0.1" max="100" inputmode="decimal">
-            <span class="unit">mg/dL</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="error-msg" id="mdf-error">すべての項目を正しく入力してください。</div>
-
-      <button class="calc-btn" onclick="calcMDF()">計算する</button>
-      <button class="reset-btn" onclick="resetSection('mdf')">リセット</button>
-
-      <div class="result-card" id="mdf-result">
-        <div class="result-label">MDF スコア</div>
-        <div class="result-value" id="mdf-val">—</div>
-        <div class="result-interp" id="mdf-interp"></div>
-        <div class="result-note" id="mdf-note"></div>
+<!-- ========== 脂質異常症 ========== -->
+<div id="tab-suita" class="section">
+  <div class="card">
+    <div class="card-title">吹田スコア<span class="badge">10年冠動脈疾患リスク</span></div>
+    <div class="formula-box">年齢・性別・喫煙・収縮期BP・TC・HDL・DM・CKDによるポイント制<br>（日本動脈硬化学会 2022年版ガイドライン準拠）</div>
+    <div class="form-row">
+      <div class="field"><label>年齢</label><div class="input-wrap"><input type="number" id="su-age" placeholder="55" min="35" max="100" inputmode="numeric"><span class="unit">歳</span></div></div>
+      <div class="field"><label>収縮期血圧</label><div class="input-wrap"><input type="number" id="su-sbp" placeholder="135" min="60" max="250" inputmode="numeric"><span class="unit">mmHg</span></div></div>
+    </div>
+    <div class="form-row">
+      <div class="field"><label>総コレステロール</label><div class="input-wrap"><input type="number" id="su-tc" placeholder="220" min="50" max="500" inputmode="numeric"><span class="unit">mg/dL</span></div></div>
+      <div class="field"><label>HDL-コレステロール</label><div class="input-wrap"><input type="number" id="su-hdl" placeholder="55" min="10" max="200" inputmode="numeric"><span class="unit">mg/dL</span></div></div>
+    </div>
+    <div class="field" style="margin-bottom:10px"><label>性別</label>
+      <div class="radio-group" style="margin-top:5px">
+        <label class="rbtn sel" id="su-m"><input type="radio" name="su-sex" value="male" checked onchange="rsel('su-m','su-f')">男性</label>
+        <label class="rbtn" id="su-f"><input type="radio" name="su-sex" value="female" onchange="rsel('su-f','su-m')">女性</label>
       </div>
     </div>
-
-    <div class="card">
-      <div class="card-title">MDF の解釈（アルコール性肝炎）</div>
-      <table class="ref-table">
-        <tr><th>MDF</th><th>重症度</th><th>治療方針の目安</th></tr>
-        <tr><td>&lt; 32</td><td><span class="tag tag-normal">軽〜中等症</span></td><td>支持療法（禁酒・栄養）</td></tr>
-        <tr><td>≥ 32</td><td><span class="tag tag-danger">重症</span></td><td>副腎皮質ステロイド検討（禁忌がなければ）</td></tr>
-      </table>
-      <div class="result-note" style="margin-top:10px;">
-        ※ MDF≥32 かつ肝性脳症がある場合、28日死亡率が高い。<br>
-        ※ ステロイド禁忌（活動性感染症・消化管出血など）を必ず確認すること。<br>
-        ※ GAHS・Lille スコアと組み合わせて総合判断する。
+    <div class="field" style="margin-bottom:10px"><label>現在喫煙</label>
+      <div class="radio-group" style="margin-top:5px">
+        <label class="rbtn" id="su-smk-y"><input type="radio" name="su-smk" value="yes" onchange="rsel('su-smk-y','su-smk-n')">あり</label>
+        <label class="rbtn sel" id="su-smk-n"><input type="radio" name="su-smk" value="no" checked onchange="rsel('su-smk-n','su-smk-y')">なし</label>
       </div>
     </div>
+    <div class="field" style="margin-bottom:10px"><label>糖尿病</label>
+      <div class="radio-group" style="margin-top:5px">
+        <label class="rbtn" id="su-dm-y"><input type="radio" name="su-dm" value="yes" onchange="rsel('su-dm-y','su-dm-n')">あり</label>
+        <label class="rbtn sel" id="su-dm-n"><input type="radio" name="su-dm" value="no" checked onchange="rsel('su-dm-n','su-dm-y')">なし</label>
+      </div>
+    </div>
+    <div class="field"><label>CKD（eGFR&lt;60 または蛋白尿）</label>
+      <div class="radio-group" style="margin-top:5px">
+        <label class="rbtn" id="su-ckd-y"><input type="radio" name="su-ckd" value="yes" onchange="rsel('su-ckd-y','su-ckd-n')">あり</label>
+        <label class="rbtn sel" id="su-ckd-n"><input type="radio" name="su-ckd" value="no" checked onchange="rsel('su-ckd-n','su-ckd-y')">なし</label>
+      </div>
+    </div>
+    <div class="err" id="su-err">年齢・SBP・TC・HDLを入力してください。</div>
+    <button class="calc-btn" onclick="calcSuita()">計算する</button>
+    <button class="reset-btn" onclick="rst('su')">リセット</button>
+    <div class="rc" id="su-rc"><div class="rl">吹田スコア</div><div class="rv" id="su-rv"></div><div class="ri" id="su-ri"></div><div class="rn" id="su-rn"></div></div>
   </div>
-
-  <!-- ===== GAHS ===== -->
-  <div id="tab-gahs" class="section">
-    <div class="card">
-      <div class="card-title">
-        GAHS スコア
-        <span class="badge">Glasgow Alcoholic Hepatitis</span>
-      </div>
-      <div class="formula-box">
-        年齢・WBC・尿素窒素・PT比（INR）・ビリルビン の5項目でスコアリング
-      </div>
-
-      <div style="margin-bottom:12px;">
-        <div style="font-size:13px;font-weight:700;color:var(--muted);margin-bottom:8px;">血液検査値を入力</div>
-        <div class="form-row">
-          <div class="field">
-            <label>年齢</label>
-            <div class="input-wrap">
-              <input type="number" id="gahs-age" placeholder="52" min="1" max="120" inputmode="numeric">
-              <span class="unit">歳</span>
-            </div>
-          </div>
-          <div class="field">
-            <label>白血球数 (WBC)</label>
-            <div class="input-wrap">
-              <input type="number" id="gahs-wbc" placeholder="16.0" min="0.1" max="200" inputmode="decimal">
-              <span class="unit">×10⁹/L</span>
-            </div>
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="field">
-            <label>尿素窒素 (BUN)</label>
-            <div class="input-wrap">
-              <input type="number" id="gahs-urea" placeholder="6.0" min="0.1" max="100" inputmode="decimal">
-              <span class="unit">mmol/L</span>
-            </div>
-          </div>
-          <div class="field">
-            <label>PT比（INR）</label>
-            <div class="input-wrap">
-              <input type="number" id="gahs-inr" placeholder="1.8" min="0.1" max="20" inputmode="decimal">
-              <span class="unit" style="right:10px;">—</span>
-            </div>
-          </div>
-        </div>
-        <div class="form-row single">
-          <div class="field">
-            <label>血清ビリルビン</label>
-            <div class="input-wrap">
-              <input type="number" id="gahs-bil" placeholder="200" min="1" max="2000" inputmode="decimal">
-              <span class="unit">μmol/L</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="error-msg" id="gahs-error">すべての項目を正しく入力してください。</div>
-
-      <button class="calc-btn" onclick="calcGAHS()">計算する</button>
-      <button class="reset-btn" onclick="resetSection('gahs')">リセット</button>
-
-      <div class="result-card" id="gahs-result">
-        <div class="result-label">GAHS スコア</div>
-        <div class="result-value" id="gahs-val">—</div>
-        <div class="result-interp" id="gahs-interp"></div>
-        <div class="result-note" id="gahs-note"></div>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-title">GAHS 採点基準</div>
-      <table class="ref-table">
-        <tr><th>項目</th><th>1点</th><th>2点</th><th>3点</th></tr>
-        <tr><td>年齢</td><td>&lt; 50歳</td><td>≥ 50歳</td><td>—</td></tr>
-        <tr><td>WBC (×10⁹/L)</td><td>&lt; 15</td><td>≥ 15</td><td>—</td></tr>
-        <tr><td>尿素窒素 (mmol/L)</td><td>&lt; 5</td><td>≥ 5</td><td>—</td></tr>
-        <tr><td>INR</td><td>&lt; 1.5</td><td>1.5〜2.0</td><td>&gt; 2.0</td></tr>
-        <tr><td>ビリルビン (μmol/L)</td><td>&lt; 125</td><td>125〜250</td><td>&gt; 250</td></tr>
-      </table>
-      <div class="divider"></div>
-      <table class="ref-table">
-        <tr><th>合計スコア</th><th>28日生存率</th><th>84日生存率</th></tr>
-        <tr><td>≤ 8</td><td>約 87%</td><td>約 79%</td></tr>
-        <tr><td>≥ 9</td><td>約 46%</td><td>約 40%</td></tr>
-      </table>
-      <div class="result-note" style="margin-top:10px;">
-        ※ スコア≥9 で副腎皮質ステロイドの恩恵が期待される（MDF≥32 との組み合わせで判断）。<br>
-        ※ 尿素窒素が mg/dL の場合は ÷2.8 で mmol/L に換算してください。
-      </div>
-    </div>
+  <div class="card">
+    <div class="card-title">10年冠動脈疾患リスクと LDL管理目標</div>
+    <table class="ref-table"><tr><th>スコア</th><th>10年CADリスク</th><th>LDL目標</th></tr>
+    <tr><td>≤5</td><td><span class="tag t-ok">低（&lt;2%）</span></td><td>&lt;160 mg/dL</td></tr>
+    <tr><td>6〜9</td><td><span class="tag t-ld">中（2〜5%）</span></td><td>&lt;140 mg/dL</td></tr>
+    <tr><td>10〜12</td><td><span class="tag t-md">高（5〜10%）</span></td><td>&lt;120 mg/dL</td></tr>
+    <tr><td>≥13</td><td><span class="tag t-dg">超高（≥10%）</span></td><td>&lt;100 mg/dL</td></tr></table>
+    <p class="rn" style="margin-top:8px">※冠動脈疾患既往（二次予防）: LDL &lt;100 mg/dL<br>※ACS・糖尿病合併の二次予防: LDL &lt;70 mg/dL<br>（日本動脈硬化学会 2022年版ガイドライン）</p>
   </div>
+</div>
+
+<div id="tab-ldl" class="section">
+  <div class="card">
+    <div class="card-title">LDL 管理目標値<span class="badge">JAS 2022</span></div>
+    <div class="formula-box">リスク因子・病態に基づく LDL-コレステロール管理目標値の設定</div>
+    <div class="field" style="margin-bottom:10px"><label>冠動脈疾患の既往（心筋梗塞・狭心症）</label>
+      <div class="radio-group" style="margin-top:5px">
+        <label class="rbtn" id="ldl-cad-y"><input type="radio" name="ldl-cad" value="yes" onchange="rsel('ldl-cad-y','ldl-cad-n');ldlToggle()">あり（二次予防）</label>
+        <label class="rbtn sel" id="ldl-cad-n"><input type="radio" name="ldl-cad" value="no" checked onchange="rsel('ldl-cad-n','ldl-cad-y');ldlToggle()">なし（一次予防）</label>
+      </div>
+    </div>
+    <div id="ldl-secondary" style="display:none">
+      <div class="field" style="margin-bottom:10px"><label>超高リスク条件（下記いずれか）</label>
+        <label class="chk-item" id="ldl-acs-btn" onclick="toggleChk('ldl-acs-btn')"><input type="checkbox" id="ldl-acs"><div class="chk-box">✓</div><span class="chk-lbl">急性冠症候群（ACS）</span></label>
+        <label class="chk-item" id="ldl-dm2-btn" onclick="toggleChk('ldl-dm2-btn')"><input type="checkbox" id="ldl-dm2"><div class="chk-box">✓</div><span class="chk-lbl">糖尿病合併</span></label>
+        <label class="chk-item" id="ldl-rec-btn" onclick="toggleChk('ldl-rec-btn')"><input type="checkbox" id="ldl-rec"><div class="chk-box">✓</div><span class="chk-lbl">冠動脈疾患の再発</span></label>
+      </div>
+    </div>
+    <div id="ldl-primary">
+      <div class="sh">一次予防リスク因子（該当するものにチェック）</div>
+      <label class="chk-item" id="ldl-age-btn" onclick="toggleChk('ldl-age-btn')"><input type="checkbox" id="ldl-age"><div class="chk-box">✓</div><span class="chk-lbl">高齢（男性≥45歳 / 女性≥55歳）</span></label>
+      <label class="chk-item" id="ldl-smk-btn" onclick="toggleChk('ldl-smk-btn')"><input type="checkbox" id="ldl-smk"><div class="chk-box">✓</div><span class="chk-lbl">現在喫煙中</span></label>
+      <label class="chk-item" id="ldl-htn-btn" onclick="toggleChk('ldl-htn-btn')"><input type="checkbox" id="ldl-htn"><div class="chk-box">✓</div><span class="chk-lbl">高血圧（治療中または SBP≥140 / DBP≥90）</span></label>
+      <label class="chk-item" id="ldl-hdl-btn" onclick="toggleChk('ldl-hdl-btn')"><input type="checkbox" id="ldl-hdl"><div class="chk-box">✓</div><span class="chk-lbl">低HDL血症（HDL &lt;40 mg/dL）</span></label>
+      <label class="chk-item" id="ldl-fhx-btn" onclick="toggleChk('ldl-fhx-btn')"><input type="checkbox" id="ldl-fhx"><div class="chk-box">✓</div><span class="chk-lbl">家族歴（一親等内に50歳未満の冠動脈疾患）</span></label>
+      <label class="chk-item" id="ldl-dm1-btn" onclick="toggleChk('ldl-dm1-btn')"><input type="checkbox" id="ldl-dm1"><div class="chk-box">✓</div><span class="chk-lbl">糖尿病・耐糖能異常</span></label>
+      <label class="chk-item" id="ldl-ckd-btn" onclick="toggleChk('ldl-ckd-btn')"><input type="checkbox" id="ldl-ckd"><div class="chk-box">✓</div><span class="chk-lbl">慢性腎臓病（CKD）</span></label>
+    </div>
+    <button class="calc-btn" onclick="calcLDL()">LDL目標値を判定</button>
+    <button class="reset-btn" onclick="rst('ldl')">リセット</button>
+    <div class="rc" id="ldl-rc"><div class="rl">LDL 管理目標</div><div class="rv" id="ldl-rv"></div><div class="ri" id="ldl-ri"></div><div class="rn" id="ldl-rn"></div></div>
+  </div>
+  <div class="card">
+    <div class="card-title">JAS 2022 LDL 管理目標一覧</div>
+    <table class="ref-table"><tr><th>カテゴリー</th><th>LDL目標</th></tr>
+    <tr><td>一次予防・低リスク（リスク因子0）</td><td>&lt;160 mg/dL</td></tr>
+    <tr><td>一次予防・中リスク（1〜2個）</td><td>&lt;140 mg/dL</td></tr>
+    <tr><td>一次予防・高リスク（3個以上 / DM / CKD）</td><td>&lt;120 mg/dL</td></tr>
+    <tr><td>二次予防（冠動脈疾患既往）</td><td>&lt;100 mg/dL</td></tr>
+    <tr><td>二次予防・超高リスク（ACS / DM合併 / 再発）</td><td>&lt;70 mg/dL</td></tr></table>
+  </div>
+</div>
+
+<!-- ========== 電解質 ========== -->
+<div id="tab-ag" class="section">
+  <div class="card">
+    <div class="card-title">Anion Gap<span class="badge">陰イオンギャップ</span></div>
+    <div class="formula-box">AG = Na − (Cl + HCO₃)<br>補正AG = AG + 2.5 × (4.0 − Alb)　（低アルブミン血症の場合）</div>
+    <div class="form-row s3">
+      <div class="field"><label>Na</label><div class="input-wrap"><input type="number" id="ag-na" placeholder="140" min="100" max="180" inputmode="numeric"><span class="unit">mEq/L</span></div></div>
+      <div class="field"><label>Cl</label><div class="input-wrap"><input type="number" id="ag-cl" placeholder="104" min="60" max="150" inputmode="numeric"><span class="unit">mEq/L</span></div></div>
+      <div class="field"><label>HCO₃</label><div class="input-wrap"><input type="number" id="ag-hco3" placeholder="24" min="1" max="60" inputmode="numeric"><span class="unit">mEq/L</span></div></div>
+    </div>
+    <div class="form-row s1">
+      <div class="field"><label>アルブミン（低Alb補正に使用・任意）</label><div class="input-wrap"><input type="number" id="ag-alb" placeholder="4.0" min="0.5" max="6" inputmode="decimal"><span class="unit">g/dL</span></div></div>
+    </div>
+    <div class="err" id="ag-err">Na・Cl・HCO₃を入力してください。</div>
+    <button class="calc-btn" onclick="calcAG()">計算する</button>
+    <button class="reset-btn" onclick="rst('ag')">リセット</button>
+    <div class="rc" id="ag-rc"><div class="rl">Anion Gap</div><div class="rv" id="ag-rv"></div><div class="ri" id="ag-ri"></div><div class="rn" id="ag-rn"></div></div>
+  </div>
+  <div class="card">
+    <div class="card-title">AG 解釈</div>
+    <table class="ref-table"><tr><th>AG</th><th>解釈</th></tr>
+    <tr><td>8〜12 mEq/L</td><td><span class="tag t-ok">正常</span></td></tr>
+    <tr><td>&gt;12 mEq/L</td><td><span class="tag t-dg">高AG性代謝性アシドーシス</span></td></tr></table>
+    <p class="rn" style="margin-top:8px">高AG原因（MUDPILES）：Methanol, Uremia, DKA, Propylene glycol, Isoniazid/Iron, Lactic acidosis, Ethanol, Salicylates</p>
+  </div>
+</div>
+
+<div id="tab-ca" class="section">
+  <div class="card">
+    <div class="card-title">補正カルシウム<span class="badge">低アルブミン補正</span></div>
+    <div class="formula-box">補正Ca = 測定Ca + (4.0 − Alb) × 0.8　（Payne式）</div>
+    <div class="form-row">
+      <div class="field"><label>測定カルシウム</label><div class="input-wrap"><input type="number" id="ca-ca" placeholder="7.8" min="3" max="20" inputmode="decimal"><span class="unit">mg/dL</span></div></div>
+      <div class="field"><label>アルブミン</label><div class="input-wrap"><input type="number" id="ca-alb" placeholder="2.5" min="0.5" max="6" inputmode="decimal"><span class="unit">g/dL</span></div></div>
+    </div>
+    <div class="err" id="ca-err">カルシウムとアルブミンを入力してください。</div>
+    <button class="calc-btn" onclick="calcCa()">計算する</button>
+    <button class="reset-btn" onclick="rst('ca')">リセット</button>
+    <div class="rc" id="ca-rc"><div class="rl">補正Ca</div><div class="rv" id="ca-rv"></div><div class="ri" id="ca-ri"></div><div class="rn" id="ca-rn"></div></div>
+  </div>
+  <div class="card">
+    <div class="card-title">血清カルシウム 基準範囲</div>
+    <table class="ref-table"><tr><th>補正Ca</th><th>評価</th></tr>
+    <tr><td>&lt;8.4 mg/dL</td><td><span class="tag t-ld">低カルシウム血症</span></td></tr>
+    <tr><td>8.4〜10.0 mg/dL</td><td><span class="tag t-ok">正常</span></td></tr>
+    <tr><td>&gt;10.0 mg/dL</td><td><span class="tag t-dg">高カルシウム血症</span></td></tr></table>
+    <p class="rn" style="margin-top:8px">※Alb&lt;4.0 g/dLでは補正が必須。ただしイオン化Caが評価可能な場合はそちらを優先。</p>
+  </div>
+</div>
+
+<div id="tab-osm" class="section">
+  <div class="card">
+    <div class="card-title">血漿浸透圧<span class="badge">計算浸透圧</span></div>
+    <div class="formula-box">計算浸透圧 = 2×Na + Glucose/18 + BUN/2.8<br>浸透圧ギャップ = 実測値 − 計算値（正常 &lt;10）</div>
+    <div class="form-row s3">
+      <div class="field"><label>Na</label><div class="input-wrap"><input type="number" id="osm-na" placeholder="140" min="100" max="180" inputmode="numeric"><span class="unit">mEq/L</span></div></div>
+      <div class="field"><label>血糖</label><div class="input-wrap"><input type="number" id="osm-glu" placeholder="100" min="40" max="2000" inputmode="numeric"><span class="unit">mg/dL</span></div></div>
+      <div class="field"><label>BUN</label><div class="input-wrap"><input type="number" id="osm-bun" placeholder="15" min="1" max="300" inputmode="numeric"><span class="unit">mg/dL</span></div></div>
+    </div>
+    <div class="form-row s1">
+      <div class="field"><label>実測浸透圧（任意・ギャップ計算用）</label><div class="input-wrap"><input type="number" id="osm-meas" placeholder="295" min="200" max="500" inputmode="numeric"><span class="unit">mOsm/kg</span></div></div>
+    </div>
+    <div class="err" id="osm-err">Na・血糖・BUNを入力してください。</div>
+    <button class="calc-btn" onclick="calcOsm()">計算する</button>
+    <button class="reset-btn" onclick="rst('osm')">リセット</button>
+    <div class="rc" id="osm-rc"><div class="rl">計算浸透圧</div><div class="rv" id="osm-rv"></div><div class="ri" id="osm-ri"></div><div class="rn" id="osm-rn"></div></div>
+  </div>
+  <div class="card">
+    <div class="card-title">血漿浸透圧 基準範囲</div>
+    <table class="ref-table"><tr><th>値</th><th>評価</th></tr>
+    <tr><td>275〜295 mOsm/kg</td><td><span class="tag t-ok">正常</span></td></tr>
+    <tr><td>&lt;275 mOsm/kg</td><td><span class="tag t-ld">低浸透圧</span></td></tr>
+    <tr><td>&gt;295 mOsm/kg</td><td><span class="tag t-md">高浸透圧</span></td></tr>
+    <tr><td>浸透圧ギャップ &gt;10</td><td><span class="tag t-dg">中毒物質の存在を疑う</span></td></tr></table>
+  </div>
+</div>
+
+<div id="tab-corrna" class="section">
+  <div class="card">
+    <div class="card-title">補正 Na<span class="badge">高血糖時</span></div>
+    <div class="formula-box">Katz法: 補正Na = 測定Na + 1.6 × (血糖 − 100) / 100<br>Hillier法: 補正Na = 測定Na + 2.4 × (血糖 − 100) / 100</div>
+    <div class="form-row">
+      <div class="field"><label>測定 Na</label><div class="input-wrap"><input type="number" id="cna-na" placeholder="128" min="100" max="180" inputmode="numeric"><span class="unit">mEq/L</span></div></div>
+      <div class="field"><label>血糖</label><div class="input-wrap"><input type="number" id="cna-glu" placeholder="600" min="100" max="3000" inputmode="numeric"><span class="unit">mg/dL</span></div></div>
+    </div>
+    <div class="err" id="cna-err">Na と血糖を入力してください（血糖>100）。</div>
+    <button class="calc-btn" onclick="calcCorrNa()">計算する</button>
+    <button class="reset-btn" onclick="rst('cna')">リセット</button>
+    <div class="multi-rc" id="cna-multi">
+      <div class="rc" id="cna-katz-rc"><div class="rl">Katz法</div><div class="rv" id="cna-katz-rv"></div><div class="ri" id="cna-katz-ri"></div></div>
+      <div class="rc" id="cna-hill-rc"><div class="rl">Hillier法</div><div class="rv" id="cna-hill-rv"></div><div class="ri" id="cna-hill-ri"></div></div>
+    </div>
+    <div class="rn" id="cna-note" style="margin-top:8px;display:none"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">補正Na の解釈</div>
+    <table class="ref-table"><tr><th>補正後Na</th><th>評価</th></tr>
+    <tr><td>&lt;135 mEq/L</td><td><span class="tag t-ld">低ナトリウム血症（真性）</span></td></tr>
+    <tr><td>135〜145 mEq/L</td><td><span class="tag t-ok">正常範囲</span></td></tr>
+    <tr><td>&gt;145 mEq/L</td><td><span class="tag t-dg">高ナトリウム血症</span></td></tr></table>
+    <p class="rn" style="margin-top:8px">※HHS（高血糖高浸透圧状態）での水・電解質補正計画に使用。<br>※Hillier法は高度高血糖（＞400 mg/dL）でより正確とされる。</p>
+  </div>
+</div>
 
 </main>
-
 <script>
-  function showTab(name, btn) {
-    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-    document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
-    document.getElementById('tab-' + name).classList.add('active');
-    btn.classList.add('active');
-  }
+const CATS={
+  kidney:{label:'腎臓',calcs:[{id:'ccr',label:'CCr（CG式）'},{id:'fena',label:'FENa'}]},
+  liver:{label:'肝臓',calcs:[{id:'meld',label:'MELD'},{id:'mdf',label:'MDF'},{id:'gahs',label:'GAHS'},{id:'jas',label:'JAS'}]},
+  diabetes:{label:'糖尿病',calcs:[{id:'bmi',label:'BMI'},{id:'homa',label:'HOMA-IR/β'},{id:'cpr',label:'CPRindex'}]},
+  lipid:{label:'脂質異常症',calcs:[{id:'suita',label:'吹田スコア'},{id:'ldl',label:'LDL管理目標'}]},
+  electrolyte:{label:'電解質',calcs:[{id:'ag',label:'Anion Gap'},{id:'ca',label:'補正Ca'},{id:'osm',label:'血漿浸透圧'},{id:'corrna',label:'補正Na'}]}
+};
+let curCat='kidney';
 
-  function selectSex(prefix, radio) {
-    document.getElementById(prefix + '-male-btn').classList.toggle('selected', radio.value === 'male');
-    document.getElementById(prefix + '-female-btn').classList.toggle('selected', radio.value === 'female');
-  }
+function selectCat(cat,btn){
+  curCat=cat;
+  document.querySelectorAll('.cat-nav button').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderSub(cat);
+}
+function renderSub(cat){
+  const nav=document.getElementById('sub-nav');
+  nav.innerHTML=CATS[cat].calcs.map((c,i)=>
+    `<button onclick="showCalc('${c.id}',this)"${i===0?' class="active"':''}>${c.label}</button>`
+  ).join('');
+  showCalcId(CATS[cat].calcs[0].id);
+}
+function showCalc(id,btn){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.getElementById('tab-'+id)?.classList.add('active');
+  document.querySelectorAll('.sub-nav button').forEach(b=>b.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+}
+function showCalcId(id){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.getElementById('tab-'+id)?.classList.add('active');
+}
+renderSub('kidney');
 
-  function selectRadio(prefix, key, radio) {
-    const group = document.querySelectorAll(`input[name="${prefix}-${key}"]`);
-    group.forEach(r => {
-      const id = `${prefix}-${r.value}${key}-btn`;
-      const btn = document.getElementById(id);
-      if (btn) btn.classList.toggle('selected', r === radio);
+// Helpers
+function v(id){return parseFloat(document.getElementById(id).value);}
+function ok(x){return !isNaN(x)&&isFinite(x)&&x>0;}
+function err(id,show,msg){const e=document.getElementById(id);if(msg)e.textContent=msg;e.classList.toggle('show',!!show);}
+function rsel(onId,offId){document.getElementById(onId).classList.add('sel');document.getElementById(offId).classList.remove('sel');}
+function radio(name){return document.querySelector(`input[name="${name}"]:checked`)?.value;}
+function setRC(id,cls,val,interp,note){
+  const el=document.getElementById(id);
+  el.className='rc show '+cls;
+  if(document.getElementById(id+'-rv'))document.getElementById(id+'-rv').textContent=val;
+  if(document.getElementById(id+'-ri'))document.getElementById(id+'-ri').textContent=interp;
+  if(note!=null&&document.getElementById(id+'-rn'))document.getElementById(id+'-rn').textContent=note;
+}
+function hideRC(id){document.getElementById(id)?.classList.remove('show');}
+function toggleChk(btnId){
+  const btn=document.getElementById(btnId);
+  btn.classList.toggle('sel');
+  const cb=btn.querySelector('input[type=checkbox]');
+  if(cb)cb.checked=!cb.checked;
+}
+function isChk(id){return document.getElementById(id)?.checked||false;}
+
+function rst(prefix){
+  const sec=document.querySelector('.section.active');
+  if(sec){
+    sec.querySelectorAll('input[type=number]').forEach(i=>i.value='');
+    sec.querySelectorAll('.err').forEach(e=>e.classList.remove('show'));
+    sec.querySelectorAll('.rc,.multi-rc').forEach(r=>r.classList.remove('show'));
+    sec.querySelectorAll('.chk-item').forEach(b=>{b.classList.remove('sel');const cb=b.querySelector('input');if(cb)cb.checked=false;});
+    // reset radio to first sel
+    sec.querySelectorAll('.radio-group').forEach(g=>{
+      const btns=g.querySelectorAll('.rbtn');
+      btns.forEach((b,i)=>{b.classList.toggle('sel',i===0);const r=b.querySelector('input');if(r)r.checked=(i===0);});
     });
   }
+}
 
-  function showError(id, showOrMsg) {
-    const el = document.getElementById(id);
-    if (typeof showOrMsg === 'string') {
-      el.textContent = showOrMsg;
-      el.classList.add('show');
-    } else {
-      el.classList.toggle('show', showOrMsg);
-    }
+// ===== CCr =====
+function calcCCr(){
+  const age=v('ccr-age'),wt=v('ccr-wt'),scr=v('ccr-scr');
+  if(!ok(age)||!ok(wt)||!ok(scr)||age>120){err('ccr-err',true);hideRC('ccr-rc');return;}
+  err('ccr-err',false);
+  const female=radio('ccr-sex')==='female';
+  let ccr=(140-age)*wt/(72*scr);
+  if(female)ccr*=0.85;
+  ccr=Math.max(ccr,0);
+  let cls,ri,rn;
+  if(ccr>=90){cls='ok';ri='G1：正常〜高値';rn='明らかな腎機能低下なし。';}
+  else if(ccr>=60){cls='ok';ri='G2：正常〜軽度低下';rn='蛋白尿などの合併に注意。';}
+  else if(ccr>=45){cls='wn';ri='G3a：軽〜中等度低下';rn='腎毒性薬剤の用量調整を検討。';}
+  else if(ccr>=30){cls='wn';ri='G3b：中〜高度低下';rn='NSAIDs・造影剤慎重投与。腎臓専門医紹介を検討。';}
+  else if(ccr>=15){cls='ng';ri='G4：高度低下';rn='腎代替療法の準備・教育を検討。';}
+  else{cls='ng';ri='G5：腎不全';rn='腎代替療法（透析・移植）の適応を検討。';}
+  setRC('ccr-rc',cls,ccr.toFixed(1)+' mL/min',ri,(female?'女性補正（×0.85）適用。':'')+rn);
+}
+
+// ===== FENa =====
+function calcFENa(){
+  const una=v('fena-una'),ucr=v('fena-ucr'),sna=v('fena-sna'),scr=v('fena-scr');
+  if(!ok(una)||!ok(ucr)||!ok(sna)||!ok(scr)){err('fena-err',true);hideRC('fena-rc');return;}
+  err('fena-err',false);
+  const fena=(una*scr)/(sna*ucr)*100;
+  let cls,ri,rn;
+  if(fena<1){cls='inf';ri='腎前性を示唆（<1%）';rn='脱水・心不全・肝不全などを考慮。';}
+  else if(fena<2){cls='wn';ri='境界域（1〜2%）';rn='腎前性・腎性いずれも否定できない。';}
+  else{cls='ng';ri='腎性を示唆（≥2%）';rn='ATNなどを考慮。利尿薬使用中は偽高値に注意。';}
+  setRC('fena-rc',cls,fena.toFixed(2)+'%',ri,rn);
+}
+
+// ===== MELD =====
+function calcMELD(){
+  let bil=v('meld-bil'),inr=v('meld-inr'),cr=v('meld-cr');
+  const dial=radio('meld-dial')==='yes';
+  if(!ok(bil)||!ok(inr)||(!dial&&!ok(cr))){err('meld-err',true);hideRC('meld-rc');return;}
+  err('meld-err',false);
+  bil=Math.max(bil,1);inr=Math.max(inr,1);
+  cr=dial?4.0:Math.min(Math.max(cr,1),4);
+  const meld=Math.round(3.78*Math.log(bil)+11.2*Math.log(inr)+9.57*Math.log(cr)+6.43);
+  let cls,ri,rn;
+  if(meld<10){cls='ok';ri='軽症（90日死亡率 約2%）';rn='定期外来管理。原疾患治療・禁酒指導を徹底。';}
+  else if(meld<20){cls='wn';ri='中等症（90日死亡率 約6%）';rn='入院加療・肝移植登録の評価を開始。';}
+  else if(meld<30){cls='ng';ri='重症（90日死亡率 約20%）';rn='移植センターへの紹介を推奨。';}
+  else if(meld<40){cls='ng';ri='高度重症（90日死亡率 約53%）';rn='緊急肝移植の適応を検討。ICU管理が必要。';}
+  else{cls='ng';ri='最重症（90日死亡率 約71%）';rn='緊急肝移植なしでは予後不良。';}
+  setRC('meld-rc',cls,meld+' 点',ri,(dial?'透析中：Cr=4.0で計算。':'')+rn);
+}
+
+// ===== MDF =====
+function calcMDF(){
+  const ptp=v('mdf-ptp'),ptc=v('mdf-ptc'),bil=v('mdf-bil');
+  if(!ok(ptp)||!ok(ptc)||!ok(bil)){err('mdf-err',true);hideRC('mdf-rc');return;}
+  if(ptp<ptc){err('mdf-err',true,'患者PTは対照PTより大きい値を入力してください。');hideRC('mdf-rc');return;}
+  err('mdf-err',false);
+  const mdf=4.6*(ptp-ptc)+bil;
+  let cls,ri,rn;
+  if(mdf<32){cls='ok';ri='軽〜中等症（MDF < 32）';rn='禁酒・栄養サポートを基本とした支持療法。';}
+  else{cls='ng';ri='重症（MDF ≥ 32）：ステロイド検討';rn='禁忌がなければプレドニゾロン40mg/日（4週間）を検討。\nLilleスコアで7日後に治療反応を評価。';}
+  setRC('mdf-rc',cls,mdf.toFixed(1)+' 点',ri,rn);
+}
+
+// ===== GAHS =====
+function calcGAHS(){
+  const age=v('gahs-age'),wbc=v('gahs-wbc'),urea=v('gahs-urea'),inr=v('gahs-inr'),bil=v('gahs-bil');
+  if(!ok(age)||!ok(wbc)||!ok(urea)||!ok(inr)||!ok(bil)){err('gahs-err',true);hideRC('gahs-rc');return;}
+  err('gahs-err',false);
+  const ap=age<50?1:2,wp=wbc<15?1:2,up=urea<5?1:2,ip=inr<1.5?1:inr<=2?2:3,bp=bil<125?1:bil<=250?2:3;
+  const sc=ap+wp+up+ip+bp;
+  let cls,ri,rn;
+  if(sc<=8){cls='wn';ri='スコア≤8：28日生存率 約87%';rn=`支持療法中心。\n内訳：年齢${ap}/WBC${wp}/尿素${up}/INR${ip}/Bil${bp}点`;}
+  else{cls='ng';ri='スコア≥9：28日生存率 約46%';rn=`予後不良。MDF≥32との組み合わせでステロイド検討。\n内訳：年齢${ap}/WBC${wp}/尿素${up}/INR${ip}/Bil${bp}点`;}
+  setRC('gahs-rc',cls,sc+' 点 / 12点',ri,rn);
+}
+
+// ===== JAS =====
+function calcJAS(){
+  const alc=v('jas-alc'),yr=v('jas-yr'),ast=v('jas-ast'),alt=v('jas-alt');
+  if(isNaN(alc)||isNaN(yr)||!ok(ast)||!ok(alt)){err('jas-err',true);hideRC('jas-rc');return;}
+  err('jas-err',false);
+  const female=radio('jas-sex')==='female';
+  const alcThresh=female?40:60;
+  const bil=v('jas-bil'),wbc=v('jas-wbc'),ggt=v('jas-ggt'),mcv=v('jas-mcv');
+  // Required criteria
+  const r1=alc>=alcThresh&&yr>=5;
+  const r2=ast>alt&&ast/alt>=2;
+  const r3=alt<=300&&alt>0;
+  const reqMet=r1&&r2&&r3;
+  // Supporting criteria
+  let sup=0,supDetails=[];
+  if(isChk('jas-fever')){sup++;supDetails.push('発熱');}
+  if(isChk('jas-pain')){sup++;supDetails.push('腹痛');}
+  if(isChk('jas-hep')){sup++;supDetails.push('肝腫大');}
+  if(!isNaN(bil)&&bil>=2){sup++;supDetails.push('黄疸');}
+  if(!isNaN(wbc)&&wbc>=12000){sup++;supDetails.push('白血球増多');}
+  if(!isNaN(ggt)){const ggtThresh=female?30:50;if(ggt>=ggtThresh){sup++;supDetails.push('GGT高値');}}
+  if(!isNaN(mcv)&&mcv>=100){sup++;supDetails.push('MCV高値');}
+  const ratio=ok(ast)&&ok(alt)?(ast/alt).toFixed(2):'—';
+  let cls,ri,rn;
+  if(!reqMet){
+    cls='inf';
+    ri='必須条件を充足せず';
+    rn=`必須①飲酒歴: ${r1?'✓':'✗（'+alc+'g/日×'+yr+'年、基準'+alcThresh+'g以上×5年以上）'}\n必須②AST/ALT比≥2 かつ AST>ALT: ${r2?'✓':'✗（比='+ratio+'）'}\n必須③ALT≤300: ${r3?'✓':'✗（ALT='+alt+'）'}`;
+  } else if(sup>=3){
+    cls='ng';ri='アルコール性肝炎（確定）';
+    rn=`必須3項目 充足 ✓\n参考条件 ${sup}/7 項目該当（${supDetails.join('・')}）\n${sup>=3?'→ 確定診断基準を満たします':''}`;
+  } else {
+    cls='wn';ri='アルコール性肝炎（疑い）';
+    rn=`必須3項目 充足 ✓\n参考条件 ${sup}/7 項目（${supDetails.length?supDetails.join('・'):'該当なし'}）\n→ 参考条件3項目未満のため「疑い」。他疾患を除外しつつ経過観察。`;
   }
+  setRC('jas-rc',cls,reqMet?`参考${sup}/7`:'必須条件×',ri,rn);
+}
 
-  function getVal(id) {
-    return parseFloat(document.getElementById(id).value);
+// ===== BMI =====
+function calcBMI(){
+  const h=v('bmi-h'),w=v('bmi-w');
+  if(!ok(h)||!ok(w)||h<50||h>250){err('bmi-err',true);hideRC('bmi-rc');return;}
+  err('bmi-err',false);
+  const bmi=w/Math.pow(h/100,2);
+  let cls,ri,rn;
+  if(bmi<18.5){cls='wn';ri='低体重';rn='栄養状態の評価を検討してください。';}
+  else if(bmi<25){cls='ok';ri='普通体重';rn=`標準体重(BMI=22): ${(22*Math.pow(h/100,2)).toFixed(1)} kg`;}
+  else if(bmi<30){cls='wn';ri='肥満1度';rn=`目標体重(BMI=25): ${(25*Math.pow(h/100,2)).toFixed(1)} kg`;}
+  else if(bmi<35){cls='wn';ri='肥満2度';rn=`目標体重(BMI=25): ${(25*Math.pow(h/100,2)).toFixed(1)} kg`;}
+  else if(bmi<40){cls='ng';ri='肥満3度';rn='高度肥満。内科的・外科的治療の検討を。';}
+  else{cls='ng';ri='肥満4度';rn='超高度肥満。専門的介入が必要です。';}
+  setRC('bmi-rc',cls,bmi.toFixed(1),ri,rn);
+}
+
+// ===== HOMA =====
+function calcHOMA(){
+  const fpg=v('homa-fpg'),iri=v('homa-iri');
+  if(!ok(fpg)||!ok(iri)||fpg<=63){err('homa-err',true);document.getElementById('homa-multi').classList.remove('show');return;}
+  err('homa-err',false);
+  const ir=iri*fpg/405;
+  const beta=360*iri/(fpg-63);
+  // HOMA-IR
+  let irc,iri2,irn;
+  if(ir<1.6){irc='ok';iri2='正常（<1.6）';irn='インスリン抵抗性なし。';}
+  else if(ir<2.5){irc='wn';iri2='要観察（1.6〜2.5）';irn='生活習慣の改善を検討。';}
+  else{irc='ng';iri2='インスリン抵抗性（≥2.5）';irn='2型糖尿病・メタボリックシンドロームを考慮。';}
+  setRC('homa-ir-rc',irc,ir.toFixed(2),iri2,irn);
+  // HOMA-β
+  let bc,bi,bn;
+  if(beta>=100){bc='ok';bi='β細胞機能良好（≥100%）';bn='インスリン分泌能は保たれている。';}
+  else if(beta>=40){bc='wn';bi='軽度低下（40〜99%）';bn='経口血糖降下薬の適応を検討。';}
+  else{bc='ng';bi='高度低下（<40%）';bn='インスリン療法を検討。';}
+  setRC('homa-b-rc',bc,beta.toFixed(0)+'%',bi,bn);
+  document.getElementById('homa-multi').classList.add('show');
+}
+
+// ===== CPR Index =====
+function calcCPR(){
+  const fpg=v('cpr-fpg'),cpr=v('cpr-cpr');
+  if(!ok(fpg)||!ok(cpr)){err('cpr-err',true);hideRC('cpr-rc');return;}
+  err('cpr-err',false);
+  const idx=cpr*100/fpg;
+  let cls,ri,rn;
+  if(idx>=1.2){cls='ok';ri='β細胞機能保持（≥1.2）';rn='インスリン非依存型と考えられる。';}
+  else if(idx>=0.8){cls='wn';ri='境界域（0.8〜1.19）';rn='経過観察。インスリン分泌能の低下傾向あり。';}
+  else{cls='ng';ri='β細胞機能低下（<0.8）';rn='インスリン療法の導入を検討。24時間尿中CPR(<20μg/日)も参考に。';}
+  setRC('cpr-rc',cls,idx.toFixed(2),ri,rn);
+}
+
+// ===== 吹田スコア =====
+function calcSuita(){
+  const age=v('su-age'),sbp=v('su-sbp'),tc=v('su-tc'),hdl=v('su-hdl');
+  if(!ok(age)||!ok(sbp)||!ok(tc)||!ok(hdl)){err('su-err',true);hideRC('su-rc');return;}
+  err('su-err',false);
+  const male=radio('su-sex')==='male';
+  const smk=radio('su-smk')==='yes';
+  const dm=radio('su-dm')==='yes';
+  const ckd=radio('su-ckd')==='yes';
+  let sc=0;
+  // Age points
+  if(male){if(age>=75)sc+=11;else if(age>=65)sc+=8;else if(age>=55)sc+=6;else if(age>=45)sc+=3;}
+  else{if(age>=75)sc+=12;else if(age>=65)sc+=9;else if(age>=55)sc+=7;else if(age>=45)sc+=5;}
+  // Smoking
+  if(smk)sc+=2;
+  // SBP
+  if(male){if(sbp>=160)sc+=4;else if(sbp>=140)sc+=3;else if(sbp>=130)sc+=2;else if(sbp>=120)sc+=1;}
+  else{if(sbp>=160)sc+=3;else if(sbp>=140)sc+=2;else if(sbp>=120)sc+=1;}
+  // TC
+  if(tc>=240)sc+=5;else if(tc>=220)sc+=4;else if(tc>=200)sc+=3;else if(tc>=180)sc+=2;else if(tc>=160)sc+=1;
+  // HDL
+  if(hdl>=60)sc-=2;else if(hdl<40)sc+=2;else if(hdl<50)sc+=1;
+  // DM
+  if(dm)sc+=2;
+  // CKD
+  if(ckd)sc+=1;
+  let cls,ri,rn,ldl;
+  if(sc<=5){cls='ok';ri='低リスク（10年CAD <2%）';ldl='<160 mg/dL';rn='生活習慣の維持・定期検査を継続。';}
+  else if(sc<=9){cls='wn';ri='中リスク（10年CAD 2〜5%）';ldl='<140 mg/dL';rn='生活習慣改善と必要に応じた薬物療法。';}
+  else if(sc<=12){cls='wn';ri='高リスク（10年CAD 5〜10%）';ldl='<120 mg/dL';rn='スタチン療法の積極的検討を。';}
+  else{cls='ng';ri='超高リスク（10年CAD ≥10%）';ldl='<100 mg/dL';rn='スタチン療法を開始し、必要に応じ強化療法。';}
+  setRC('su-rc',cls,sc+' 点',ri,`LDL管理目標: ${ldl}\n${rn}`);
+}
+
+// ===== LDL 目標値 =====
+function ldlToggle(){
+  const cad=radio('ldl-cad')==='yes';
+  document.getElementById('ldl-secondary').style.display=cad?'block':'none';
+  document.getElementById('ldl-primary').style.display=cad?'none':'block';
+}
+function calcLDL(){
+  const cad=radio('ldl-cad')==='yes';
+  let cls,rv,ri,rn;
+  if(cad){
+    const vhigh=isChk('ldl-acs')||isChk('ldl-dm2')||isChk('ldl-rec');
+    if(vhigh){cls='ng';rv='<70 mg/dL';ri='二次予防・超高リスク';rn='ACS・糖尿病合併・冠動脈疾患再発に該当。\n高強度スタチン±エゼチミブを検討。';}
+    else{cls='wn';rv='<100 mg/dL';ri='二次予防（通常）';rn='スタチン療法を継続・強化。LDL達成状況を定期確認。';}
+  } else {
+    const dm=isChk('ldl-dm1'),ckd=isChk('ldl-ckd');
+    let cnt=0;
+    ['ldl-age','ldl-smk','ldl-htn','ldl-hdl','ldl-fhx','ldl-dm1','ldl-ckd'].forEach(id=>{if(isChk(id))cnt++;});
+    if(dm||ckd||cnt>=3){cls='wn';rv='<120 mg/dL';ri='一次予防・高リスク';rn=`リスク因子${cnt}個（DM:${dm?'あり':'なし'} / CKD:${ckd?'あり':'なし'}）\n積極的な生活習慣改善＋薬物療法を検討。`;}
+    else if(cnt>=1){cls='ok';rv='<140 mg/dL';ri='一次予防・中リスク';rn=`リスク因子${cnt}個。生活習慣改善を優先。`;}
+    else{cls='ok';rv='<160 mg/dL';ri='一次予防・低リスク';rn='リスク因子なし。食事・運動習慣の維持を。';}
   }
+  setRC('ldl-rc',cls,rv,ri,rn);
+}
 
-  function isValid(v) { return !isNaN(v) && v > 0; }
+// ===== Anion Gap =====
+function calcAG(){
+  const na=v('ag-na'),cl=v('ag-cl'),hco3=v('ag-hco3');
+  if(isNaN(na)||isNaN(cl)||isNaN(hco3)){err('ag-err',true);hideRC('ag-rc');return;}
+  err('ag-err',false);
+  const ag=na-(cl+hco3);
+  const alb=v('ag-alb');
+  const hasAlb=!isNaN(alb)&&alb>0;
+  const corrAG=hasAlb?ag+2.5*(4.0-alb):null;
+  let cls,ri,rn;
+  const agEff=hasAlb?corrAG:ag;
+  if(agEff<=12){cls='ok';ri='正常（≤12）';rn='高AG性代謝性アシドーシスを除外できる。';}
+  else{cls='ng';ri='高AG（>12）';rn='代謝性アシドーシスを考慮（MUDPILES）。';}
+  const note=`AG = ${ag.toFixed(1)} mEq/L${hasAlb?`\n補正AG = ${corrAG.toFixed(1)} mEq/L（Alb=${alb}で補正）`:''}`;
+  setRC('ag-rc',cls,agEff.toFixed(1)+' mEq/L',ri,note+'\n'+rn);
+}
 
-  // ===== BMI =====
-  function calcBMI() {
-    const h = getVal('bmi-height');
-    const w = getVal('bmi-weight');
+// ===== 補正Ca =====
+function calcCa(){
+  const ca=v('ca-ca'),alb=v('ca-alb');
+  if(!ok(ca)||!ok(alb)){err('ca-err',true);hideRC('ca-rc');return;}
+  err('ca-err',false);
+  const corr=ca+(4.0-alb)*0.8;
+  let cls,ri,rn;
+  if(corr<8.4){cls='wn';ri='低Ca血症';rn='低アルブミン補正後でも低カルシウム。\nPTH・ビタミンD・Mgを確認。';}
+  else if(corr<=10.0){cls='ok';ri='正常範囲（8.4〜10.0）';rn='';}
+  else{cls='ng';ri='高Ca血症';rn='悪性腫瘍・原発性副甲状腺機能亢進症などを考慮。';}
+  setRC('ca-rc',cls,corr.toFixed(1)+' mg/dL',ri,`測定値: ${ca} mg/dL → 補正後: ${corr.toFixed(1)} mg/dL（Alb=${alb}）\n${rn}`);
+}
 
-    if (!isValid(h) || !isValid(w) || h < 50 || h > 250) {
-      showError('bmi-error', true);
-      document.getElementById('bmi-result').classList.remove('show');
-      return;
-    }
-    showError('bmi-error', false);
+// ===== 血漿浸透圧 =====
+function calcOsm(){
+  const na=v('osm-na'),glu=v('osm-glu'),bun=v('osm-bun');
+  if(isNaN(na)||!ok(glu)||!ok(bun)){err('osm-err',true);hideRC('osm-rc');return;}
+  err('osm-err',false);
+  const calc=2*na+glu/18+bun/2.8;
+  const meas=v('osm-meas');
+  const hasM=!isNaN(meas)&&meas>0;
+  const gap=hasM?meas-calc:null;
+  let cls,ri,rn;
+  if(calc<275){cls='wn';ri='低浸透圧（<275）';rn='低ナトリウム血症・低血糖などを確認。';}
+  else if(calc<=295){cls='ok';ri='正常（275〜295）';rn='';}
+  else{cls='ng';ri='高浸透圧（>295）';rn='高血糖・高Na・尿毒症などを確認。';}
+  const gapNote=hasM?`\n浸透圧ギャップ = ${gap.toFixed(1)}${Math.abs(gap)>10?' ⚠️ >10（中毒物質を考慮）':' （正常）'}`:'';
+  setRC('osm-rc',cls,calc.toFixed(0)+' mOsm/kg',ri,`計算浸透圧: ${calc.toFixed(1)}${gapNote}\n${rn}`);
+}
 
-    const bmi = w / Math.pow(h / 100, 2);
-    const el = document.getElementById('bmi-result');
-    const valEl = document.getElementById('bmi-val');
-    const interpEl = document.getElementById('bmi-interp');
-    const noteEl = document.getElementById('bmi-note');
+// ===== 補正Na =====
+function calcCorrNa(){
+  const na=v('cna-na'),glu=v('cna-glu');
+  if(isNaN(na)||isNaN(glu)||glu<=100){err('cna-err',true);document.getElementById('cna-multi').classList.remove('show');document.getElementById('cna-note').style.display='none';return;}
+  err('cna-err',false);
+  const katz=na+1.6*(glu-100)/100;
+  const hill=na+2.4*(glu-100)/100;
+  function naClass(x){return x<135?'wn':x<=145?'ok':'ng';}
+  function naLabel(x){return x<135?'低Na血症（補正後）':x<=145?'正常範囲（補正後）':'高Na血症（補正後）';}
+  setRC('cna-katz-rc',naClass(katz),katz.toFixed(1)+' mEq/L',naLabel(katz),null);
+  setRC('cna-hill-rc',naClass(hill),hill.toFixed(1)+' mEq/L',naLabel(hill),null);
+  document.getElementById('cna-multi').classList.add('show');
+  const note=document.getElementById('cna-note');
+  note.textContent=`測定Na: ${na} mEq/L | 血糖: ${glu} mg/dL\nKatz法（1973）: ${katz.toFixed(1)} / Hillier法（1999）: ${hill.toFixed(1)}\n高度高血糖（>400）ではHillier法がより正確とされる。`;
+  note.style.display='block';
+}
 
-    valEl.textContent = bmi.toFixed(1);
-
-    let cls, interp, note;
-    if (bmi < 18.5) {
-      cls = 'warn'; interp = '低体重';
-      note = '栄養状態の評価を検討してください。';
-    } else if (bmi < 25) {
-      cls = 'normal'; interp = '普通体重';
-      note = `標準体重 (BMI=22): ${(22 * Math.pow(h/100, 2)).toFixed(1)} kg`;
-    } else if (bmi < 30) {
-      cls = 'warn'; interp = '肥満1度';
-      note = `目標体重 (BMI=25): ${(25 * Math.pow(h/100, 2)).toFixed(1)} kg`;
-    } else if (bmi < 35) {
-      cls = 'warn'; interp = '肥満2度';
-      note = `目標体重 (BMI=25): ${(25 * Math.pow(h/100, 2)).toFixed(1)} kg`;
-    } else if (bmi < 40) {
-      cls = 'danger'; interp = '肥満3度';
-      note = '高度肥満。内科的・外科的治療の検討を。';
-    } else {
-      cls = 'danger'; interp = '肥満4度';
-      note = '超高度肥満。専門的介入が必要です。';
-    }
-
-    el.className = 'result-card show ' + cls;
-    interpEl.textContent = interp;
-    noteEl.textContent = note;
+// Enter key
+document.addEventListener('keydown',e=>{
+  if(e.key==='Enter'){
+    const s=document.querySelector('.section.active');
+    if(s)s.querySelector('.calc-btn')?.click();
   }
-
-  // ===== CCr =====
-  function calcCCr() {
-    const age = getVal('ccr-age');
-    const wt  = getVal('ccr-weight');
-    const scr = getVal('ccr-scr');
-    const isFemale = document.querySelector('input[name="ccr-sex"]:checked').value === 'female';
-
-    if (!isValid(age) || !isValid(wt) || !isValid(scr) || age > 120) {
-      showError('ccr-error', true);
-      document.getElementById('ccr-result').classList.remove('show');
-      return;
-    }
-    showError('ccr-error', false);
-
-    let ccr = (140 - age) * wt / (72 * scr);
-    if (isFemale) ccr *= 0.85;
-    ccr = Math.max(ccr, 0);
-
-    const el = document.getElementById('ccr-result');
-    const valEl = document.getElementById('ccr-val');
-    const interpEl = document.getElementById('ccr-interp');
-    const noteEl = document.getElementById('ccr-note');
-
-    valEl.textContent = ccr.toFixed(1) + ' mL/min';
-
-    let cls, interp, note;
-    if (ccr >= 90) {
-      cls = 'normal'; interp = 'G1：正常〜高値';
-      note = '明らかな腎機能低下なし。';
-    } else if (ccr >= 60) {
-      cls = 'normal'; interp = 'G2：正常〜軽度低下';
-      note = '蛋白尿などの合併に注意。';
-    } else if (ccr >= 45) {
-      cls = 'warn'; interp = 'G3a：軽度〜中等度低下';
-      note = '腎毒性薬剤の用量調整を検討。貧血・骨代謝異常の評価を。';
-    } else if (ccr >= 30) {
-      cls = 'warn'; interp = 'G3b：中等度〜高度低下';
-      note = 'NSAIDs・造影剤の慎重投与。腎臓専門医への紹介を検討。';
-    } else if (ccr >= 15) {
-      cls = 'danger'; interp = 'G4：高度低下';
-      note = '腎代替療法の準備・教育を検討。腎臓専門医へ紹介。';
-    } else {
-      cls = 'danger'; interp = 'G5：腎不全';
-      note = '腎代替療法（透析・移植）の適応を検討。';
-    }
-
-    el.className = 'result-card show ' + cls;
-    interpEl.textContent = interp;
-    noteEl.textContent = (isFemale ? '女性補正（×0.85）適用済み。' : '') + note;
-  }
-
-  // ===== FENa =====
-  function calcFENa() {
-    const una = getVal('fena-una');
-    const ucr = getVal('fena-ucr');
-    const sna = getVal('fena-sna');
-    const scr = getVal('fena-scr');
-
-    if (!isValid(una) || !isValid(ucr) || !isValid(sna) || !isValid(scr)) {
-      showError('fena-error', true);
-      document.getElementById('fena-result').classList.remove('show');
-      return;
-    }
-    showError('fena-error', false);
-
-    const fena = (una * scr) / (sna * ucr) * 100;
-
-    const el = document.getElementById('fena-result');
-    const valEl = document.getElementById('fena-val');
-    const interpEl = document.getElementById('fena-interp');
-    const noteEl = document.getElementById('fena-note');
-
-    valEl.textContent = fena.toFixed(2) + ' %';
-
-    let cls, interp, note;
-    if (fena < 1) {
-      cls = 'info'; interp = '腎前性を示唆 (< 1%)';
-      note = '脱水・心不全・肝不全・敗血症初期などを考慮。利尿薬使用がなければ腎前性を強く示唆。';
-    } else if (fena < 2) {
-      cls = 'warn'; interp = '境界域 (1〜2%)';
-      note = '腎前性・腎性いずれも否定できない。臨床所見・経過と総合して判断。';
-    } else {
-      cls = 'danger'; interp = '腎性を示唆 (≥ 2%)';
-      note = '急性尿細管壊死（ATN）などを考慮。ただし利尿薬使用中は偽高値に注意。';
-    }
-
-    el.className = 'result-card show ' + cls;
-    interpEl.textContent = interp;
-    noteEl.textContent = note;
-  }
-
-  // ===== MELD =====
-  function calcMELD() {
-    let bil = getVal('meld-bil');
-    let inr = getVal('meld-inr');
-    let cr  = getVal('meld-cr');
-    const onDial = document.querySelector('input[name="meld-dial"]:checked').value === 'yes';
-
-    if (!isValid(bil) || !isValid(inr) || (!onDial && !isValid(cr))) {
-      showError('meld-error', true);
-      document.getElementById('meld-result').classList.remove('show');
-      return;
-    }
-    showError('meld-error', false);
-
-    bil = Math.max(bil, 1.0);
-    inr = Math.max(inr, 1.0);
-    cr  = onDial ? 4.0 : Math.min(Math.max(cr, 1.0), 4.0);
-
-    const meld = Math.round(3.78 * Math.log(bil) + 11.2 * Math.log(inr) + 9.57 * Math.log(cr) + 6.43);
-
-    const el      = document.getElementById('meld-result');
-    const valEl   = document.getElementById('meld-val');
-    const interpEl= document.getElementById('meld-interp');
-    const noteEl  = document.getElementById('meld-note');
-
-    valEl.textContent = meld + ' 点';
-
-    let cls, interp, note;
-    if (meld < 10) {
-      cls = 'normal'; interp = '軽症（90日死亡率 約2%）';
-      note = '定期的な外来管理を継続。原疾患の治療・禁酒指導を徹底。';
-    } else if (meld < 20) {
-      cls = 'warn'; interp = '中等症（90日死亡率 約6%）';
-      note = '入院加療・専門施設への紹介を検討。肝移植登録の評価を開始。';
-    } else if (meld < 30) {
-      cls = 'danger'; interp = '重症（90日死亡率 約20%）';
-      note = '移植センターへの紹介を推奨。合併症（感染・出血・脳症）の積極的管理を。';
-    } else if (meld < 40) {
-      cls = 'danger'; interp = '高度重症（90日死亡率 約53%）';
-      note = '緊急肝移植の適応を検討。ICU管理が必要な場合が多い。';
-    } else {
-      cls = 'danger'; interp = '最重症（90日死亡率 約71%）';
-      note = '緊急肝移植なしでは予後不良。家族への説明・意思決定支援も重要。';
-    }
-
-    el.className = 'result-card show ' + cls;
-    interpEl.textContent = interp;
-    noteEl.textContent = (onDial ? '透析中のためCr=4.0で計算。' : '') + note;
-  }
-
-  // ===== MDF =====
-  function calcMDF() {
-    const ptP = getVal('mdf-pt-patient');
-    const ptC = getVal('mdf-pt-control');
-    const bil = getVal('mdf-bil');
-
-    if (!isValid(ptP) || !isValid(ptC) || !isValid(bil) || ptP < ptC) {
-      showError('mdf-error', ptP < ptC
-        ? '患者PTは対照PTより大きい値を入力してください。'
-        : 'すべての項目を正しく入力してください。');
-      document.getElementById('mdf-result').classList.remove('show');
-      return;
-    }
-    showError('mdf-error', false);
-
-    const mdf = 4.6 * (ptP - ptC) + bil;
-
-    const el      = document.getElementById('mdf-result');
-    const valEl   = document.getElementById('mdf-val');
-    const interpEl= document.getElementById('mdf-interp');
-    const noteEl  = document.getElementById('mdf-note');
-
-    valEl.textContent = mdf.toFixed(1) + ' 点';
-
-    let cls, interp, note;
-    if (mdf < 32) {
-      cls = 'normal'; interp = '軽〜中等症 (MDF < 32)';
-      note = '禁酒・栄養サポートを基本とした支持療法。経過観察を継続。';
-    } else {
-      cls = 'danger'; interp = '重症 (MDF ≥ 32)：ステロイド検討';
-      note = '禁忌がなければプレドニゾロン40mg/日（4週間→漸減）を検討。\nLille スコアで7日後に治療反応を評価すること。';
-    }
-
-    el.className = 'result-card show ' + cls;
-    interpEl.textContent = interp;
-    noteEl.textContent = note;
-  }
-
-  // ===== GAHS =====
-  function calcGAHS() {
-    const age = getVal('gahs-age');
-    const wbc = getVal('gahs-wbc');
-    const urea= getVal('gahs-urea');
-    const inr = getVal('gahs-inr');
-    const bil = getVal('gahs-bil');
-
-    if (!isValid(age) || !isValid(wbc) || !isValid(urea) || !isValid(inr) || !isValid(bil)) {
-      showError('gahs-error', true);
-      document.getElementById('gahs-result').classList.remove('show');
-      return;
-    }
-    showError('gahs-error', false);
-
-    let score = 0;
-    score += age  < 50  ? 1 : 2;
-    score += wbc  < 15  ? 1 : 2;
-    score += urea < 5   ? 1 : 2;
-    score += inr  < 1.5 ? 1 : inr <= 2.0 ? 2 : 3;
-    score += bil  < 125 ? 1 : bil <= 250  ? 2 : 3;
-
-    // sub-scores for display
-    const ageP  = age  < 50  ? 1 : 2;
-    const wbcP  = wbc  < 15  ? 1 : 2;
-    const ureaP = urea < 5   ? 1 : 2;
-    const inrP  = inr  < 1.5 ? 1 : inr <= 2.0 ? 2 : 3;
-    const bilP  = bil  < 125 ? 1 : bil <= 250  ? 2 : 3;
-
-    const el      = document.getElementById('gahs-result');
-    const valEl   = document.getElementById('gahs-val');
-    const interpEl= document.getElementById('gahs-interp');
-    const noteEl  = document.getElementById('gahs-note');
-
-    valEl.textContent = score + ' 点 / 12点';
-
-    let cls, interp, note;
-    if (score <= 8) {
-      cls = 'warn'; interp = 'スコア≤8：28日生存率 約87%';
-      note = `支持療法中心。ステロイドの上乗せ効果は限定的な可能性あり。\n内訳：年齢${ageP}点 / WBC${wbcP}点 / 尿素${ureaP}点 / INR${inrP}点 / Bil${bilP}点`;
-    } else {
-      cls = 'danger'; interp = 'スコア≥9：28日生存率 約46%';
-      note = `予後不良。MDF≥32 と組み合わせてステロイド療法を積極的に検討。\n内訳：年齢${ageP}点 / WBC${wbcP}点 / 尿素${ureaP}点 / INR${inrP}点 / Bil${bilP}点`;
-    }
-
-    el.className = 'result-card show ' + cls;
-    interpEl.textContent = interp;
-    noteEl.textContent = note;
-  }
-
-  // ===== Reset =====
-  function resetSection(prefix) {
-    const section = document.getElementById('tab-' + prefix);
-    section.querySelectorAll('input[type="number"]').forEach(i => i.value = '');
-    const radios = section.querySelectorAll('input[type="radio"]');
-    radios.forEach((r, i) => { r.checked = i === 0; });
-    if (prefix === 'ccr') {
-      document.getElementById('ccr-male-btn').classList.add('selected');
-      document.getElementById('ccr-female-btn').classList.remove('selected');
-    }
-    if (prefix === 'meld') {
-      document.getElementById('meld-nodial-btn').classList.add('selected');
-      document.getElementById('meld-yesdial-btn').classList.remove('selected');
-    }
-    section.querySelectorAll('.result-card').forEach(c => c.classList.remove('show'));
-    section.querySelectorAll('.error-msg').forEach(e => e.classList.remove('show'));
-  }
-
-  // Enter key support
-  document.addEventListener('keydown', e => {
-    if (e.key === 'Enter') {
-      const active = document.querySelector('.section.active');
-      if (active) active.querySelector('.calc-btn')?.click();
-    }
-  });
+});
 </script>
 </body>
 </html>
