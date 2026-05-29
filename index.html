@@ -370,13 +370,16 @@
 
 <header>
   <h1>医療計算ツール</h1>
-  <p>BMI / クレアチニンクリアランス / FENa</p>
+  <p>BMI / CCr / FENa / MELD / MDF / GAHS</p>
 </header>
 
 <nav>
   <button class="active" onclick="showTab('bmi', this)">BMI</button>
   <button onclick="showTab('ccr', this)">CCr (CG式)</button>
   <button onclick="showTab('fena', this)">FENa</button>
+  <button onclick="showTab('meld', this)">MELD</button>
+  <button onclick="showTab('mdf', this)">MDF</button>
+  <button onclick="showTab('gahs', this)">GAHS</button>
 </nav>
 
 <main>
@@ -603,6 +606,247 @@
     </div>
   </div>
 
+
+  <!-- ===== MELD ===== -->
+  <div id="tab-meld" class="section">
+    <div class="card">
+      <div class="card-title">
+        MELD スコア
+        <span class="badge">末期肝疾患モデル</span>
+      </div>
+      <div class="formula-box">
+        MELD = 3.78×ln(Bil) + 11.2×ln(INR) + 9.57×ln(Cr) + 6.43<br>
+        ※ Bil・Cr の下限 1.0、Cr の上限 4.0（透析中は 4.0 固定）
+      </div>
+
+      <div class="form-row">
+        <div class="field">
+          <label>血清ビリルビン</label>
+          <div class="input-wrap">
+            <input type="number" id="meld-bil" placeholder="2.0" min="0.1" max="100" inputmode="decimal">
+            <span class="unit">mg/dL</span>
+          </div>
+        </div>
+        <div class="field">
+          <label>INR</label>
+          <div class="input-wrap">
+            <input type="number" id="meld-inr" placeholder="1.5" min="0.1" max="20" inputmode="decimal">
+            <span class="unit" style="right:10px;">—</span>
+          </div>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="field">
+          <label>血清クレアチニン</label>
+          <div class="input-wrap">
+            <input type="number" id="meld-cr" placeholder="1.0" min="0.1" max="30" inputmode="decimal">
+            <span class="unit">mg/dL</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="field" style="margin-bottom:0;">
+        <label>週2回以上の透析</label>
+        <div class="radio-group" style="margin-top:5px;">
+          <label class="radio-btn selected" id="meld-nodial-btn">
+            <input type="radio" name="meld-dial" value="no" checked onchange="selectRadio('meld','dial',this)">
+            なし
+          </label>
+          <label class="radio-btn" id="meld-yesdial-btn">
+            <input type="radio" name="meld-dial" value="yes" onchange="selectRadio('meld','dial',this)">
+            あり（Cr=4.0 固定）
+          </label>
+        </div>
+      </div>
+
+      <div class="error-msg" id="meld-error">すべての項目を正しく入力してください。</div>
+
+      <button class="calc-btn" onclick="calcMELD()">計算する</button>
+      <button class="reset-btn" onclick="resetSection('meld')">リセット</button>
+
+      <div class="result-card" id="meld-result">
+        <div class="result-label">MELD スコア</div>
+        <div class="result-value" id="meld-val">—</div>
+        <div class="result-interp" id="meld-interp"></div>
+        <div class="result-note" id="meld-note"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">MELD と 90日死亡率</div>
+      <table class="ref-table">
+        <tr><th>MELD</th><th>90日死亡率（目安）</th><th>重症度</th></tr>
+        <tr><td>&lt; 10</td><td>約 2%</td><td><span class="tag tag-normal">軽症</span></td></tr>
+        <tr><td>10 〜 19</td><td>約 6%</td><td><span class="tag tag-mild">中等症</span></td></tr>
+        <tr><td>20 〜 29</td><td>約 20%</td><td><span class="tag tag-mod">重症</span></td></tr>
+        <tr><td>30 〜 39</td><td>約 53%</td><td><span class="tag tag-severe">高度重症</span></td></tr>
+        <tr><td>≥ 40</td><td>約 71%</td><td><span class="tag tag-danger">最重症</span></td></tr>
+      </table>
+      <div class="result-note" style="margin-top:10px;">
+        ※ 肝移植の優先順位付けに使用される。スコア≥15で移植恩恵が大きいとされる。<br>
+        ※ 急性肝不全・肝細胞癌・原疾患によって例外規定あり。
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MDF ===== -->
+  <div id="tab-mdf" class="section">
+    <div class="card">
+      <div class="card-title">
+        MDF スコア
+        <span class="badge">Maddrey 判別関数</span>
+      </div>
+      <div class="formula-box">
+        MDF = 4.6 × (患者PT − 対照PT) + 血清ビリルビン (mg/dL)<br>
+        ※ PT の単位は秒、対照PT の正常値は施設ごとに確認
+      </div>
+
+      <div class="form-row">
+        <div class="field">
+          <label>患者 PT</label>
+          <div class="input-wrap">
+            <input type="number" id="mdf-pt-patient" placeholder="18.0" min="1" max="120" inputmode="decimal">
+            <span class="unit">秒</span>
+          </div>
+        </div>
+        <div class="field">
+          <label>対照 PT（正常値）</label>
+          <div class="input-wrap">
+            <input type="number" id="mdf-pt-control" placeholder="12.0" min="1" max="30" inputmode="decimal">
+            <span class="unit">秒</span>
+          </div>
+        </div>
+      </div>
+      <div class="form-row single">
+        <div class="field">
+          <label>血清ビリルビン</label>
+          <div class="input-wrap">
+            <input type="number" id="mdf-bil" placeholder="8.0" min="0.1" max="100" inputmode="decimal">
+            <span class="unit">mg/dL</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="error-msg" id="mdf-error">すべての項目を正しく入力してください。</div>
+
+      <button class="calc-btn" onclick="calcMDF()">計算する</button>
+      <button class="reset-btn" onclick="resetSection('mdf')">リセット</button>
+
+      <div class="result-card" id="mdf-result">
+        <div class="result-label">MDF スコア</div>
+        <div class="result-value" id="mdf-val">—</div>
+        <div class="result-interp" id="mdf-interp"></div>
+        <div class="result-note" id="mdf-note"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">MDF の解釈（アルコール性肝炎）</div>
+      <table class="ref-table">
+        <tr><th>MDF</th><th>重症度</th><th>治療方針の目安</th></tr>
+        <tr><td>&lt; 32</td><td><span class="tag tag-normal">軽〜中等症</span></td><td>支持療法（禁酒・栄養）</td></tr>
+        <tr><td>≥ 32</td><td><span class="tag tag-danger">重症</span></td><td>副腎皮質ステロイド検討（禁忌がなければ）</td></tr>
+      </table>
+      <div class="result-note" style="margin-top:10px;">
+        ※ MDF≥32 かつ肝性脳症がある場合、28日死亡率が高い。<br>
+        ※ ステロイド禁忌（活動性感染症・消化管出血など）を必ず確認すること。<br>
+        ※ GAHS・Lille スコアと組み合わせて総合判断する。
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== GAHS ===== -->
+  <div id="tab-gahs" class="section">
+    <div class="card">
+      <div class="card-title">
+        GAHS スコア
+        <span class="badge">Glasgow Alcoholic Hepatitis</span>
+      </div>
+      <div class="formula-box">
+        年齢・WBC・尿素窒素・PT比（INR）・ビリルビン の5項目でスコアリング
+      </div>
+
+      <div style="margin-bottom:12px;">
+        <div style="font-size:13px;font-weight:700;color:var(--muted);margin-bottom:8px;">血液検査値を入力</div>
+        <div class="form-row">
+          <div class="field">
+            <label>年齢</label>
+            <div class="input-wrap">
+              <input type="number" id="gahs-age" placeholder="52" min="1" max="120" inputmode="numeric">
+              <span class="unit">歳</span>
+            </div>
+          </div>
+          <div class="field">
+            <label>白血球数 (WBC)</label>
+            <div class="input-wrap">
+              <input type="number" id="gahs-wbc" placeholder="16.0" min="0.1" max="200" inputmode="decimal">
+              <span class="unit">×10⁹/L</span>
+            </div>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="field">
+            <label>尿素窒素 (BUN)</label>
+            <div class="input-wrap">
+              <input type="number" id="gahs-urea" placeholder="6.0" min="0.1" max="100" inputmode="decimal">
+              <span class="unit">mmol/L</span>
+            </div>
+          </div>
+          <div class="field">
+            <label>PT比（INR）</label>
+            <div class="input-wrap">
+              <input type="number" id="gahs-inr" placeholder="1.8" min="0.1" max="20" inputmode="decimal">
+              <span class="unit" style="right:10px;">—</span>
+            </div>
+          </div>
+        </div>
+        <div class="form-row single">
+          <div class="field">
+            <label>血清ビリルビン</label>
+            <div class="input-wrap">
+              <input type="number" id="gahs-bil" placeholder="200" min="1" max="2000" inputmode="decimal">
+              <span class="unit">μmol/L</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="error-msg" id="gahs-error">すべての項目を正しく入力してください。</div>
+
+      <button class="calc-btn" onclick="calcGAHS()">計算する</button>
+      <button class="reset-btn" onclick="resetSection('gahs')">リセット</button>
+
+      <div class="result-card" id="gahs-result">
+        <div class="result-label">GAHS スコア</div>
+        <div class="result-value" id="gahs-val">—</div>
+        <div class="result-interp" id="gahs-interp"></div>
+        <div class="result-note" id="gahs-note"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">GAHS 採点基準</div>
+      <table class="ref-table">
+        <tr><th>項目</th><th>1点</th><th>2点</th><th>3点</th></tr>
+        <tr><td>年齢</td><td>&lt; 50歳</td><td>≥ 50歳</td><td>—</td></tr>
+        <tr><td>WBC (×10⁹/L)</td><td>&lt; 15</td><td>≥ 15</td><td>—</td></tr>
+        <tr><td>尿素窒素 (mmol/L)</td><td>&lt; 5</td><td>≥ 5</td><td>—</td></tr>
+        <tr><td>INR</td><td>&lt; 1.5</td><td>1.5〜2.0</td><td>&gt; 2.0</td></tr>
+        <tr><td>ビリルビン (μmol/L)</td><td>&lt; 125</td><td>125〜250</td><td>&gt; 250</td></tr>
+      </table>
+      <div class="divider"></div>
+      <table class="ref-table">
+        <tr><th>合計スコア</th><th>28日生存率</th><th>84日生存率</th></tr>
+        <tr><td>≤ 8</td><td>約 87%</td><td>約 79%</td></tr>
+        <tr><td>≥ 9</td><td>約 46%</td><td>約 40%</td></tr>
+      </table>
+      <div class="result-note" style="margin-top:10px;">
+        ※ スコア≥9 で副腎皮質ステロイドの恩恵が期待される（MDF≥32 との組み合わせで判断）。<br>
+        ※ 尿素窒素が mg/dL の場合は ÷2.8 で mmol/L に換算してください。
+      </div>
+    </div>
+  </div>
+
 </main>
 
 <script>
@@ -618,8 +862,23 @@
     document.getElementById(prefix + '-female-btn').classList.toggle('selected', radio.value === 'female');
   }
 
-  function showError(id, show) {
-    document.getElementById(id).classList.toggle('show', show);
+  function selectRadio(prefix, key, radio) {
+    const group = document.querySelectorAll(`input[name="${prefix}-${key}"]`);
+    group.forEach(r => {
+      const id = `${prefix}-${r.value}${key}-btn`;
+      const btn = document.getElementById(id);
+      if (btn) btn.classList.toggle('selected', r === radio);
+    });
+  }
+
+  function showError(id, showOrMsg) {
+    const el = document.getElementById(id);
+    if (typeof showOrMsg === 'string') {
+      el.textContent = showOrMsg;
+      el.classList.add('show');
+    } else {
+      el.classList.toggle('show', showOrMsg);
+    }
   }
 
   function getVal(id) {
@@ -765,6 +1024,144 @@
     noteEl.textContent = note;
   }
 
+  // ===== MELD =====
+  function calcMELD() {
+    let bil = getVal('meld-bil');
+    let inr = getVal('meld-inr');
+    let cr  = getVal('meld-cr');
+    const onDial = document.querySelector('input[name="meld-dial"]:checked').value === 'yes';
+
+    if (!isValid(bil) || !isValid(inr) || (!onDial && !isValid(cr))) {
+      showError('meld-error', true);
+      document.getElementById('meld-result').classList.remove('show');
+      return;
+    }
+    showError('meld-error', false);
+
+    bil = Math.max(bil, 1.0);
+    inr = Math.max(inr, 1.0);
+    cr  = onDial ? 4.0 : Math.min(Math.max(cr, 1.0), 4.0);
+
+    const meld = Math.round(3.78 * Math.log(bil) + 11.2 * Math.log(inr) + 9.57 * Math.log(cr) + 6.43);
+
+    const el      = document.getElementById('meld-result');
+    const valEl   = document.getElementById('meld-val');
+    const interpEl= document.getElementById('meld-interp');
+    const noteEl  = document.getElementById('meld-note');
+
+    valEl.textContent = meld + ' 点';
+
+    let cls, interp, note;
+    if (meld < 10) {
+      cls = 'normal'; interp = '軽症（90日死亡率 約2%）';
+      note = '定期的な外来管理を継続。原疾患の治療・禁酒指導を徹底。';
+    } else if (meld < 20) {
+      cls = 'warn'; interp = '中等症（90日死亡率 約6%）';
+      note = '入院加療・専門施設への紹介を検討。肝移植登録の評価を開始。';
+    } else if (meld < 30) {
+      cls = 'danger'; interp = '重症（90日死亡率 約20%）';
+      note = '移植センターへの紹介を推奨。合併症（感染・出血・脳症）の積極的管理を。';
+    } else if (meld < 40) {
+      cls = 'danger'; interp = '高度重症（90日死亡率 約53%）';
+      note = '緊急肝移植の適応を検討。ICU管理が必要な場合が多い。';
+    } else {
+      cls = 'danger'; interp = '最重症（90日死亡率 約71%）';
+      note = '緊急肝移植なしでは予後不良。家族への説明・意思決定支援も重要。';
+    }
+
+    el.className = 'result-card show ' + cls;
+    interpEl.textContent = interp;
+    noteEl.textContent = (onDial ? '透析中のためCr=4.0で計算。' : '') + note;
+  }
+
+  // ===== MDF =====
+  function calcMDF() {
+    const ptP = getVal('mdf-pt-patient');
+    const ptC = getVal('mdf-pt-control');
+    const bil = getVal('mdf-bil');
+
+    if (!isValid(ptP) || !isValid(ptC) || !isValid(bil) || ptP < ptC) {
+      showError('mdf-error', ptP < ptC
+        ? '患者PTは対照PTより大きい値を入力してください。'
+        : 'すべての項目を正しく入力してください。');
+      document.getElementById('mdf-result').classList.remove('show');
+      return;
+    }
+    showError('mdf-error', false);
+
+    const mdf = 4.6 * (ptP - ptC) + bil;
+
+    const el      = document.getElementById('mdf-result');
+    const valEl   = document.getElementById('mdf-val');
+    const interpEl= document.getElementById('mdf-interp');
+    const noteEl  = document.getElementById('mdf-note');
+
+    valEl.textContent = mdf.toFixed(1) + ' 点';
+
+    let cls, interp, note;
+    if (mdf < 32) {
+      cls = 'normal'; interp = '軽〜中等症 (MDF < 32)';
+      note = '禁酒・栄養サポートを基本とした支持療法。経過観察を継続。';
+    } else {
+      cls = 'danger'; interp = '重症 (MDF ≥ 32)：ステロイド検討';
+      note = '禁忌がなければプレドニゾロン40mg/日（4週間→漸減）を検討。\nLille スコアで7日後に治療反応を評価すること。';
+    }
+
+    el.className = 'result-card show ' + cls;
+    interpEl.textContent = interp;
+    noteEl.textContent = note;
+  }
+
+  // ===== GAHS =====
+  function calcGAHS() {
+    const age = getVal('gahs-age');
+    const wbc = getVal('gahs-wbc');
+    const urea= getVal('gahs-urea');
+    const inr = getVal('gahs-inr');
+    const bil = getVal('gahs-bil');
+
+    if (!isValid(age) || !isValid(wbc) || !isValid(urea) || !isValid(inr) || !isValid(bil)) {
+      showError('gahs-error', true);
+      document.getElementById('gahs-result').classList.remove('show');
+      return;
+    }
+    showError('gahs-error', false);
+
+    let score = 0;
+    score += age  < 50  ? 1 : 2;
+    score += wbc  < 15  ? 1 : 2;
+    score += urea < 5   ? 1 : 2;
+    score += inr  < 1.5 ? 1 : inr <= 2.0 ? 2 : 3;
+    score += bil  < 125 ? 1 : bil <= 250  ? 2 : 3;
+
+    // sub-scores for display
+    const ageP  = age  < 50  ? 1 : 2;
+    const wbcP  = wbc  < 15  ? 1 : 2;
+    const ureaP = urea < 5   ? 1 : 2;
+    const inrP  = inr  < 1.5 ? 1 : inr <= 2.0 ? 2 : 3;
+    const bilP  = bil  < 125 ? 1 : bil <= 250  ? 2 : 3;
+
+    const el      = document.getElementById('gahs-result');
+    const valEl   = document.getElementById('gahs-val');
+    const interpEl= document.getElementById('gahs-interp');
+    const noteEl  = document.getElementById('gahs-note');
+
+    valEl.textContent = score + ' 点 / 12点';
+
+    let cls, interp, note;
+    if (score <= 8) {
+      cls = 'warn'; interp = 'スコア≤8：28日生存率 約87%';
+      note = `支持療法中心。ステロイドの上乗せ効果は限定的な可能性あり。\n内訳：年齢${ageP}点 / WBC${wbcP}点 / 尿素${ureaP}点 / INR${inrP}点 / Bil${bilP}点`;
+    } else {
+      cls = 'danger'; interp = 'スコア≥9：28日生存率 約46%';
+      note = `予後不良。MDF≥32 と組み合わせてステロイド療法を積極的に検討。\n内訳：年齢${ageP}点 / WBC${wbcP}点 / 尿素${ureaP}点 / INR${inrP}点 / Bil${bilP}点`;
+    }
+
+    el.className = 'result-card show ' + cls;
+    interpEl.textContent = interp;
+    noteEl.textContent = note;
+  }
+
   // ===== Reset =====
   function resetSection(prefix) {
     const section = document.getElementById('tab-' + prefix);
@@ -774,6 +1171,10 @@
     if (prefix === 'ccr') {
       document.getElementById('ccr-male-btn').classList.add('selected');
       document.getElementById('ccr-female-btn').classList.remove('selected');
+    }
+    if (prefix === 'meld') {
+      document.getElementById('meld-nodial-btn').classList.add('selected');
+      document.getElementById('meld-yesdial-btn').classList.remove('selected');
     }
     section.querySelectorAll('.result-card').forEach(c => c.classList.remove('show'));
     section.querySelectorAll('.error-msg').forEach(e => e.classList.remove('show'));
