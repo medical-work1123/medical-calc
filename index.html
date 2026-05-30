@@ -38,7 +38,7 @@ input[type=number]:focus{outline:none;border-color:var(--p);box-shadow:0 0 0 3px
 .chk-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border:1.5px solid var(--bdr);border-radius:10px;margin-bottom:7px;cursor:pointer;transition:all .2s;user-select:none;}
 .chk-item.sel{border-color:var(--p);background:var(--pl);}
 .chk-item input{display:none;}
-.chk-box{width:20px;height:20px;border:2px solid var(--bdr);border-radius:5px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:13px;}
+.chk-box{width:20px;height:20px;border:2px solid var(--bdr);border-radius:5px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:13px;color:transparent;}
 .chk-item.sel .chk-box{background:var(--p);border-color:var(--p);color:#fff;}
 .chk-lbl{font-size:14px;font-weight:500;}
 .calc-btn{width:100%;padding:14px;background:var(--p);color:#fff;border:none;border-radius:12px;font-size:16px;font-weight:700;cursor:pointer;margin-top:12px;transition:background .2s,transform .1s;-webkit-tap-highlight-color:transparent;}
@@ -1035,7 +1035,12 @@ function toggleChk(btnId){
   const cb=btn.querySelector('input[type=checkbox]');
   if(cb)cb.checked=nowSel;
 }
-function isChk(id){return document.getElementById(id)?.checked||false;}
+function isChk(id){
+  const cb=document.getElementById(id);
+  if(!cb)return false;
+  const item=cb.closest('.chk-item');
+  return item?item.classList.contains('sel'):(cb.checked||false);
+}
 
 function rst(prefix){
   const sec=document.querySelector('.section.active');
