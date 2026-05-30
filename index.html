@@ -1019,9 +1019,10 @@ function radio(name){return document.querySelector(`input[name="${name}"]:checke
 function setRC(id,cls,val,interp,note){
   const el=document.getElementById(id);
   el.className='rc show '+cls;
-  if(document.getElementById(id+'-rv'))document.getElementById(id+'-rv').textContent=val;
-  if(document.getElementById(id+'-ri'))document.getElementById(id+'-ri').textContent=interp;
-  if(note!=null&&document.getElementById(id+'-rn'))document.getElementById(id+'-rn').textContent=note;
+  const base=id.replace(/-rc$/,'');
+  if(document.getElementById(base+'-rv'))document.getElementById(base+'-rv').textContent=val;
+  if(document.getElementById(base+'-ri'))document.getElementById(base+'-ri').textContent=interp;
+  if(note!=null&&document.getElementById(base+'-rn'))document.getElementById(base+'-rn').textContent=note;
 }
 function hideRC(id){document.getElementById(id)?.classList.remove('show');}
 function toggleChk(btnId){
