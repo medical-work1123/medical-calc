@@ -80,7 +80,7 @@ input[type=number]:focus{outline:none;border-color:var(--p);box-shadow:0 0 0 3px
 <body>
 <header>
   <h1>医療計算ツール</h1>
-  <p>腎臓・肝臓・糖尿病・脂質異常症・電解質</p>
+  <p>腎臓・肝臓・糖尿病・脂質異常症・電解質・感染症・膵・胆道</p>
 </header>
 <nav class="cat-nav" id="cat-nav">
   <button onclick="selectCat('kidney',this)" class="active">腎臓</button>
@@ -88,6 +88,8 @@ input[type=number]:focus{outline:none;border-color:var(--p);box-shadow:0 0 0 3px
   <button onclick="selectCat('diabetes',this)">糖尿病</button>
   <button onclick="selectCat('lipid',this)">脂質異常症</button>
   <button onclick="selectCat('electrolyte',this)">電解質</button>
+  <button onclick="selectCat('infection',this)">感染症</button>
+  <button onclick="selectCat('panc_bili',this)">膵・胆道</button>
 </nav>
 <nav class="sub-nav" id="sub-nav"></nav>
 <main>
@@ -580,6 +582,396 @@ input[type=number]:focus{outline:none;border-color:var(--p);box-shadow:0 0 0 3px
   </div>
 </div>
 
+
+<!-- ========== 感染症 ========== -->
+<div id="tab-centor" class="section">
+  <div class="card">
+    <div class="card-title">Modified Centor スコア<span class="badge">A群溶連菌咽頭炎</span></div>
+    <div class="formula-box">McIsaac修正版（1998）：GAS咽頭炎の事前確率を評価</div>
+    <div class="sh">年齢</div>
+    <div class="field" style="margin-bottom:10px">
+      <div class="radio-group" style="margin-top:5px;flex-wrap:wrap">
+        <label class="rbtn" id="centor-age1"><input type="radio" name="centor-age" value="1" onchange="rselN(['centor-age1','centor-age2','centor-age3'],0)">3〜14歳(+1)</label>
+        <label class="rbtn sel" id="centor-age2"><input type="radio" name="centor-age" value="0" checked onchange="rselN(['centor-age1','centor-age2','centor-age3'],1)">15〜44歳(±0)</label>
+        <label class="rbtn" id="centor-age3"><input type="radio" name="centor-age" value="-1" onchange="rselN(['centor-age1','centor-age2','centor-age3'],2)">≥45歳(−1)</label>
+      </div>
+    </div>
+    <div class="sh">症状・所見（各1点）</div>
+    <label class="chk-item" id="centor-exudate-btn" onclick="toggleChk('centor-exudate-btn')"><input type="checkbox" id="centor-exudate"><div class="chk-box">✓</div><span class="chk-lbl">扁桃滲出液または扁桃腫大</span></label>
+    <label class="chk-item" id="centor-node-btn" onclick="toggleChk('centor-node-btn')"><input type="checkbox" id="centor-node"><div class="chk-box">✓</div><span class="chk-lbl">圧痛を伴う前頸部リンパ節腫脹</span></label>
+    <label class="chk-item" id="centor-fever-btn" onclick="toggleChk('centor-fever-btn')"><input type="checkbox" id="centor-fever"><div class="chk-box">✓</div><span class="chk-lbl">発熱（体温 >38°C）</span></label>
+    <label class="chk-item" id="centor-cough-btn" onclick="toggleChk('centor-cough-btn')"><input type="checkbox" id="centor-cough"><div class="chk-box">✓</div><span class="chk-lbl">咳嗽がない（咳なし：+1点）</span></label>
+    <button class="calc-btn" onclick="calcCentor()">計算する</button>
+    <button class="reset-btn" onclick="rst('centor')">リセット</button>
+    <div class="rc" id="centor-rc"><div class="rl">Centor スコア</div><div class="rv" id="centor-rv"></div><div class="ri" id="centor-ri"></div><div class="rn" id="centor-rn"></div></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Modified Centor スコア 判定基準</div>
+    <table class="ref-table"><tr><th>スコア</th><th>GAS確率</th><th>対応</th></tr>
+    <tr><td>≤0</td><td>&lt;10%</td><td><span class="tag t-ok">検査・治療不要</span></td></tr>
+    <tr><td>1</td><td>&lt;10%</td><td><span class="tag t-ok">検査・治療不要</span></td></tr>
+    <tr><td>2</td><td>11〜17%</td><td><span class="tag t-ld">RADT/培養を考慮</span></td></tr>
+    <tr><td>3</td><td>28〜35%</td><td><span class="tag t-md">RADT/培養を推奨</span></td></tr>
+    <tr><td>≥4</td><td>≥52%</td><td><span class="tag t-dg">抗菌薬投与を検討</span></td></tr></table>
+    <p class="rn" style="margin-top:8px">GAS: A群β溶血性連鎖球菌。RADT: 迅速抗原検査。<br>咳嗽・鼻汁が主体の場合はウイルス性を強く疑う。</p>
+  </div>
+</div>
+
+<div id="tab-sinusitis" class="section">
+  <div class="card">
+    <div class="card-title">急性鼻副鼻腔炎<span class="badge">EPOS 2020 準拠</span></div>
+    <div class="formula-box">診断：下記2項目以上（鼻閉または鼻汁を含む）<br>重症度：VASスコアによる分類（0=なし〜10=最強）</div>
+    <div class="sh">主症状（2項目以上、かつ鼻閉or鼻汁を含むこと）</div>
+    <label class="chk-item" id="sin-block-btn" onclick="toggleChk('sin-block-btn')"><input type="checkbox" id="sin-block"><div class="chk-box">✓</div><span class="chk-lbl">鼻閉（必須症状の1つ）</span></label>
+    <label class="chk-item" id="sin-discharge-btn" onclick="toggleChk('sin-discharge-btn')"><input type="checkbox" id="sin-discharge"><div class="chk-box">✓</div><span class="chk-lbl">鼻汁（前鼻漏・後鼻漏）（必須症状の1つ）</span></label>
+    <label class="chk-item" id="sin-pain-btn" onclick="toggleChk('sin-pain-btn')"><input type="checkbox" id="sin-pain"><div class="chk-box">✓</div><span class="chk-lbl">顔面痛・顔面圧迫感・頭痛</span></label>
+    <label class="chk-item" id="sin-smell-btn" onclick="toggleChk('sin-smell-btn')"><input type="checkbox" id="sin-smell"><div class="chk-box">✓</div><span class="chk-lbl">嗅覚低下または消失</span></label>
+    <div class="form-row s1" style="margin-top:10px">
+      <div class="field"><label>症状の強さ（VAS：0〜10）</label><div class="input-wrap"><input type="number" id="sin-vas" placeholder="5" min="0" max="10" inputmode="decimal"><span class="unit">点</span></div></div>
+    </div>
+    <div class="divider"></div>
+    <div class="sh">細菌性疑い因子</div>
+    <label class="chk-item" id="sin-worsen-btn" onclick="toggleChk('sin-worsen-btn')"><input type="checkbox" id="sin-worsen"><div class="chk-box">✓</div><span class="chk-lbl">5日後に悪化 または 10日以降も改善なし（double sickening）</span></label>
+    <label class="chk-item" id="sin-fever-btn" onclick="toggleChk('sin-fever-btn')"><input type="checkbox" id="sin-fever"><div class="chk-box">✓</div><span class="chk-lbl">発熱（≥38°C）</span></label>
+    <label class="chk-item" id="sin-unilat-btn" onclick="toggleChk('sin-unilat-btn')"><input type="checkbox" id="sin-unilat"><div class="chk-box">✓</div><span class="chk-lbl">片側性の強い顔面痛・歯痛</span></label>
+    <label class="chk-item" id="sin-purulent-btn" onclick="toggleChk('sin-purulent-btn')"><input type="checkbox" id="sin-purulent"><div class="chk-box">✓</div><span class="chk-lbl">膿性鼻汁（一側性）</span></label>
+    <div class="err" id="sin-err">VASスコア（0〜10）を入力してください。</div>
+    <button class="calc-btn" onclick="calcSinusitis()">判定する</button>
+    <button class="reset-btn" onclick="rst('sin')">リセット</button>
+    <div class="rc" id="sin-rc"><div class="rl">判定</div><div class="rv" id="sin-rv"></div><div class="ri" id="sin-ri"></div><div class="rn" id="sin-rn"></div></div>
+  </div>
+  <div class="card">
+    <div class="card-title">急性鼻副鼻腔炎 重症度と対応</div>
+    <table class="ref-table"><tr><th>重症度</th><th>VAS</th><th>対応</th></tr>
+    <tr><td><span class="tag t-ok">軽症</span></td><td>0〜3</td><td>鼻洗浄・対症療法。抗菌薬原則不要。</td></tr>
+    <tr><td><span class="tag t-ld">中等症</span></td><td>4〜7</td><td>細菌性疑いがあれば抗菌薬考慮。</td></tr>
+    <tr><td><span class="tag t-dg">重症</span></td><td>8〜10</td><td>抗菌薬投与。眼窩・頭蓋内合併症を除外。</td></tr></table>
+    <p class="rn" style="margin-top:8px">※急性鼻副鼻腔炎の約98%はウイルス性。<br>細菌性疑い：double sickening（一旦改善後の再悪化）または重篤な症状。<br>抗菌薬第一選択：アモキシシリン 750〜1500mg/日 ×5〜7日</p>
+  </div>
+</div>
+
+<div id="tab-adrop" class="section">
+  <div class="card">
+    <div class="card-title">A-DROP スコア<span class="badge">市中肺炎重症度</span></div>
+    <div class="formula-box">日本呼吸器学会 市中肺炎重症度分類（各1点・合計0〜5点）</div>
+    <label class="chk-item" id="adrop-a-btn" onclick="toggleChk('adrop-a-btn')"><input type="checkbox" id="adrop-a"><div class="chk-box">✓</div><span class="chk-lbl"><b>A</b>ge：男性≥70歳 または 女性≥75歳</span></label>
+    <label class="chk-item" id="adrop-d-btn" onclick="toggleChk('adrop-d-btn')"><input type="checkbox" id="adrop-d"><div class="chk-box">✓</div><span class="chk-lbl"><b>D</b>ehydration：BUN≥21mg/dL または脱水</span></label>
+    <label class="chk-item" id="adrop-r-btn" onclick="toggleChk('adrop-r-btn')"><input type="checkbox" id="adrop-r"><div class="chk-box">✓</div><span class="chk-lbl"><b>R</b>espiration：SpO₂≤90% または PaO₂≤60mmHg（room air）</span></label>
+    <label class="chk-item" id="adrop-o-btn" onclick="toggleChk('adrop-o-btn')"><input type="checkbox" id="adrop-o"><div class="chk-box">✓</div><span class="chk-lbl"><b>O</b>rientation：意識障害あり</span></label>
+    <label class="chk-item" id="adrop-p-btn" onclick="toggleChk('adrop-p-btn')"><input type="checkbox" id="adrop-p"><div class="chk-box">✓</div><span class="chk-lbl"><b>P</b>ressure：収縮期血圧≤90mmHg</span></label>
+    <button class="calc-btn" onclick="calcADROP()">計算する</button>
+    <button class="reset-btn" onclick="rst('adrop')">リセット</button>
+    <div class="rc" id="adrop-rc"><div class="rl">A-DROP</div><div class="rv" id="adrop-rv"></div><div class="ri" id="adrop-ri"></div><div class="rn" id="adrop-rn"></div></div>
+  </div>
+  <div class="card">
+    <div class="card-title">A-DROP 重症度と入院判断</div>
+    <table class="ref-table"><tr><th>スコア</th><th>重症度</th><th>対応</th></tr>
+    <tr><td>0</td><td><span class="tag t-ok">軽症</span></td><td>外来治療</td></tr>
+    <tr><td>1〜2</td><td><span class="tag t-ld">中等症</span></td><td>入院治療（外来も可）</td></tr>
+    <tr><td>3</td><td><span class="tag t-md">重症</span></td><td>入院治療（ICU検討）</td></tr>
+    <tr><td>4〜5</td><td><span class="tag t-dg">超重症</span></td><td>ICU入室</td></tr></table>
+    <p class="rn" style="margin-top:8px">※R・O・Pのいずれか1項目が陽性の場合は中等症以上として扱う。<br>※A-DROP≥3はICU/HCUへの入院を強く考慮する。</p>
+  </div>
+</div>
+
+<div id="tab-pntype" class="section">
+  <div class="card">
+    <div class="card-title">肺炎鑑別<span class="badge">細菌性 vs 非定型</span></div>
+    <div class="formula-box">Miyashita スコア準拠：典型細菌性因子 / 非定型性因子の対比</div>
+    <div class="sh">典型細菌性因子（各1点）</div>
+    <label class="chk-item" id="pn-age-btn" onclick="toggleChk('pn-age-btn')"><input type="checkbox" id="pn-age"><div class="chk-box">✓</div><span class="chk-lbl">年齢≥60歳</span></label>
+    <label class="chk-item" id="pn-base-btn" onclick="toggleChk('pn-base-btn')"><input type="checkbox" id="pn-base"><div class="chk-box">✓</div><span class="chk-lbl">基礎疾患あり（COPD・糖尿病・心疾患・免疫不全など）</span></label>
+    <label class="chk-item" id="pn-acute-btn" onclick="toggleChk('pn-acute-btn')"><input type="checkbox" id="pn-acute"><div class="chk-box">✓</div><span class="chk-lbl">急性発症（症状出現から3日以内）</span></label>
+    <label class="chk-item" id="pn-sputum-btn" onclick="toggleChk('pn-sputum-btn')"><input type="checkbox" id="pn-sputum"><div class="chk-box">✓</div><span class="chk-lbl">膿性痰あり</span></label>
+    <label class="chk-item" id="pn-crackle-btn" onclick="toggleChk('pn-crackle-btn')"><input type="checkbox" id="pn-crackle"><div class="chk-box">✓</div><span class="chk-lbl">聴診でラ音（crackles）あり</span></label>
+    <label class="chk-item" id="pn-wbc-btn" onclick="toggleChk('pn-wbc-btn')"><input type="checkbox" id="pn-wbc"><div class="chk-box">✓</div><span class="chk-lbl">WBC≥10,000/µL または核左方移動</span></label>
+    <div class="divider"></div>
+    <div class="sh">非定型肺炎因子（各1点）</div>
+    <label class="chk-item" id="pn-young-btn" onclick="toggleChk('pn-young-btn')"><input type="checkbox" id="pn-young"><div class="chk-box">✓</div><span class="chk-lbl">年齢&lt;60歳</span></label>
+    <label class="chk-item" id="pn-nobase-btn" onclick="toggleChk('pn-nobase-btn')"><input type="checkbox" id="pn-nobase"><div class="chk-box">✓</div><span class="chk-lbl">基礎疾患なし</span></label>
+    <label class="chk-item" id="pn-slow-btn" onclick="toggleChk('pn-slow-btn')"><input type="checkbox" id="pn-slow"><div class="chk-box">✓</div><span class="chk-lbl">緩徐発症（3日超）</span></label>
+    <label class="chk-item" id="pn-nosputum-btn" onclick="toggleChk('pn-nosputum-btn')"><input type="checkbox" id="pn-nosputum"><div class="chk-box">✓</div><span class="chk-lbl">痰なし</span></label>
+    <label class="chk-item" id="pn-xray-btn" onclick="toggleChk('pn-xray-btn')"><input type="checkbox" id="pn-xray"><div class="chk-box">✓</div><span class="chk-lbl">胸部X線所見が症状より重い（画像優位）</span></label>
+    <label class="chk-item" id="pn-ca-btn" onclick="toggleChk('pn-ca-btn')"><input type="checkbox" id="pn-ca"><div class="chk-box">✓</div><span class="chk-lbl">コールドアグルチニン≥1:64 またはMP抗体≥1:160</span></label>
+    <button class="calc-btn" onclick="calcPnType()">判定する</button>
+    <button class="reset-btn" onclick="rst('pn')">リセット</button>
+    <div class="rc" id="pntype-rc"><div class="rl">鑑別判定</div><div class="rv" id="pntype-rv"></div><div class="ri" id="pntype-ri"></div><div class="rn" id="pntype-rn"></div></div>
+  </div>
+  <div class="card">
+    <div class="card-title">細菌性 vs 非定型肺炎 鑑別の目安</div>
+    <table class="ref-table"><tr><th>指標</th><th>細菌性（典型）</th><th>非定型</th></tr>
+    <tr><td>好発</td><td>高齢・基礎疾患あり</td><td>若年・健常人</td></tr>
+    <tr><td>発症</td><td>急性（数日以内）</td><td>緩徐（1〜2週）</td></tr>
+    <tr><td>痰</td><td>膿性・血性</td><td>少量または無痰</td></tr>
+    <tr><td>身体所見</td><td>crackles著明</td><td>所見乏しい</td></tr>
+    <tr><td>WBC</td><td>≥10,000（核左方移動）</td><td>正常〜軽度上昇</td></tr></table>
+    <p class="rn" style="margin-top:8px">非定型原因：Mycoplasma、Chlamydophila、Legionella、ウイルス性<br>典型細菌性≥3かつ非定型≤2 → 細菌性；非定型≥3かつ典型≤2 → 非定型</p>
+  </div>
+</div>
+
+<div id="tab-qsofa" class="section">
+  <div class="card">
+    <div class="card-title">qSOFA<span class="badge">敗血症スクリーニング</span></div>
+    <div class="formula-box">Sepsis-3 quick SOFA（各1点）：院外・救急・一般病棟でのスクリーニング</div>
+    <label class="chk-item" id="qsofa-resp-btn" onclick="toggleChk('qsofa-resp-btn')"><input type="checkbox" id="qsofa-resp"><div class="chk-box">✓</div><span class="chk-lbl">呼吸数≥22回/分</span></label>
+    <label class="chk-item" id="qsofa-mental-btn" onclick="toggleChk('qsofa-mental-btn')"><input type="checkbox" id="qsofa-mental"><div class="chk-box">✓</div><span class="chk-lbl">意識変容（GCS&lt;15 または新たな意識障害）</span></label>
+    <label class="chk-item" id="qsofa-sbp-btn" onclick="toggleChk('qsofa-sbp-btn')"><input type="checkbox" id="qsofa-sbp"><div class="chk-box">✓</div><span class="chk-lbl">収縮期血圧≤100mmHg</span></label>
+    <button class="calc-btn" onclick="calcQSOFA()">計算する</button>
+    <button class="reset-btn" onclick="rst('qsofa')">リセット</button>
+    <div class="rc" id="qsofa-rc"><div class="rl">qSOFA</div><div class="rv" id="qsofa-rv"></div><div class="ri" id="qsofa-ri"></div><div class="rn" id="qsofa-rn"></div></div>
+  </div>
+  <div class="card">
+    <div class="card-title">qSOFA 解釈</div>
+    <table class="ref-table"><tr><th>スコア</th><th>解釈</th><th>対応</th></tr>
+    <tr><td>0〜1</td><td><span class="tag t-ok">低リスク</span></td><td>経過観察継続</td></tr>
+    <tr><td>≥2</td><td><span class="tag t-dg">敗血症を強く疑う</span></td><td>SOFA評価・血液培養・乳酸値測定</td></tr></table>
+    <p class="rn" style="margin-top:8px">※qSOFA≥2：院内死亡リスク>10%（入院患者）。<br>※感染症が疑われる場合にのみ使用。qSOFAは確定診断ではない。<br>※ICU入室患者ではSOFA（full）を使用すること。</p>
+  </div>
+</div>
+
+<div id="tab-sofa" class="section">
+  <div class="card">
+    <div class="card-title">SOFA スコア<span class="badge">Sequential Organ Failure Assessment</span></div>
+    <div class="formula-box">6臓器系を各0〜4点で評価（合計0〜24点）</div>
+    <div class="sh">① 呼吸（PaO₂/FiO₂ mmHg）</div>
+    <div class="field" style="margin-bottom:10px"><div class="radio-group" style="flex-wrap:wrap;margin-top:5px">
+      <label class="rbtn sel" id="sofa-r0"><input type="radio" name="sofa-resp" value="0" checked onchange="rselN(['sofa-r0','sofa-r1','sofa-r2','sofa-r3','sofa-r4'],0)">≥400（0点）</label>
+      <label class="rbtn" id="sofa-r1"><input type="radio" name="sofa-resp" value="1" onchange="rselN(['sofa-r0','sofa-r1','sofa-r2','sofa-r3','sofa-r4'],1)">300〜399（1点）</label>
+      <label class="rbtn" id="sofa-r2"><input type="radio" name="sofa-resp" value="2" onchange="rselN(['sofa-r0','sofa-r1','sofa-r2','sofa-r3','sofa-r4'],2)">&lt;300+呼吸補助（2点）</label>
+      <label class="rbtn" id="sofa-r3"><input type="radio" name="sofa-resp" value="3" onchange="rselN(['sofa-r0','sofa-r1','sofa-r2','sofa-r3','sofa-r4'],3)">&lt;200+呼吸補助（3点）</label>
+      <label class="rbtn" id="sofa-r4"><input type="radio" name="sofa-resp" value="4" onchange="rselN(['sofa-r0','sofa-r1','sofa-r2','sofa-r3','sofa-r4'],4)">&lt;100+呼吸補助（4点）</label>
+    </div></div>
+    <div class="sh">② 凝固（血小板 ×10³/µL）</div>
+    <div class="field" style="margin-bottom:10px"><div class="radio-group" style="flex-wrap:wrap;margin-top:5px">
+      <label class="rbtn sel" id="sofa-c0"><input type="radio" name="sofa-coag" value="0" checked onchange="rselN(['sofa-c0','sofa-c1','sofa-c2','sofa-c3','sofa-c4'],0)">≥150（0点）</label>
+      <label class="rbtn" id="sofa-c1"><input type="radio" name="sofa-coag" value="1" onchange="rselN(['sofa-c0','sofa-c1','sofa-c2','sofa-c3','sofa-c4'],1)">100〜149（1点）</label>
+      <label class="rbtn" id="sofa-c2"><input type="radio" name="sofa-coag" value="2" onchange="rselN(['sofa-c0','sofa-c1','sofa-c2','sofa-c3','sofa-c4'],2)">50〜99（2点）</label>
+      <label class="rbtn" id="sofa-c3"><input type="radio" name="sofa-coag" value="3" onchange="rselN(['sofa-c0','sofa-c1','sofa-c2','sofa-c3','sofa-c4'],3)">20〜49（3点）</label>
+      <label class="rbtn" id="sofa-c4"><input type="radio" name="sofa-coag" value="4" onchange="rselN(['sofa-c0','sofa-c1','sofa-c2','sofa-c3','sofa-c4'],4)">&lt;20（4点）</label>
+    </div></div>
+    <div class="sh">③ 肝臓（ビリルビン mg/dL）</div>
+    <div class="field" style="margin-bottom:10px"><div class="radio-group" style="flex-wrap:wrap;margin-top:5px">
+      <label class="rbtn sel" id="sofa-l0"><input type="radio" name="sofa-liver" value="0" checked onchange="rselN(['sofa-l0','sofa-l1','sofa-l2','sofa-l3','sofa-l4'],0)">&lt;1.2（0点）</label>
+      <label class="rbtn" id="sofa-l1"><input type="radio" name="sofa-liver" value="1" onchange="rselN(['sofa-l0','sofa-l1','sofa-l2','sofa-l3','sofa-l4'],1)">1.2〜1.9（1点）</label>
+      <label class="rbtn" id="sofa-l2"><input type="radio" name="sofa-liver" value="2" onchange="rselN(['sofa-l0','sofa-l1','sofa-l2','sofa-l3','sofa-l4'],2)">2.0〜5.9（2点）</label>
+      <label class="rbtn" id="sofa-l3"><input type="radio" name="sofa-liver" value="3" onchange="rselN(['sofa-l0','sofa-l1','sofa-l2','sofa-l3','sofa-l4'],3)">6.0〜11.9（3点）</label>
+      <label class="rbtn" id="sofa-l4"><input type="radio" name="sofa-liver" value="4" onchange="rselN(['sofa-l0','sofa-l1','sofa-l2','sofa-l3','sofa-l4'],4)">≥12.0（4点）</label>
+    </div></div>
+    <div class="sh">④ 循環（MAP または昇圧薬投与量）</div>
+    <div class="field" style="margin-bottom:10px"><div class="radio-group" style="flex-wrap:wrap;margin-top:5px">
+      <label class="rbtn sel" id="sofa-v0"><input type="radio" name="sofa-cv" value="0" checked onchange="rselN(['sofa-v0','sofa-v1','sofa-v2','sofa-v3','sofa-v4'],0)">MAP≥70（0点）</label>
+      <label class="rbtn" id="sofa-v1"><input type="radio" name="sofa-cv" value="1" onchange="rselN(['sofa-v0','sofa-v1','sofa-v2','sofa-v3','sofa-v4'],1)">MAP&lt;70（1点）</label>
+      <label class="rbtn" id="sofa-v2"><input type="radio" name="sofa-cv" value="2" onchange="rselN(['sofa-v0','sofa-v1','sofa-v2','sofa-v3','sofa-v4'],2)">DOA≤5またはDOB（2点）</label>
+      <label class="rbtn" id="sofa-v3"><input type="radio" name="sofa-cv" value="3" onchange="rselN(['sofa-v0','sofa-v1','sofa-v2','sofa-v3','sofa-v4'],3)">DOA>5またはNAd/Adr≤0.1（3点）</label>
+      <label class="rbtn" id="sofa-v4"><input type="radio" name="sofa-cv" value="4" onchange="rselN(['sofa-v0','sofa-v1','sofa-v2','sofa-v3','sofa-v4'],4)">DOA>15またはNAd/Adr>0.1（4点）</label>
+    </div></div>
+    <div class="sh">⑤ 中枢神経（GCS）</div>
+    <div class="field" style="margin-bottom:10px"><div class="radio-group" style="flex-wrap:wrap;margin-top:5px">
+      <label class="rbtn sel" id="sofa-n0"><input type="radio" name="sofa-cns" value="0" checked onchange="rselN(['sofa-n0','sofa-n1','sofa-n2','sofa-n3','sofa-n4'],0)">15（0点）</label>
+      <label class="rbtn" id="sofa-n1"><input type="radio" name="sofa-cns" value="1" onchange="rselN(['sofa-n0','sofa-n1','sofa-n2','sofa-n3','sofa-n4'],1)">13〜14（1点）</label>
+      <label class="rbtn" id="sofa-n2"><input type="radio" name="sofa-cns" value="2" onchange="rselN(['sofa-n0','sofa-n1','sofa-n2','sofa-n3','sofa-n4'],2)">10〜12（2点）</label>
+      <label class="rbtn" id="sofa-n3"><input type="radio" name="sofa-cns" value="3" onchange="rselN(['sofa-n0','sofa-n1','sofa-n2','sofa-n3','sofa-n4'],3)">6〜9（3点）</label>
+      <label class="rbtn" id="sofa-n4"><input type="radio" name="sofa-cns" value="4" onchange="rselN(['sofa-n0','sofa-n1','sofa-n2','sofa-n3','sofa-n4'],4)">&lt;6（4点）</label>
+    </div></div>
+    <div class="sh">⑥ 腎臓（Cr mg/dL または尿量）</div>
+    <div class="field" style="margin-bottom:10px"><div class="radio-group" style="flex-wrap:wrap;margin-top:5px">
+      <label class="rbtn sel" id="sofa-k0"><input type="radio" name="sofa-renal" value="0" checked onchange="rselN(['sofa-k0','sofa-k1','sofa-k2','sofa-k3','sofa-k4'],0)">&lt;1.2（0点）</label>
+      <label class="rbtn" id="sofa-k1"><input type="radio" name="sofa-renal" value="1" onchange="rselN(['sofa-k0','sofa-k1','sofa-k2','sofa-k3','sofa-k4'],1)">1.2〜1.9（1点）</label>
+      <label class="rbtn" id="sofa-k2"><input type="radio" name="sofa-renal" value="2" onchange="rselN(['sofa-k0','sofa-k1','sofa-k2','sofa-k3','sofa-k4'],2)">2.0〜3.4（2点）</label>
+      <label class="rbtn" id="sofa-k3"><input type="radio" name="sofa-renal" value="3" onchange="rselN(['sofa-k0','sofa-k1','sofa-k2','sofa-k3','sofa-k4'],3)">3.5〜4.9 or UO&lt;500mL/d（3点）</label>
+      <label class="rbtn" id="sofa-k4"><input type="radio" name="sofa-renal" value="4" onchange="rselN(['sofa-k0','sofa-k1','sofa-k2','sofa-k3','sofa-k4'],4)">≥5.0 or UO&lt;200mL/d（4点）</label>
+    </div></div>
+    <button class="calc-btn" onclick="calcSOFA()">計算する</button>
+    <button class="reset-btn" onclick="rst('sofa')">リセット</button>
+    <div class="rc" id="sofa-rc"><div class="rl">SOFA スコア</div><div class="rv" id="sofa-rv"></div><div class="ri" id="sofa-ri"></div><div class="rn" id="sofa-rn"></div></div>
+  </div>
+  <div class="card">
+    <div class="card-title">SOFA スコアと死亡率</div>
+    <table class="ref-table"><tr><th>スコア</th><th>ICU死亡率</th></tr>
+    <tr><td>0〜6</td><td>&lt;10%</td></tr>
+    <tr><td>7〜9</td><td>約15〜20%</td></tr>
+    <tr><td>10〜12</td><td>約40〜50%</td></tr>
+    <tr><td>13〜14</td><td>約50〜60%</td></tr>
+    <tr><td>≥15</td><td>&gt;80%</td></tr></table>
+    <p class="rn" style="margin-top:8px">Sepsis-3定義：感染症疑い＋SOFAが2点以上急性増加。<br>敗血症性ショック：敗血症＋昇圧薬必要＋乳酸≥2mmol/L。<br>DOA=ドパミン、DOB=ドブタミン、NAd=ノルアドレナリン、Adr=アドレナリン（µg/kg/min）</p>
+  </div>
+</div>
+
+<div id="tab-sirs" class="section">
+  <div class="card">
+    <div class="card-title">SIRS 診断基準<span class="badge">全身性炎症反応症候群</span></div>
+    <div class="formula-box">下記4項目中 2項目以上を満たす場合にSIRS診断</div>
+    <label class="chk-item" id="sirs-temp-btn" onclick="toggleChk('sirs-temp-btn')"><input type="checkbox" id="sirs-temp"><div class="chk-box">✓</div><span class="chk-lbl">体温 &gt;38°C または &lt;36°C</span></label>
+    <label class="chk-item" id="sirs-hr-btn" onclick="toggleChk('sirs-hr-btn')"><input type="checkbox" id="sirs-hr"><div class="chk-box">✓</div><span class="chk-lbl">心拍数 &gt;90回/分</span></label>
+    <label class="chk-item" id="sirs-rr-btn" onclick="toggleChk('sirs-rr-btn')"><input type="checkbox" id="sirs-rr"><div class="chk-box">✓</div><span class="chk-lbl">呼吸数 &gt;20回/分 または PaCO₂ &lt;32mmHg</span></label>
+    <label class="chk-item" id="sirs-wbc-btn" onclick="toggleChk('sirs-wbc-btn')"><input type="checkbox" id="sirs-wbc"><div class="chk-box">✓</div><span class="chk-lbl">WBC &gt;12,000/mm³ または &lt;4,000/mm³ または 幼若球（桿状核球）&gt;10%</span></label>
+    <button class="calc-btn" onclick="calcSIRS()">判定する</button>
+    <button class="reset-btn" onclick="rst('sirs')">リセット</button>
+    <div class="rc" id="sirs-rc"><div class="rl">SIRS</div><div class="rv" id="sirs-rv"></div><div class="ri" id="sirs-ri"></div><div class="rn" id="sirs-rn"></div></div>
+  </div>
+  <div class="card">
+    <div class="card-title">SIRS・敗血症・敗血症性ショックの定義</div>
+    <table class="ref-table"><tr><th>病態</th><th>定義</th></tr>
+    <tr><td><span class="tag t-ld">SIRS</span></td><td>4項目中2項目以上（感染の有無問わず）</td></tr>
+    <tr><td><span class="tag t-md">敗血症（旧定義）</span></td><td>感染症＋SIRS≥2項目</td></tr>
+    <tr><td><span class="tag t-sv">敗血症（Sepsis-3）</span></td><td>感染症疑い＋SOFA≥2点急性増加</td></tr>
+    <tr><td><span class="tag t-dg">敗血症性ショック</span></td><td>敗血症＋昇圧薬必要＋乳酸≥2mmol/L</td></tr></table>
+    <p class="rn" style="margin-top:8px">※SIRSは非感染性疾患（外傷・熱傷・膵炎など）でも陽性となる。<br>※急性膵炎重症度スコアの1項目にもSIRSが含まれる。</p>
+  </div>
+</div>
+
+<!-- ========== 膵・胆道 ========== -->
+<div id="tab-panc" class="section">
+  <div class="card">
+    <div class="card-title">急性膵炎 重症度スコア<span class="badge">厚生労働省スコア</span></div>
+    <div class="formula-box">予後因子スコア（9項目）＋CTグレード：合計3点以上で重症</div>
+    <div class="sh">予後因子（各1点）</div>
+    <label class="chk-item" id="panc-be-btn" onclick="toggleChk('panc-be-btn')"><input type="checkbox" id="panc-be"><div class="chk-box">✓</div><span class="chk-lbl">Base excess ≤−3mEq/L または収縮期血圧&lt;80mmHg（ショック）</span></label>
+    <label class="chk-item" id="panc-pao2-btn" onclick="toggleChk('panc-pao2-btn')"><input type="checkbox" id="panc-pao2"><div class="chk-box">✓</div><span class="chk-lbl">PaO₂≤60mmHg（room air）または呼吸不全</span></label>
+    <label class="chk-item" id="panc-bun-btn" onclick="toggleChk('panc-bun-btn')"><input type="checkbox" id="panc-bun"><div class="chk-box">✓</div><span class="chk-lbl">BUN≥40mg/dL または Cr≥2.0mg/dL または乏尿（&lt;400mL/日）</span></label>
+    <label class="chk-item" id="panc-ldh-btn" onclick="toggleChk('panc-ldh-btn')"><input type="checkbox" id="panc-ldh"><div class="chk-box">✓</div><span class="chk-lbl">LDH≥正常上限の2倍</span></label>
+    <label class="chk-item" id="panc-plt-btn" onclick="toggleChk('panc-plt-btn')"><input type="checkbox" id="panc-plt"><div class="chk-box">✓</div><span class="chk-lbl">血小板≤10万/mm³</span></label>
+    <label class="chk-item" id="panc-ca-btn" onclick="toggleChk('panc-ca-btn')"><input type="checkbox" id="panc-ca"><div class="chk-box">✓</div><span class="chk-lbl">総Ca≤7.5mg/dL</span></label>
+    <label class="chk-item" id="panc-crp-btn" onclick="toggleChk('panc-crp-btn')"><input type="checkbox" id="panc-crp"><div class="chk-box">✓</div><span class="chk-lbl">CRP≥15mg/dL</span></label>
+    <label class="chk-item" id="panc-sirs-btn" onclick="toggleChk('panc-sirs-btn')"><input type="checkbox" id="panc-sirs"><div class="chk-box">✓</div><span class="chk-lbl">SIRS診断基準≥3項目陽性</span></label>
+    <label class="chk-item" id="panc-age-btn" onclick="toggleChk('panc-age-btn')"><input type="checkbox" id="panc-age"><div class="chk-box">✓</div><span class="chk-lbl">年齢≥70歳</span></label>
+    <div class="divider"></div>
+    <div class="sh">造影CT重症化危険因子</div>
+    <div class="field" style="margin-bottom:10px"><label>CTグレード</label>
+      <div class="radio-group" style="margin-top:5px;flex-wrap:wrap">
+        <label class="rbtn sel" id="panc-ct0"><input type="radio" name="panc-ct" value="0" checked onchange="rselN(['panc-ct0','panc-ct1','panc-ct2'],0)">Grade 1〜2（膵腫大・周囲脂肪織炎）（0点）</label>
+        <label class="rbtn" id="panc-ct1"><input type="radio" name="panc-ct" value="1" onchange="rselN(['panc-ct0','panc-ct1','panc-ct2'],1)">Grade 3（前腎傍腔への浸潤）（1点）</label>
+        <label class="rbtn" id="panc-ct2"><input type="radio" name="panc-ct" value="2" onchange="rselN(['panc-ct0','panc-ct1','panc-ct2'],2)">Grade 4〜5（広範な膵外浸潤・腹水）（2点）</label>
+      </div>
+    </div>
+    <button class="calc-btn" onclick="calcPanc()">計算する</button>
+    <button class="reset-btn" onclick="rst('panc')">リセット</button>
+    <div class="rc" id="panc-rc"><div class="rl">急性膵炎重症度</div><div class="rv" id="panc-rv"></div><div class="ri" id="panc-ri"></div><div class="rn" id="panc-rn"></div></div>
+  </div>
+  <div class="card">
+    <div class="card-title">急性膵炎 重症度判定基準</div>
+    <table class="ref-table"><tr><th>スコア</th><th>重症度</th><th>死亡率</th><th>対応</th></tr>
+    <tr><td>0〜2</td><td><span class="tag t-ok">軽症</span></td><td>&lt;1%</td><td>一般病棟で輸液・絶食管理</td></tr>
+    <tr><td>≥3</td><td><span class="tag t-dg">重症</span></td><td>15〜30%</td><td>ICU/HCU管理、専門施設転送を検討</td></tr></table>
+    <p class="rn" style="margin-top:8px">※重症度判定は発症後48時間以内に行う（動的評価）。<br>※スコア2点でも臨床的に重症と判断された場合は重症として管理。<br>※感染性壊死（発症4週後以降）には外科的・内視鏡的ドレナージを検討。</p>
+  </div>
+</div>
+
+<div id="tab-cholecyst-dx" class="section">
+  <div class="card">
+    <div class="card-title">急性胆嚢炎 診断基準<span class="badge">TG18</span></div>
+    <div class="formula-box">東京ガイドライン2018：A（局所炎症）＋B（全身炎症）＋C（画像）</div>
+    <div class="sh">A. 局所炎症所見（1項目以上で陽性）</div>
+    <label class="chk-item" id="chcy-a1-btn" onclick="toggleChk('chcy-a1-btn')"><input type="checkbox" id="chcy-a1"><div class="chk-box">✓</div><span class="chk-lbl">右上腹部圧痛・腫瘤触知・筋性防御</span></label>
+    <label class="chk-item" id="chcy-a2-btn" onclick="toggleChk('chcy-a2-btn')"><input type="checkbox" id="chcy-a2"><div class="chk-box">✓</div><span class="chk-lbl">Murphy徴候陽性</span></label>
+    <div class="sh" style="margin-top:10px">B. 全身炎症所見（1項目以上で陽性）</div>
+    <label class="chk-item" id="chcy-b1-btn" onclick="toggleChk('chcy-b1-btn')"><input type="checkbox" id="chcy-b1"><div class="chk-box">✓</div><span class="chk-lbl">発熱（&gt;38°C）</span></label>
+    <label class="chk-item" id="chcy-b2-btn" onclick="toggleChk('chcy-b2-btn')"><input type="checkbox" id="chcy-b2"><div class="chk-box">✓</div><span class="chk-lbl">CRP上昇（&gt;3mg/dL）</span></label>
+    <label class="chk-item" id="chcy-b3-btn" onclick="toggleChk('chcy-b3-btn')"><input type="checkbox" id="chcy-b3"><div class="chk-box">✓</div><span class="chk-lbl">WBC上昇（&gt;10,000/µL）</span></label>
+    <div class="sh" style="margin-top:10px">C. 画像所見（1項目以上で確定）</div>
+    <label class="chk-item" id="chcy-c1-btn" onclick="toggleChk('chcy-c1-btn')"><input type="checkbox" id="chcy-c1"><div class="chk-box">✓</div><span class="chk-lbl">急性胆嚢炎の特徴的画像所見（胆嚢壁肥厚・sonographic Murphy sign・胆嚢周囲液体貯留など）</span></label>
+    <button class="calc-btn" onclick="calcCholecystDx()">診断を判定</button>
+    <button class="reset-btn" onclick="rst('chcy')">リセット</button>
+    <div class="rc" id="chcy-dx-rc"><div class="rl">急性胆嚢炎 診断</div><div class="rv" id="chcy-dx-rv"></div><div class="ri" id="chcy-dx-ri"></div><div class="rn" id="chcy-dx-rn"></div></div>
+  </div>
+  <div class="card">
+    <div class="card-title">急性胆嚢炎 TG18 診断基準まとめ</div>
+    <table class="ref-table"><tr><th>条件</th><th>診断</th></tr>
+    <tr><td>A≥1 ＋ B≥1 ＋ C≥1</td><td><span class="tag t-dg">確定診断</span></td></tr>
+    <tr><td>A≥1 ＋ B≥1（C未施行）</td><td><span class="tag t-ld">疑い診断</span></td></tr>
+    <tr><td>条件不足</td><td><span class="tag t-ok">診断基準を満たさず</span></td></tr></table>
+    <p class="rn" style="margin-top:8px">※画像検査（腹部超音波）が第一選択。<br>鑑別：急性肝炎・急性胆管炎・消化性潰瘍・急性膵炎・右側結腸疾患。</p>
+  </div>
+</div>
+
+<div id="tab-cholang-dx" class="section">
+  <div class="card">
+    <div class="card-title">急性胆管炎 診断基準<span class="badge">TG18</span></div>
+    <div class="formula-box">東京ガイドライン2018：A（全身炎症）＋B（胆汁うっ滞）＋C（画像）</div>
+    <div class="sh">A. 全身炎症所見（1項目以上）</div>
+    <label class="chk-item" id="chan-a1-btn" onclick="toggleChk('chan-a1-btn')"><input type="checkbox" id="chan-a1"><div class="chk-box">✓</div><span class="chk-lbl">発熱 and/or 悪寒戦慄（&gt;38°C）</span></label>
+    <label class="chk-item" id="chan-a2-btn" onclick="toggleChk('chan-a2-btn')"><input type="checkbox" id="chan-a2"><div class="chk-box">✓</div><span class="chk-lbl">WBC異常（&lt;4,000 または &gt;10,000/µL）</span></label>
+    <label class="chk-item" id="chan-a3-btn" onclick="toggleChk('chan-a3-btn')"><input type="checkbox" id="chan-a3"><div class="chk-box">✓</div><span class="chk-lbl">CRP上昇（≥1mg/dL）</span></label>
+    <div class="sh" style="margin-top:10px">B. 胆汁うっ滞所見（1項目以上）</div>
+    <label class="chk-item" id="chan-b1-btn" onclick="toggleChk('chan-b1-btn')"><input type="checkbox" id="chan-b1"><div class="chk-box">✓</div><span class="chk-lbl">黄疸（T-Bil≥2mg/dL）</span></label>
+    <label class="chk-item" id="chan-b2-btn" onclick="toggleChk('chan-b2-btn')"><input type="checkbox" id="chan-b2"><div class="chk-box">✓</div><span class="chk-lbl">肝胆道系酵素上昇（ALP/γ-GTP/AST/ALT &gt;正常上限の1.5倍）</span></label>
+    <div class="sh" style="margin-top:10px">C. 画像所見（1項目以上）</div>
+    <label class="chk-item" id="chan-c1-btn" onclick="toggleChk('chan-c1-btn')"><input type="checkbox" id="chan-c1"><div class="chk-box">✓</div><span class="chk-lbl">胆管拡張</span></label>
+    <label class="chk-item" id="chan-c2-btn" onclick="toggleChk('chan-c2-btn')"><input type="checkbox" id="chan-c2"><div class="chk-box">✓</div><span class="chk-lbl">胆管炎の原因（胆管結石・狭窄・ステント閉塞など）の画像確認</span></label>
+    <button class="calc-btn" onclick="calcCholangDx()">診断を判定</button>
+    <button class="reset-btn" onclick="rst('chan')">リセット</button>
+    <div class="rc" id="chan-dx-rc"><div class="rl">急性胆管炎 診断</div><div class="rv" id="chan-dx-rv"></div><div class="ri" id="chan-dx-ri"></div><div class="rn" id="chan-dx-rn"></div></div>
+  </div>
+  <div class="card">
+    <div class="card-title">急性胆管炎 TG18 診断基準まとめ</div>
+    <table class="ref-table"><tr><th>条件</th><th>診断</th></tr>
+    <tr><td>A≥1 ＋ B≥1 ＋ C≥1</td><td><span class="tag t-dg">確定診断</span></td></tr>
+    <tr><td>A≥1 ＋ B≥1（C未施行）</td><td><span class="tag t-ld">疑い診断</span></td></tr>
+    <tr><td>条件不足</td><td><span class="tag t-ok">診断基準を満たさず</span></td></tr></table>
+    <p class="rn" style="margin-top:8px">Charcot三徴（発熱・黄疸・右上腹部痛）→ 急性胆管炎を強く疑う。<br>Reynolds五徴（Charcot三徴＋意識障害＋敗血症性ショック）→ 重症胆管炎。<br>確定後は速やかに胆道ドレナージ（ERCP/PTCD）の適応を評価。</p>
+  </div>
+</div>
+
+<div id="tab-cholecyst-sev" class="section">
+  <div class="card">
+    <div class="card-title">急性胆嚢炎 重症度判定<span class="badge">TG18</span></div>
+    <div class="formula-box">TG18重症度分類：Grade I（軽症）・II（中等症）・III（重症）</div>
+    <div class="sh">Grade III（重症）判定因子：臓器機能障害（1項目以上で Grade III）</div>
+    <label class="chk-item" id="chcy-s-cv-btn" onclick="toggleChk('chcy-s-cv-btn')"><input type="checkbox" id="chcy-s-cv"><div class="chk-box">✓</div><span class="chk-lbl">循環：収縮期血圧維持に昇圧薬必要</span></label>
+    <label class="chk-item" id="chcy-s-ns-btn" onclick="toggleChk('chcy-s-ns-btn')"><input type="checkbox" id="chcy-s-ns"><div class="chk-box">✓</div><span class="chk-lbl">神経：意識障害</span></label>
+    <label class="chk-item" id="chcy-s-resp-btn" onclick="toggleChk('chcy-s-resp-btn')"><input type="checkbox" id="chcy-s-resp"><div class="chk-box">✓</div><span class="chk-lbl">呼吸：PaO₂/FiO₂比&lt;300</span></label>
+    <label class="chk-item" id="chcy-s-liver-btn" onclick="toggleChk('chcy-s-liver-btn')"><input type="checkbox" id="chcy-s-liver"><div class="chk-box">✓</div><span class="chk-lbl">肝臓：PT-INR&gt;1.5</span></label>
+    <label class="chk-item" id="chcy-s-renal-btn" onclick="toggleChk('chcy-s-renal-btn')"><input type="checkbox" id="chcy-s-renal"><div class="chk-box">✓</div><span class="chk-lbl">腎臓：Cr&gt;2.0mg/dL</span></label>
+    <label class="chk-item" id="chcy-s-heme-btn" onclick="toggleChk('chcy-s-heme-btn')"><input type="checkbox" id="chcy-s-heme"><div class="chk-box">✓</div><span class="chk-lbl">血液：血小板&lt;10万/µL</span></label>
+    <div class="sh" style="margin-top:10px">Grade II（中等症）判定因子：局所炎症（Grade IIIなければ1項目以上で Grade II）</div>
+    <label class="chk-item" id="chcy-s-wbc-btn" onclick="toggleChk('chcy-s-wbc-btn')"><input type="checkbox" id="chcy-s-wbc"><div class="chk-box">✓</div><span class="chk-lbl">WBC&gt;18,000/µL</span></label>
+    <label class="chk-item" id="chcy-s-mass-btn" onclick="toggleChk('chcy-s-mass-btn')"><input type="checkbox" id="chcy-s-mass"><div class="chk-box">✓</div><span class="chk-lbl">右上腹部に圧痛を伴う腫瘤触知</span></label>
+    <label class="chk-item" id="chcy-s-dur-btn" onclick="toggleChk('chcy-s-dur-btn')"><input type="checkbox" id="chcy-s-dur"><div class="chk-box">✓</div><span class="chk-lbl">症状発現から72時間以上</span></label>
+    <label class="chk-item" id="chcy-s-local-btn" onclick="toggleChk('chcy-s-local-btn')"><input type="checkbox" id="chcy-s-local"><div class="chk-box">✓</div><span class="chk-lbl">著明な局所炎症（胆嚢壊疽・気腫性胆嚢炎・胆嚢周囲膿瘍・胆嚢穿孔・肝膿瘍・胆汁性腹膜炎）</span></label>
+    <button class="calc-btn" onclick="calcCholecystSev()">重症度を判定</button>
+    <button class="reset-btn" onclick="rst('chcys')">リセット</button>
+    <div class="rc" id="chcy-sev-rc"><div class="rl">急性胆嚢炎 重症度</div><div class="rv" id="chcy-sev-rv"></div><div class="ri" id="chcy-sev-ri"></div><div class="rn" id="chcy-sev-rn"></div></div>
+  </div>
+  <div class="card">
+    <div class="card-title">急性胆嚢炎 TG18 重症度と治療方針</div>
+    <table class="ref-table"><tr><th>Grade</th><th>重症度</th><th>治療方針</th></tr>
+    <tr><td>I</td><td><span class="tag t-ok">軽症</span></td><td>早期腹腔鏡下胆嚢摘出術</td></tr>
+    <tr><td>II</td><td><span class="tag t-ld">中等症</span></td><td>全身状態良好→早期手術、不良→胆嚢ドレナージ後に待機手術</td></tr>
+    <tr><td>III</td><td><span class="tag t-dg">重症</span></td><td>集中治療＋緊急胆嚢ドレナージ（PT-GBD）、安定後に手術</td></tr></table>
+  </div>
+</div>
+
+<div id="tab-cholang-sev" class="section">
+  <div class="card">
+    <div class="card-title">急性胆管炎 重症度判定<span class="badge">TG18</span></div>
+    <div class="formula-box">TG18重症度分類：Grade I（軽症）・II（中等症）・III（重症）</div>
+    <div class="sh">Grade III（重症）判定因子：臓器機能障害（1項目以上で Grade III）</div>
+    <label class="chk-item" id="chan-s-cv-btn" onclick="toggleChk('chan-s-cv-btn')"><input type="checkbox" id="chan-s-cv"><div class="chk-box">✓</div><span class="chk-lbl">循環：収縮期血圧維持に昇圧薬必要</span></label>
+    <label class="chk-item" id="chan-s-ns-btn" onclick="toggleChk('chan-s-ns-btn')"><input type="checkbox" id="chan-s-ns"><div class="chk-box">✓</div><span class="chk-lbl">神経：意識障害</span></label>
+    <label class="chk-item" id="chan-s-resp-btn" onclick="toggleChk('chan-s-resp-btn')"><input type="checkbox" id="chan-s-resp"><div class="chk-box">✓</div><span class="chk-lbl">呼吸：PaO₂/FiO₂比&lt;300</span></label>
+    <label class="chk-item" id="chan-s-liver-btn" onclick="toggleChk('chan-s-liver-btn')"><input type="checkbox" id="chan-s-liver"><div class="chk-box">✓</div><span class="chk-lbl">肝臓：PT-INR&gt;1.5</span></label>
+    <label class="chk-item" id="chan-s-renal-btn" onclick="toggleChk('chan-s-renal-btn')"><input type="checkbox" id="chan-s-renal"><div class="chk-box">✓</div><span class="chk-lbl">腎臓：Cr&gt;1.5mg/dL</span></label>
+    <label class="chk-item" id="chan-s-heme-btn" onclick="toggleChk('chan-s-heme-btn')"><input type="checkbox" id="chan-s-heme"><div class="chk-box">✓</div><span class="chk-lbl">血液：血小板&lt;10万/µL</span></label>
+    <div class="sh" style="margin-top:10px">Grade II（中等症）判定因子（Grade IIIなければ1項目以上で Grade II）</div>
+    <label class="chk-item" id="chan-s-wbc-btn" onclick="toggleChk('chan-s-wbc-btn')"><input type="checkbox" id="chan-s-wbc"><div class="chk-box">✓</div><span class="chk-lbl">WBC異常（&lt;4,000 または &gt;12,000/µL）</span></label>
+    <label class="chk-item" id="chan-s-fever-btn" onclick="toggleChk('chan-s-fever-btn')"><input type="checkbox" id="chan-s-fever"><div class="chk-box">✓</div><span class="chk-lbl">高熱（≥39°C）</span></label>
+    <label class="chk-item" id="chan-s-age-btn" onclick="toggleChk('chan-s-age-btn')"><input type="checkbox" id="chan-s-age"><div class="chk-box">✓</div><span class="chk-lbl">高齢者（≥75歳）</span></label>
+    <label class="chk-item" id="chan-s-bil-btn" onclick="toggleChk('chan-s-bil-btn')"><input type="checkbox" id="chan-s-bil"><div class="chk-box">✓</div><span class="chk-lbl">高度黄疸（T-Bil≥5mg/dL）</span></label>
+    <label class="chk-item" id="chan-s-alb-btn" onclick="toggleChk('chan-s-alb-btn')"><input type="checkbox" id="chan-s-alb"><div class="chk-box">✓</div><span class="chk-lbl">低アルブミン血症（&lt;正常下限×0.7）</span></label>
+    <button class="calc-btn" onclick="calcCholangSev()">重症度を判定</button>
+    <button class="reset-btn" onclick="rst('chans')">リセット</button>
+    <div class="rc" id="chan-sev-rc"><div class="rl">急性胆管炎 重症度</div><div class="rv" id="chan-sev-rv"></div><div class="ri" id="chan-sev-ri"></div><div class="rn" id="chan-sev-rn"></div></div>
+  </div>
+  <div class="card">
+    <div class="card-title">急性胆管炎 TG18 重症度と治療方針</div>
+    <table class="ref-table"><tr><th>Grade</th><th>重症度</th><th>治療方針</th></tr>
+    <tr><td>I</td><td><span class="tag t-ok">軽症</span></td><td>抗菌薬投与。初期治療に反応すれば待機的ドレナージ</td></tr>
+    <tr><td>II</td><td><span class="tag t-ld">中等症</span></td><td>抗菌薬＋早期胆道ドレナージ（ERCP/PTCD）</td></tr>
+    <tr><td>III</td><td><span class="tag t-dg">重症</span></td><td>集中治療＋緊急胆道ドレナージ（ERCP第一選択）</td></tr></table>
+    <p class="rn" style="margin-top:8px">※Reynolds五徴（発熱＋黄疸＋腹痛＋意識障害＋ショック）はGrade III。</p>
+  </div>
+</div>
+
 </main>
 <script>
 const CATS={
@@ -587,7 +979,9 @@ const CATS={
   liver:{label:'肝臓',calcs:[{id:'meld',label:'MELD'},{id:'mdf',label:'MDF'},{id:'gahs',label:'GAHS'},{id:'jas',label:'JAS'}]},
   diabetes:{label:'糖尿病',calcs:[{id:'bmi',label:'BMI'},{id:'homa',label:'HOMA-IR/β'},{id:'cpr',label:'CPRindex'}]},
   lipid:{label:'脂質異常症',calcs:[{id:'suita',label:'吹田スコア'},{id:'ldl',label:'LDL管理目標'}]},
-  electrolyte:{label:'電解質',calcs:[{id:'ag',label:'Anion Gap'},{id:'ca',label:'補正Ca'},{id:'osm',label:'血漿浸透圧'},{id:'corrna',label:'補正Na'}]}
+  electrolyte:{label:'電解質',calcs:[{id:'ag',label:'Anion Gap'},{id:'ca',label:'補正Ca'},{id:'osm',label:'血漿浸透圧'},{id:'corrna',label:'補正Na'}]},
+  infection:{label:'感染症',calcs:[{id:'centor',label:'Centorスコア'},{id:'sinusitis',label:'急性鼻副鼻腔炎'},{id:'adrop',label:'A-DROP'},{id:'pntype',label:'肺炎鑑別'},{id:'qsofa',label:'qSOFA'},{id:'sofa',label:'SOFA'},{id:'sirs',label:'SIRS'}]},
+  panc_bili:{label:'膵・胆道',calcs:[{id:'panc',label:'急性膵炎重症度'},{id:'cholecyst-dx',label:'胆嚢炎診断'},{id:'cholang-dx',label:'胆管炎診断'},{id:'cholecyst-sev',label:'胆嚢炎重症度'},{id:'cholang-sev',label:'胆管炎重症度'}]}
 };
 let curCat='kidney';
 
@@ -938,6 +1332,176 @@ function calcCorrNa(){
   const note=document.getElementById('cna-note');
   note.textContent=`測定Na: ${na} mEq/L | 血糖: ${glu} mg/dL\nKatz法（1973）: ${katz.toFixed(1)} / Hillier法（1999）: ${hill.toFixed(1)}\n高度高血糖（>400）ではHillier法がより正確とされる。`;
   note.style.display='block';
+}
+
+// ===== N個ラジオボタン共通セレクター =====
+function rselN(ids,selIdx){ids.forEach((id,i)=>document.getElementById(id).classList.toggle('sel',i===selIdx));}
+
+// ===== Centor/McIsaac =====
+function calcCentor(){
+  const age=parseInt(radio('centor-age')||'0');
+  let sc=age;
+  if(isChk('centor-exudate'))sc++;
+  if(isChk('centor-node'))sc++;
+  if(isChk('centor-fever'))sc++;
+  if(isChk('centor-cough'))sc++;
+  let cls,ri,rn;
+  if(sc<=1){cls='ok';ri='GAS咽頭炎の可能性低い（<10%）';rn='検査・抗菌薬投与は不要。対症療法のみ。';}
+  else if(sc===2){cls='wn';ri='GAS確率 11〜17%';rn='迅速抗原検査（RADT）または咽頭培養を考慮。陽性時に抗菌薬投与。';}
+  else if(sc===3){cls='wn';ri='GAS確率 28〜35%';rn='迅速抗原検査（RADT）または咽頭培養を推奨。陽性時に抗菌薬投与。';}
+  else{cls='ng';ri='GAS確率≥52%（抗菌薬投与を検討）';rn='A群溶連菌咽頭炎の可能性が高い。\n第一選択：アモキシシリン 500mg×3/日 ×10日間\nペニシリンアレルギー：アジスロマイシン 500mg/日 ×3日間';}
+  setRC('centor-rc',cls,sc+' 点',ri,rn);
+}
+
+// ===== 急性鼻副鼻腔炎 =====
+function calcSinusitis(){
+  const vas=v('sin-vas');
+  if(isNaN(vas)||vas<0||vas>10){err('sin-err',true);hideRC('sin-rc');return;}
+  err('sin-err',false);
+  const hasBlock=isChk('sin-block'),hasDisch=isChk('sin-discharge');
+  const hasPain=isChk('sin-pain'),hasSmell=isChk('sin-smell');
+  const symCount=[hasBlock,hasDisch,hasPain,hasSmell].filter(Boolean).length;
+  const diagnosed=symCount>=2&&(hasBlock||hasDisch);
+  const bact=[isChk('sin-worsen'),isChk('sin-fever'),isChk('sin-unilat'),isChk('sin-purulent')].filter(Boolean).length;
+  let sev='',sevCls='ok';
+  if(vas<=3){sev='軽症';sevCls='ok';}else if(vas<=7){sev='中等症';sevCls='wn';}else{sev='重症';sevCls='ng';}
+  let cls,ri,rn;
+  if(!diagnosed){
+    cls='inf';ri='急性鼻副鼻腔炎の診断基準を満たさず';
+    rn=`症状数：${symCount}/4（鼻閉または鼻汁を含む2項目以上が必要）\n対症療法（鼻洗浄・生理食塩水点鼻）を継続。`;
+  } else {
+    cls=sevCls;ri=`急性鼻副鼻腔炎（${sev}）`;
+    rn=`VAS ${vas}/10（${sev}）　細菌性疑い因子：${bact}/4項目\n`;
+    if(bact>=2)rn+=`細菌性疑い → 抗菌薬検討（アモキシシリン 750〜1500mg/日 ×5〜7日）`;
+    else rn+=`ウイルス性の可能性高い。抗菌薬は原則不要。\n5日後に悪化または10日以降も改善なければ再評価。`;
+  }
+  setRC('sin-rc',cls,diagnosed?sev:'診断基準外',ri,rn);
+}
+
+// ===== A-DROP =====
+function calcADROP(){
+  const a=isChk('adrop-a')?1:0,d=isChk('adrop-d')?1:0;
+  const r=isChk('adrop-r')?1:0,o=isChk('adrop-o')?1:0,p=isChk('adrop-p')?1:0;
+  const sc=a+d+r+o+p;
+  let cls,ri,rn;
+  if(sc===0){cls='ok';ri='軽症';rn='外来治療が可能。経口抗菌薬による治療を検討。';}
+  else if(sc<=2&&r===0&&o===0&&p===0){cls='wn';ri='中等症';rn='入院治療を考慮。経静脈的抗菌薬投与。';}
+  else if(sc<=2){cls='ng';ri='重症（R/O/P陽性）';rn='R・O・Pはいずれか1項目でも重症以上として扱う。入院・ICU検討。';}
+  else if(sc===3){cls='ng';ri='重症（ICU入室を検討）';rn='入院治療が必要。ICU/HCUへの入室を検討。';}
+  else{cls='ng';ri='超重症（ICU入室）';rn='ICU入室が必要。集中的な管理と広域抗菌薬投与。';}
+  setRC('adrop-rc',cls,sc+' 点 / 5点',ri,`A=${a} D=${d} R=${r} O=${o} P=${p}\n${rn}`);
+}
+
+// ===== 肺炎鑑別 =====
+function calcPnType(){
+  const typ=[isChk('pn-age'),isChk('pn-base'),isChk('pn-acute'),isChk('pn-sputum'),isChk('pn-crackle'),isChk('pn-wbc')].filter(Boolean).length;
+  const atyp=[isChk('pn-young'),isChk('pn-nobase'),isChk('pn-slow'),isChk('pn-nosputum'),isChk('pn-xray'),isChk('pn-ca')].filter(Boolean).length;
+  let cls,ri,rn;
+  if(typ>=3&&atyp<=2){cls='ng';ri='細菌性肺炎を支持';rn=`典型細菌性因子：${typ}/6　非定型因子：${atyp}/6\n第一選択：βラクタム系（アモキシシリン/CVA・スルバクタム）\n重症例：カルバペネム系`;}
+  else if(atyp>=3&&typ<=2){cls='wn';ri='非定型肺炎を支持';rn=`典型細菌性因子：${typ}/6　非定型因子：${atyp}/6\n第一選択：マクロライド系（アジスロマイシン）またはドキシサイクリン\nレジオネラ疑い：フルオロキノロン系`;}
+  else{cls='inf';ri='鑑別困難（両者の要素が混在）';rn=`典型細菌性因子：${typ}/6　非定型因子：${atyp}/6\n広域抗菌薬治療を検討（βラクタム系＋マクロライド系の併用）。\n喀痰グラム染色・培養、尿中抗原検査を活用。`;}
+  setRC('pntype-rc',cls,`典型${typ}/非型${atyp}`,ri,rn);
+}
+
+// ===== qSOFA =====
+function calcQSOFA(){
+  const r=isChk('qsofa-resp')?1:0,m=isChk('qsofa-mental')?1:0,s=isChk('qsofa-sbp')?1:0;
+  const sc=r+m+s;
+  let cls,ri,rn;
+  if(sc<2){cls='ok';ri='低リスク（qSOFA<2）';rn='現時点では敗血症の可能性は低い。継続的な観察を行う。';}
+  else{cls='ng';ri='敗血症を強く疑う（qSOFA≥2）';rn='SOFAスコアによる臓器障害評価を実施。\n血液培養（2セット）・血液ガス・乳酸値を採取。\n感染源の同定と適切な抗菌薬投与を開始。';}
+  setRC('qsofa-rc',cls,sc+' 点 / 3点',ri,rn);
+}
+
+// ===== SOFA =====
+function calcSOFA(){
+  const resp=parseInt(radio('sofa-resp')||'0');
+  const coag=parseInt(radio('sofa-coag')||'0');
+  const liver=parseInt(radio('sofa-liver')||'0');
+  const cv=parseInt(radio('sofa-cv')||'0');
+  const cns=parseInt(radio('sofa-cns')||'0');
+  const renal=parseInt(radio('sofa-renal')||'0');
+  const sc=resp+coag+liver+cv+cns+renal;
+  let cls,ri;
+  if(sc<=6){cls='ok';ri='ICU死亡率 <10%';}
+  else if(sc<=9){cls='wn';ri='ICU死亡率 約15〜20%';}
+  else if(sc<=12){cls='ng';ri='ICU死亡率 約40〜50%';}
+  else if(sc<=14){cls='ng';ri='ICU死亡率 約50〜60%';}
+  else{cls='ng';ri='ICU死亡率 >80%';}
+  const det=`呼吸${resp}+凝固${coag}+肝${liver}+循環${cv}+CNS${cns}+腎${renal}`;
+  const rn=`${det}\n感染症疑い＋SOFA≥2点急性増加 → 敗血症（Sepsis-3定義）\n昇圧薬必要＋乳酸≥2mmol/L → 敗血症性ショック`;
+  setRC('sofa-rc',cls,sc+' 点 / 24点',ri,rn);
+}
+
+// ===== SIRS =====
+function calcSIRS(){
+  const t=isChk('sirs-temp')?1:0,h=isChk('sirs-hr')?1:0;
+  const r=isChk('sirs-rr')?1:0,w=isChk('sirs-wbc')?1:0;
+  const sc=t+h+r+w;
+  let cls,ri,rn;
+  if(sc<2){cls='ok';ri=`SIRS診断基準を満たさず（${sc}/4項目）`;rn='現時点ではSIRSなし。継続観察を行う。';}
+  else{cls='ng';ri=`SIRS陽性（${sc}/4項目）`;rn='感染症が疑われる場合は敗血症（旧定義）の可能性あり。\nSepsis-3ではSOFAによる臓器障害評価が必要。\nqSOFAでスクリーニング後、SOFAで評価することを推奨。';}
+  setRC('sirs-rc',cls,sc+' / 4点',ri,rn);
+}
+
+// ===== 急性膵炎重症度 =====
+function calcPanc(){
+  const items=['panc-be','panc-pao2','panc-bun','panc-ldh','panc-plt','panc-ca','panc-crp','panc-sirs','panc-age'];
+  const sc=items.filter(id=>isChk(id)).length;
+  const ct=parseInt(radio('panc-ct')||'0');
+  const total=sc+ct;
+  let cls,ri,rn;
+  if(total<=2){cls='ok';ri='軽症急性膵炎';rn='一般病棟での管理。十分な輸液・絶食・疼痛管理。\n定期的に再評価し重症化の早期発見に努める。';}
+  else{cls='ng';ri='重症急性膵炎（スコア≥3）';rn='ICU/HCU管理が必要。膵専門施設への転送を検討。\n造影CTによる壊死・膿瘍・仮性嚢胞の評価を行う。';}
+  setRC('panc-rc',cls,`予後因子${sc}点＋CT${ct}点＝${total}点`,ri,rn);
+}
+
+// ===== 急性胆嚢炎 診断 =====
+function calcCholecystDx(){
+  const a=isChk('chcy-a1')||isChk('chcy-a2');
+  const b=isChk('chcy-b1')||isChk('chcy-b2')||isChk('chcy-b3');
+  const c=isChk('chcy-c1');
+  let cls,ri,rn;
+  if(a&&b&&c){cls='ng';ri='急性胆嚢炎（確定診断）';rn='TG18診断基準 A＋B＋C を満たす。\n重症度判定を行い治療方針（手術/ドレナージ）を決定。';}
+  else if(a&&b){cls='wn';ri='急性胆嚢炎（疑い診断）';rn='TG18基準 A＋B を満たす（画像確認が必要）。\n腹部超音波または造影CT/MRIによる画像確認を推奨。';}
+  else{cls='ok';ri='急性胆嚢炎の診断基準を満たさず';rn='A（局所炎症）とB（全身炎症）の両方が必要。\n他疾患（急性肝炎・消化性潰瘍・急性膵炎など）を鑑別。';}
+  setRC('chcy-dx-rc',cls,a&&b&&c?'確定診断':a&&b?'疑い診断':'基準外',ri,
+    `A局所炎症: ${a?'✓陽性':'✗陰性'} | B全身炎症: ${b?'✓陽性':'✗陰性'} | C画像: ${c?'✓陽性':'未施行/陰性'}\n${rn}`);
+}
+
+// ===== 急性胆管炎 診断 =====
+function calcCholangDx(){
+  const a=isChk('chan-a1')||isChk('chan-a2')||isChk('chan-a3');
+  const b=isChk('chan-b1')||isChk('chan-b2');
+  const c=isChk('chan-c1')||isChk('chan-c2');
+  let cls,ri,rn;
+  if(a&&b&&c){cls='ng';ri='急性胆管炎（確定診断）';rn='TG18診断基準 A＋B＋C を満たす。\n重症度判定を行い早期胆道ドレナージの適応を評価。';}
+  else if(a&&b){cls='wn';ri='急性胆管炎（疑い診断）';rn='TG18基準 A＋B を満たす（画像確認が必要）。\n胆管拡張の評価（腹部超音波・MRI/MRCP）を行う。';}
+  else{cls='ok';ri='急性胆管炎の診断基準を満たさず';rn='A（全身炎症）とB（胆汁うっ滞）の両方が必要。\nCharcot三徴（発熱・黄疸・右上腹部痛）の確認を。';}
+  setRC('chan-dx-rc',cls,a&&b&&c?'確定診断':a&&b?'疑い診断':'基準外',ri,
+    `A全身炎症: ${a?'✓':'✗'} | B胆汁うっ滞: ${b?'✓':'✗'} | C画像: ${c?'✓':'未施行/✗'}\n${rn}`);
+}
+
+// ===== 急性胆嚢炎 重症度 =====
+function calcCholecystSev(){
+  const g3=['chcy-s-cv','chcy-s-ns','chcy-s-resp','chcy-s-liver','chcy-s-renal','chcy-s-heme'].some(id=>isChk(id));
+  const g2=['chcy-s-wbc','chcy-s-mass','chcy-s-dur','chcy-s-local'].some(id=>isChk(id));
+  let cls,ri,rn;
+  if(g3){cls='ng';ri='Grade III（重症）';rn='臓器機能障害あり。ICU入室・集中治療を開始。\n緊急胆嚢ドレナージ（PT-GBD）後に安定してから手術を検討。';}
+  else if(g2){cls='wn';ri='Grade II（中等症）';rn='局所炎症が著明。全身状態良好なら早期腹腔鏡下胆嚢摘出術。\n状態不良なら胆嚢ドレナージ後に待機手術。';}
+  else{cls='ok';ri='Grade I（軽症）';rn='軽症胆嚢炎。早期腹腔鏡下胆嚢摘出術（発症72時間以内）が推奨。';}
+  setRC('chcy-sev-rc',cls,g3?'Grade III':g2?'Grade II':'Grade I',ri,rn);
+}
+
+// ===== 急性胆管炎 重症度 =====
+function calcCholangSev(){
+  const g3=['chan-s-cv','chan-s-ns','chan-s-resp','chan-s-liver','chan-s-renal','chan-s-heme'].some(id=>isChk(id));
+  const g2=['chan-s-wbc','chan-s-fever','chan-s-age','chan-s-bil','chan-s-alb'].some(id=>isChk(id));
+  let cls,ri,rn;
+  if(g3){cls='ng';ri='Grade III（重症）';rn='臓器機能障害あり。血行動態安定化（ICU管理）を優先。\n緊急胆道ドレナージ（ERCP/PTCD）を早急に施行。';}
+  else if(g2){cls='wn';ri='Grade II（中等症）';rn='早期胆道ドレナージ（ERCP）が推奨。\n適切な抗菌薬投与と全身管理を行う。';}
+  else{cls='ok';ri='Grade I（軽症）';rn='抗菌薬投与で初期治療を行う。\n初期治療に反応しない場合は早期ドレナージを検討。';}
+  setRC('chan-sev-rc',cls,g3?'Grade III':g2?'Grade II':'Grade I',ri,rn);
 }
 
 // Enter key
