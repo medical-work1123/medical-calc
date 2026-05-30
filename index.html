@@ -1009,6 +1009,10 @@ function showCalcId(id){
   document.getElementById('tab-'+id)?.classList.add('active');
 }
 renderSub('kidney');
+// チェックボックスの合成クリックが親ラベルにバブリングして toggleChk が2回呼ばれるのを防ぐ
+document.querySelectorAll('.chk-item input[type=checkbox]').forEach(function(cb){
+  cb.addEventListener('click',function(e){e.stopPropagation();});
+});
 
 // Helpers
 function v(id){return parseFloat(document.getElementById(id).value);}
@@ -1027,9 +1031,9 @@ function setRC(id,cls,val,interp,note){
 function hideRC(id){document.getElementById(id)?.classList.remove('show');}
 function toggleChk(btnId){
   const btn=document.getElementById(btnId);
-  btn.classList.toggle('sel');
+  const nowSel=btn.classList.toggle('sel');
   const cb=btn.querySelector('input[type=checkbox]');
-  if(cb)cb.checked=!cb.checked;
+  if(cb)cb.checked=nowSel;
 }
 function isChk(id){return document.getElementById(id)?.checked||false;}
 
