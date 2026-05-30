@@ -386,53 +386,72 @@ input[type=number]:focus{outline:none;border-color:var(--p);box-shadow:0 0 0 3px
 <!-- ========== 脂質異常症 ========== -->
 <div id="tab-suita" class="section">
   <div class="card">
-    <div class="card-title">吹田スコア<span class="badge">10年冠動脈疾患リスク</span></div>
-    <div class="formula-box">年齢・性別・喫煙・収縮期BP・TC・HDL・DM・CKDによるポイント制<br>（日本動脈硬化学会 2022年版ガイドライン準拠）</div>
+    <div class="card-title">久山町スコア<span class="badge">動脈硬化性疾患発症予測</span></div>
+    <div class="formula-box">JAS 2022準拠 一次予防用（40〜79歳）<br>年齢はリスク列の決定に使用。スコアは性別・血圧・LDL・HDL・喫煙・耐糖能の6変数（最高19点）</div>
+    <div class="sh">年齢（スコアには含まれず・リスク区分の決定に使用）</div>
+    <div class="field" style="margin-bottom:10px">
+      <div class="radio-group" style="margin-top:5px;flex-wrap:wrap">
+        <label class="rbtn sel" id="hs-age1"><input type="radio" name="hs-age" value="40" checked onchange="rselN(['hs-age1','hs-age2','hs-age3','hs-age4'],0)">40〜49歳</label>
+        <label class="rbtn" id="hs-age2"><input type="radio" name="hs-age" value="50" onchange="rselN(['hs-age1','hs-age2','hs-age3','hs-age4'],1)">50〜59歳</label>
+        <label class="rbtn" id="hs-age3"><input type="radio" name="hs-age" value="60" onchange="rselN(['hs-age1','hs-age2','hs-age3','hs-age4'],2)">60〜69歳</label>
+        <label class="rbtn" id="hs-age4"><input type="radio" name="hs-age" value="70" onchange="rselN(['hs-age1','hs-age2','hs-age3','hs-age4'],3)">70〜79歳</label>
+      </div>
+    </div>
+    <div class="field" style="margin-bottom:10px"><label>性別（男性+7点）</label>
+      <div class="radio-group" style="margin-top:5px">
+        <label class="rbtn sel" id="hs-m"><input type="radio" name="hs-sex" value="male" checked onchange="rsel('hs-m','hs-f')">男性</label>
+        <label class="rbtn" id="hs-f"><input type="radio" name="hs-sex" value="female" onchange="rsel('hs-f','hs-m')">女性</label>
+      </div>
+    </div>
     <div class="form-row">
-      <div class="field"><label>年齢</label><div class="input-wrap"><input type="number" id="su-age" placeholder="55" min="35" max="100" inputmode="numeric"><span class="unit">歳</span></div></div>
-      <div class="field"><label>収縮期血圧</label><div class="input-wrap"><input type="number" id="su-sbp" placeholder="135" min="60" max="250" inputmode="numeric"><span class="unit">mmHg</span></div></div>
+      <div class="field"><label>収縮期血圧</label><div class="input-wrap"><input type="number" id="hs-sbp" placeholder="130" min="60" max="250" inputmode="numeric"><span class="unit">mmHg</span></div></div>
+      <div class="field"><label>LDL-コレステロール</label><div class="input-wrap"><input type="number" id="hs-ldl" placeholder="120" min="30" max="500" inputmode="numeric"><span class="unit">mg/dL</span></div></div>
     </div>
-    <div class="form-row">
-      <div class="field"><label>総コレステロール</label><div class="input-wrap"><input type="number" id="su-tc" placeholder="220" min="50" max="500" inputmode="numeric"><span class="unit">mg/dL</span></div></div>
-      <div class="field"><label>HDL-コレステロール</label><div class="input-wrap"><input type="number" id="su-hdl" placeholder="55" min="10" max="200" inputmode="numeric"><span class="unit">mg/dL</span></div></div>
+    <div class="form-row s1">
+      <div class="field"><label>HDL-コレステロール</label><div class="input-wrap"><input type="number" id="hs-hdl" placeholder="55" min="10" max="200" inputmode="numeric"><span class="unit">mg/dL</span></div></div>
     </div>
-    <div class="field" style="margin-bottom:10px"><label>性別</label>
+    <div class="field" style="margin-bottom:10px"><label>現在喫煙（+2点）</label>
       <div class="radio-group" style="margin-top:5px">
-        <label class="rbtn sel" id="su-m"><input type="radio" name="su-sex" value="male" checked onchange="rsel('su-m','su-f')">男性</label>
-        <label class="rbtn" id="su-f"><input type="radio" name="su-sex" value="female" onchange="rsel('su-f','su-m')">女性</label>
+        <label class="rbtn sel" id="hs-smk-n"><input type="radio" name="hs-smk" value="no" checked onchange="rsel('hs-smk-n','hs-smk-y')">なし</label>
+        <label class="rbtn" id="hs-smk-y"><input type="radio" name="hs-smk" value="yes" onchange="rsel('hs-smk-y','hs-smk-n')">あり</label>
       </div>
     </div>
-    <div class="field" style="margin-bottom:10px"><label>現在喫煙</label>
+    <div class="field" style="margin-bottom:10px"><label>耐糖能異常・糖尿病（+1点）</label>
       <div class="radio-group" style="margin-top:5px">
-        <label class="rbtn" id="su-smk-y"><input type="radio" name="su-smk" value="yes" onchange="rsel('su-smk-y','su-smk-n')">あり</label>
-        <label class="rbtn sel" id="su-smk-n"><input type="radio" name="su-smk" value="no" checked onchange="rsel('su-smk-n','su-smk-y')">なし</label>
+        <label class="rbtn sel" id="hs-dm-n"><input type="radio" name="hs-dm" value="no" checked onchange="rsel('hs-dm-n','hs-dm-y')">なし</label>
+        <label class="rbtn" id="hs-dm-y"><input type="radio" name="hs-dm" value="yes" onchange="rsel('hs-dm-y','hs-dm-n')">あり</label>
       </div>
     </div>
-    <div class="field" style="margin-bottom:10px"><label>糖尿病</label>
-      <div class="radio-group" style="margin-top:5px">
-        <label class="rbtn" id="su-dm-y"><input type="radio" name="su-dm" value="yes" onchange="rsel('su-dm-y','su-dm-n')">あり</label>
-        <label class="rbtn sel" id="su-dm-n"><input type="radio" name="su-dm" value="no" checked onchange="rsel('su-dm-n','su-dm-y')">なし</label>
-      </div>
-    </div>
-    <div class="field"><label>CKD（eGFR&lt;60 または蛋白尿）</label>
-      <div class="radio-group" style="margin-top:5px">
-        <label class="rbtn" id="su-ckd-y"><input type="radio" name="su-ckd" value="yes" onchange="rsel('su-ckd-y','su-ckd-n')">あり</label>
-        <label class="rbtn sel" id="su-ckd-n"><input type="radio" name="su-ckd" value="no" checked onchange="rsel('su-ckd-n','su-ckd-y')">なし</label>
-      </div>
-    </div>
-    <div class="err" id="su-err">年齢・SBP・TC・HDLを入力してください。</div>
-    <button class="calc-btn" onclick="calcSuita()">計算する</button>
-    <button class="reset-btn" onclick="rst('su')">リセット</button>
-    <div class="rc" id="su-rc"><div class="rl">吹田スコア</div><div class="rv" id="su-rv"></div><div class="ri" id="su-ri"></div><div class="rn" id="su-rn"></div></div>
+    <div class="err" id="hs-err">収縮期血圧・LDL-C・HDL-Cを入力してください。</div>
+    <button class="calc-btn" onclick="calcHisayama()">計算する</button>
+    <button class="reset-btn" onclick="rst('hs')">リセット</button>
+    <div class="rc" id="hs-rc"><div class="rl">久山町スコア</div><div class="rv" id="hs-rv"></div><div class="ri" id="hs-ri"></div><div class="rn" id="hs-rn"></div></div>
   </div>
   <div class="card">
-    <div class="card-title">10年冠動脈疾患リスクと LDL管理目標</div>
-    <table class="ref-table"><tr><th>スコア</th><th>10年CADリスク</th><th>LDL目標</th></tr>
-    <tr><td>≤5</td><td><span class="tag t-ok">低（&lt;2%）</span></td><td>&lt;160 mg/dL</td></tr>
-    <tr><td>6〜9</td><td><span class="tag t-ld">中（2〜5%）</span></td><td>&lt;140 mg/dL</td></tr>
-    <tr><td>10〜12</td><td><span class="tag t-md">高（5〜10%）</span></td><td>&lt;120 mg/dL</td></tr>
-    <tr><td>≥13</td><td><span class="tag t-dg">超高（≥10%）</span></td><td>&lt;100 mg/dL</td></tr></table>
-    <p class="rn" style="margin-top:8px">※冠動脈疾患既往（二次予防）: LDL &lt;100 mg/dL<br>※ACS・糖尿病合併の二次予防: LDL &lt;70 mg/dL<br>（日本動脈硬化学会 2022年版ガイドライン）</p>
+    <div class="card-title">久山町スコア 採点基準と年齢別リスク区分</div>
+    <table class="ref-table">
+      <tr><th colspan="2">変数</th><th>点数</th></tr>
+      <tr><td>性別</td><td>男性</td><td>+7</td></tr>
+      <tr><td rowspan="5">収縮期血圧<br>(mmHg)</td><td>&lt;120</td><td>0</td></tr>
+      <tr><td>120〜129</td><td>+1</td></tr><tr><td>130〜139</td><td>+2</td></tr>
+      <tr><td>140〜159</td><td>+3</td></tr><tr><td>≥160</td><td>+4</td></tr>
+      <tr><td>耐糖能異常・DM</td><td>あり</td><td>+1</td></tr>
+      <tr><td rowspan="4">LDL-C<br>(mg/dL)</td><td>&lt;120</td><td>0</td></tr>
+      <tr><td>120〜139</td><td>+1</td></tr><tr><td>140〜159</td><td>+2</td></tr>
+      <tr><td>≥160</td><td>+3</td></tr>
+      <tr><td rowspan="3">HDL-C<br>(mg/dL)</td><td>≥60</td><td>0</td></tr>
+      <tr><td>40〜59</td><td>+1</td></tr><tr><td>&lt;40</td><td>+2</td></tr>
+      <tr><td>現在喫煙</td><td>あり</td><td>+2</td></tr>
+    </table>
+    <div class="divider"></div>
+    <table class="ref-table">
+      <tr><th>年齢</th><th><span class="tag t-ok">低リスク &lt;2%</span></th><th><span class="tag t-ld">中リスク 2〜9%</span></th><th><span class="tag t-dg">高リスク ≥10%</span></th></tr>
+      <tr><td>40〜49歳</td><td>≤12点</td><td>13〜19点</td><td>—※</td></tr>
+      <tr><td>50〜59歳</td><td>≤7点</td><td>8〜18点</td><td>≥19点</td></tr>
+      <tr><td>60〜69歳</td><td>≤1点</td><td>2〜12点</td><td>≥13点</td></tr>
+      <tr><td>70〜79歳</td><td>—※</td><td>≤7点</td><td>≥8点</td></tr>
+    </table>
+    <p class="rn" style="margin-top:8px">※40〜49歳は最高スコア19点でも推定リスク5.2%（高リスク到達なし）<br>※70〜79歳はスコア0でも推定リスク3.4%（低リスク到達なし）<br>同じスコアでも年齢によりリスク区分が異なる（例：10点は50代=中リスク、70代=高リスク）<br>LDL管理目標：低リスク&lt;160／中リスク&lt;140／高リスク&lt;120 mg/dL</p>
   </div>
 </div>
 
@@ -978,7 +997,7 @@ const CATS={
   kidney:{label:'腎臓',calcs:[{id:'ccr',label:'CCr（CG式）'},{id:'fena',label:'FENa'}]},
   liver:{label:'肝臓',calcs:[{id:'meld',label:'MELD'},{id:'mdf',label:'MDF'},{id:'gahs',label:'GAHS'},{id:'jas',label:'JAS'}]},
   diabetes:{label:'糖尿病',calcs:[{id:'bmi',label:'BMI'},{id:'homa',label:'HOMA-IR/β'},{id:'cpr',label:'CPRindex'}]},
-  lipid:{label:'脂質異常症',calcs:[{id:'suita',label:'吹田スコア'},{id:'ldl',label:'LDL管理目標'}]},
+  lipid:{label:'脂質異常症',calcs:[{id:'suita',label:'久山町スコア'},{id:'ldl',label:'LDL管理目標'}]},
   electrolyte:{label:'電解質',calcs:[{id:'ag',label:'Anion Gap'},{id:'ca',label:'補正Ca'},{id:'osm',label:'血漿浸透圧'},{id:'corrna',label:'補正Na'}]},
   infection:{label:'感染症',calcs:[{id:'centor',label:'Centorスコア'},{id:'sinusitis',label:'急性鼻副鼻腔炎'},{id:'adrop',label:'A-DROP'},{id:'pntype',label:'肺炎鑑別'},{id:'qsofa',label:'qSOFA'},{id:'sofa',label:'SOFA'},{id:'sirs',label:'SIRS'}]},
   panc_bili:{label:'膵・胆道',calcs:[{id:'panc',label:'急性膵炎重症度'},{id:'cholecyst-dx',label:'胆嚢炎診断'},{id:'cholang-dx',label:'胆管炎診断'},{id:'cholecyst-sev',label:'胆嚢炎重症度'},{id:'cholang-sev',label:'胆管炎重症度'}]}
@@ -1222,39 +1241,59 @@ function calcCPR(){
   setRC('cpr-rc',cls,idx.toFixed(2),ri,rn);
 }
 
-// ===== 吹田スコア =====
-function calcSuita(){
-  const age=v('su-age'),sbp=v('su-sbp'),tc=v('su-tc'),hdl=v('su-hdl');
-  if(!ok(age)||!ok(sbp)||!ok(tc)||!ok(hdl)){err('su-err',true);hideRC('su-rc');return;}
-  err('su-err',false);
-  const male=radio('su-sex')==='male';
-  const smk=radio('su-smk')==='yes';
-  const dm=radio('su-dm')==='yes';
-  const ckd=radio('su-ckd')==='yes';
+// ===== 久山町スコア =====
+// 10年ASCVD推定リスク表（スコア0〜19 × 年齢群）
+const HISAYAMA_TABLE={
+  40:[1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.1,1.3,1.4,1.7,1.9,2.2,2.6,3.0,3.4,3.9,4.5,5.2],
+  50:[1.0,1.0,1.0,1.1,1.3,1.4,1.7,1.9,2.2,2.6,3.0,3.4,3.9,4.5,5.2,6.0,6.9,7.9,9.1,10.4],
+  60:[1.7,1.9,2.2,2.6,3.0,3.4,3.9,4.5,5.2,6.0,6.9,7.9,9.1,10.4,11.9,13.6,15.5,17.7,20.2,22.9],
+  70:[3.4,3.9,4.5,5.2,6.0,6.9,7.9,9.1,10.4,11.9,13.6,15.5,17.7,20.2,22.9,25.9,29.3,33.0,37.0,41.1]
+};
+function calcHisayama(){
+  const sbp=v('hs-sbp'),ldlV=v('hs-ldl'),hdl=v('hs-hdl');
+  if(!ok(sbp)||!ok(ldlV)||!ok(hdl)){err('hs-err',true);hideRC('hs-rc');return;}
+  err('hs-err',false);
+  const male=radio('hs-sex')==='male';
+  const ageG=parseInt(radio('hs-age')||'40');
+  const smk=radio('hs-smk')==='yes';
+  const dm=radio('hs-dm')==='yes';
   let sc=0;
-  // Age points
-  if(male){if(age>=75)sc+=11;else if(age>=65)sc+=8;else if(age>=55)sc+=6;else if(age>=45)sc+=3;}
-  else{if(age>=75)sc+=12;else if(age>=65)sc+=9;else if(age>=55)sc+=7;else if(age>=45)sc+=5;}
+  if(male)sc+=7;
+  // SBP
+  if(sbp<120)sc+=0;else if(sbp<130)sc+=1;else if(sbp<140)sc+=2;else if(sbp<160)sc+=3;else sc+=4;
+  // DM/glucose
+  if(dm)sc+=1;
+  // LDL-C
+  if(ldlV<120)sc+=0;else if(ldlV<140)sc+=1;else if(ldlV<160)sc+=2;else sc+=3;
+  // HDL-C
+  if(hdl>=60)sc+=0;else if(hdl>=40)sc+=1;else sc+=2;
   // Smoking
   if(smk)sc+=2;
-  // SBP
-  if(male){if(sbp>=160)sc+=4;else if(sbp>=140)sc+=3;else if(sbp>=130)sc+=2;else if(sbp>=120)sc+=1;}
-  else{if(sbp>=160)sc+=3;else if(sbp>=140)sc+=2;else if(sbp>=120)sc+=1;}
-  // TC
-  if(tc>=240)sc+=5;else if(tc>=220)sc+=4;else if(tc>=200)sc+=3;else if(tc>=180)sc+=2;else if(tc>=160)sc+=1;
-  // HDL
-  if(hdl>=60)sc-=2;else if(hdl<40)sc+=2;else if(hdl<50)sc+=1;
-  // DM
-  if(dm)sc+=2;
-  // CKD
-  if(ckd)sc+=1;
-  let cls,ri,rn,ldl;
-  if(sc<=5){cls='ok';ri='低リスク（10年CAD <2%）';ldl='<160 mg/dL';rn='生活習慣の維持・定期検査を継続。';}
-  else if(sc<=9){cls='wn';ri='中リスク（10年CAD 2〜5%）';ldl='<140 mg/dL';rn='生活習慣改善と必要に応じた薬物療法。';}
-  else if(sc<=12){cls='wn';ri='高リスク（10年CAD 5〜10%）';ldl='<120 mg/dL';rn='スタチン療法の積極的検討を。';}
-  else{cls='ng';ri='超高リスク（10年CAD ≥10%）';ldl='<100 mg/dL';rn='スタチン療法を開始し、必要に応じ強化療法。';}
-  setRC('su-rc',cls,sc+' 点',ri,`LDL管理目標: ${ldl}\n${rn}`);
+  const sc2=Math.min(sc,19);
+  const estRisk=HISAYAMA_TABLE[ageG][sc2];
+  // Risk classification by age group
+  let cls,ri,ldlTarget,rn;
+  if(ageG===40){
+    if(sc<=12){cls='ok';ri='低リスク（推定10年リスク<2%）';ldlTarget='<160 mg/dL';}
+    else{cls='wn';ri='中リスク（推定10年リスク2〜9%）';ldlTarget='<140 mg/dL';}
+  } else if(ageG===50){
+    if(sc<=7){cls='ok';ri='低リスク（推定10年リスク<2%）';ldlTarget='<160 mg/dL';}
+    else if(sc<=18){cls='wn';ri='中リスク（推定10年リスク2〜9%）';ldlTarget='<140 mg/dL';}
+    else{cls='ng';ri='高リスク（推定10年リスク≥10%）';ldlTarget='<120 mg/dL';}
+  } else if(ageG===60){
+    if(sc<=1){cls='ok';ri='低リスク（推定10年リスク<2%）';ldlTarget='<160 mg/dL';}
+    else if(sc<=12){cls='wn';ri='中リスク（推定10年リスク2〜9%）';ldlTarget='<140 mg/dL';}
+    else{cls='ng';ri='高リスク（推定10年リスク≥10%）';ldlTarget='<120 mg/dL';}
+  } else { // 70-79
+    if(sc<=7){cls='wn';ri='中リスク（推定10年リスク2〜9%）';ldlTarget='<140 mg/dL';}
+    else{cls='ng';ri='高リスク（推定10年リスク≥10%）';ldlTarget='<120 mg/dL';}
+  }
+  const ageLabel=`${ageG}〜${ageG+9}歳`;
+  const detail=`性別(${male?'男+7':'女0'}) SBP(${sbp<120?0:sbp<130?1:sbp<140?2:sbp<160?3:4}点) DM(${dm?1:0}点) LDL(${ldlV<120?0:ldlV<140?1:ldlV<160?2:3}点) HDL(${hdl>=60?0:hdl>=40?1:2}点) 喫煙(${smk?2:0}点)`;
+  rn=`${ageLabel}　推定10年ASCVD発症リスク：${estRisk.toFixed(1)}%\n${detail}\nLDL管理目標：${ldlTarget}`;
+  setRC('hs-rc',cls,sc2+' 点 / 19点',ri,rn);
 }
+function calcSuita(){calcHisayama();}
 
 // ===== LDL 目標値 =====
 function ldlToggle(){
