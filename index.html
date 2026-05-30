@@ -457,43 +457,62 @@ input[type=number]:focus{outline:none;border-color:var(--p);box-shadow:0 0 0 3px
 
 <div id="tab-ldl" class="section">
   <div class="card">
-    <div class="card-title">LDL 管理目標値<span class="badge">JAS 2022</span></div>
-    <div class="formula-box">リスク因子・病態に基づく LDL-コレステロール管理目標値の設定</div>
-    <div class="field" style="margin-bottom:10px"><label>冠動脈疾患の既往（心筋梗塞・狭心症）</label>
+    <div class="card-title">LDL管理目標 フローチャート<span class="badge">JAS 2022</span></div>
+    <div class="formula-box">動脈硬化性疾患予防ガイドライン2022年版準拠<br>二次予防 → 超高リスク判定 → 一次予防高リスク → 久山町スコア の順に評価</div>
+
+    <div class="sh">STEP 1：動脈硬化性疾患の既往（二次予防の判定）</div>
+    <div class="field" style="margin-bottom:8px"><label>冠動脈疾患の既往（心筋梗塞・狭心症・PCI・CABG 等）</label>
       <div class="radio-group" style="margin-top:5px">
-        <label class="rbtn" id="ldl-cad-y"><input type="radio" name="ldl-cad" value="yes" onchange="rsel('ldl-cad-y','ldl-cad-n');ldlToggle()">あり（二次予防）</label>
-        <label class="rbtn sel" id="ldl-cad-n"><input type="radio" name="ldl-cad" value="no" checked onchange="rsel('ldl-cad-n','ldl-cad-y');ldlToggle()">なし（一次予防）</label>
+        <label class="rbtn sel" id="ldl2-cad-n"><input type="radio" name="ldl2-cad" value="no" checked onchange="rsel('ldl2-cad-n','ldl2-cad-y');ldl2Toggle()">なし</label>
+        <label class="rbtn" id="ldl2-cad-y"><input type="radio" name="ldl2-cad" value="yes" onchange="rsel('ldl2-cad-y','ldl2-cad-n');ldl2Toggle()">あり</label>
       </div>
     </div>
-    <div id="ldl-secondary" style="display:none">
-      <div class="field" style="margin-bottom:10px"><label>超高リスク条件（下記いずれか）</label>
-        <label class="chk-item" id="ldl-acs-btn" onclick="toggleChk('ldl-acs-btn')"><input type="checkbox" id="ldl-acs"><div class="chk-box">✓</div><span class="chk-lbl">急性冠症候群（ACS）</span></label>
-        <label class="chk-item" id="ldl-dm2-btn" onclick="toggleChk('ldl-dm2-btn')"><input type="checkbox" id="ldl-dm2"><div class="chk-box">✓</div><span class="chk-lbl">糖尿病合併</span></label>
-        <label class="chk-item" id="ldl-rec-btn" onclick="toggleChk('ldl-rec-btn')"><input type="checkbox" id="ldl-rec"><div class="chk-box">✓</div><span class="chk-lbl">冠動脈疾患の再発</span></label>
+    <div class="field"><label>アテローム血栓性脳梗塞の既往（非心原性脳梗塞のうちアテローム血栓性）</label>
+      <div class="radio-group" style="margin-top:5px">
+        <label class="rbtn sel" id="ldl2-str-n"><input type="radio" name="ldl2-str" value="no" checked onchange="rsel('ldl2-str-n','ldl2-str-y');ldl2Toggle()">なし</label>
+        <label class="rbtn" id="ldl2-str-y"><input type="radio" name="ldl2-str" value="yes" onchange="rsel('ldl2-str-y','ldl2-str-n');ldl2Toggle()">あり</label>
       </div>
     </div>
-    <div id="ldl-primary">
-      <div class="sh">一次予防リスク因子（該当するものにチェック）</div>
-      <label class="chk-item" id="ldl-age-btn" onclick="toggleChk('ldl-age-btn')"><input type="checkbox" id="ldl-age"><div class="chk-box">✓</div><span class="chk-lbl">高齢（男性≥45歳 / 女性≥55歳）</span></label>
-      <label class="chk-item" id="ldl-smk-btn" onclick="toggleChk('ldl-smk-btn')"><input type="checkbox" id="ldl-smk"><div class="chk-box">✓</div><span class="chk-lbl">現在喫煙中</span></label>
-      <label class="chk-item" id="ldl-htn-btn" onclick="toggleChk('ldl-htn-btn')"><input type="checkbox" id="ldl-htn"><div class="chk-box">✓</div><span class="chk-lbl">高血圧（治療中または SBP≥140 / DBP≥90）</span></label>
-      <label class="chk-item" id="ldl-hdl-btn" onclick="toggleChk('ldl-hdl-btn')"><input type="checkbox" id="ldl-hdl"><div class="chk-box">✓</div><span class="chk-lbl">低HDL血症（HDL &lt;40 mg/dL）</span></label>
-      <label class="chk-item" id="ldl-fhx-btn" onclick="toggleChk('ldl-fhx-btn')"><input type="checkbox" id="ldl-fhx"><div class="chk-box">✓</div><span class="chk-lbl">家族歴（一親等内に50歳未満の冠動脈疾患）</span></label>
-      <label class="chk-item" id="ldl-dm1-btn" onclick="toggleChk('ldl-dm1-btn')"><input type="checkbox" id="ldl-dm1"><div class="chk-box">✓</div><span class="chk-lbl">糖尿病・耐糖能異常</span></label>
-      <label class="chk-item" id="ldl-ckd-btn" onclick="toggleChk('ldl-ckd-btn')"><input type="checkbox" id="ldl-ckd"><div class="chk-box">✓</div><span class="chk-lbl">慢性腎臓病（CKD）</span></label>
+
+    <!-- Secondary prevention section -->
+    <div id="ldl2-sec" style="display:none">
+      <div class="divider"></div>
+      <div class="sh">STEP 2：超高リスク条件（いずれか1項目以上で超高リスク）</div>
+      <label class="chk-item" id="ldl2-acs-btn" onclick="toggleChk('ldl2-acs-btn')"><input type="checkbox" id="ldl2-acs"><div class="chk-box">✓</div><span class="chk-lbl">急性冠症候群（ACS：UA・NSTEMI・STEMI）</span></label>
+      <label class="chk-item" id="ldl2-dm-btn" onclick="toggleChk('ldl2-dm-btn')"><input type="checkbox" id="ldl2-dm"><div class="chk-box">✓</div><span class="chk-lbl">糖尿病合併（冠動脈疾患＋DM）</span></label>
+      <label class="chk-item" id="ldl2-rec-btn" onclick="toggleChk('ldl2-rec-btn')"><input type="checkbox" id="ldl2-rec"><div class="chk-box">✓</div><span class="chk-lbl">冠動脈疾患の再発（2回以上のイベント）</span></label>
+      <label class="chk-item" id="ldl2-poly-btn" onclick="toggleChk('ldl2-poly-btn')"><input type="checkbox" id="ldl2-poly"><div class="chk-box">✓</div><span class="chk-lbl">多枝病変・多部位動脈硬化性病変（冠動脈＋末梢・頸動脈等）</span></label>
+      <label class="chk-item" id="ldl2-fh-btn" onclick="toggleChk('ldl2-fh-btn')"><input type="checkbox" id="ldl2-fh"><div class="chk-box">✓</div><span class="chk-lbl">家族性高コレステロール血症（FH）合併</span></label>
     </div>
+
+    <!-- Primary prevention section -->
+    <div id="ldl2-pri">
+      <div class="divider"></div>
+      <div class="sh">STEP 2：一次予防・絶対的高リスク条件（いずれか1項目以上で高リスク）</div>
+      <label class="chk-item" id="ldl2-pdm-btn" onclick="toggleChk('ldl2-pdm-btn')"><input type="checkbox" id="ldl2-pdm"><div class="chk-box">✓</div><span class="chk-lbl">糖尿病（2型・または合併症を有する1型）</span></label>
+      <label class="chk-item" id="ldl2-ckd-btn" onclick="toggleChk('ldl2-ckd-btn')"><input type="checkbox" id="ldl2-ckd"><div class="chk-box">✓</div><span class="chk-lbl">CKD（eGFR&lt;60 または蛋白尿陽性）</span></label>
+      <label class="chk-item" id="ldl2-pad-btn" onclick="toggleChk('ldl2-pad-btn')"><input type="checkbox" id="ldl2-pad"><div class="chk-box">✓</div><span class="chk-lbl">末梢動脈疾患（PAD）</span></label>
+      <div class="sh" style="margin-top:12px">STEP 3：上記すべてなしの場合 → 久山町スコアで評価</div>
+      <p style="font-size:13px;color:var(--mu);padding:8px 0 4px">DM・CKD・PADがいずれもない場合は、「脂質異常症」タブの<b>久山町スコア</b>で10年リスクを算出してリスク区分を決定してください。</p>
+      <table class="ref-table" style="margin-top:4px"><tr><th>久山町スコア リスク区分</th><th>LDL目標</th></tr>
+      <tr><td><span class="tag t-ok">低リスク（10年リスク &lt;2%）</span></td><td>&lt;160 mg/dL</td></tr>
+      <tr><td><span class="tag t-ld">中リスク（10年リスク 2〜9%）</span></td><td>&lt;140 mg/dL</td></tr>
+      <tr><td><span class="tag t-dg">高リスク（10年リスク ≥10%）</span></td><td>&lt;120 mg/dL</td></tr></table>
+    </div>
+
     <button class="calc-btn" onclick="calcLDL()">LDL目標値を判定</button>
     <button class="reset-btn" onclick="rst('ldl')">リセット</button>
-    <div class="rc" id="ldl-rc"><div class="rl">LDL 管理目標</div><div class="rv" id="ldl-rv"></div><div class="ri" id="ldl-ri"></div><div class="rn" id="ldl-rn"></div></div>
+    <div class="rc" id="ldl-rc"><div class="rl">LDL管理目標</div><div class="rv" id="ldl-rv"></div><div class="ri" id="ldl-ri"></div><div class="rn" id="ldl-rn"></div></div>
   </div>
   <div class="card">
-    <div class="card-title">JAS 2022 LDL 管理目標一覧</div>
-    <table class="ref-table"><tr><th>カテゴリー</th><th>LDL目標</th></tr>
-    <tr><td>一次予防・低リスク（リスク因子0）</td><td>&lt;160 mg/dL</td></tr>
-    <tr><td>一次予防・中リスク（1〜2個）</td><td>&lt;140 mg/dL</td></tr>
-    <tr><td>一次予防・高リスク（3個以上 / DM / CKD）</td><td>&lt;120 mg/dL</td></tr>
-    <tr><td>二次予防（冠動脈疾患既往）</td><td>&lt;100 mg/dL</td></tr>
-    <tr><td>二次予防・超高リスク（ACS / DM合併 / 再発）</td><td>&lt;70 mg/dL</td></tr></table>
+    <div class="card-title">JAS 2022 LDL管理目標一覧</div>
+    <table class="ref-table"><tr><th>カテゴリー</th><th>LDL目標</th><th>non-HDL目標</th></tr>
+    <tr><td>二次予防・超高リスク</td><td><span class="tag t-dg">&lt;70 mg/dL</span></td><td>&lt;100 mg/dL</td></tr>
+    <tr><td>二次予防（通常）</td><td><span class="tag t-sv">&lt;100 mg/dL</span></td><td>&lt;130 mg/dL</td></tr>
+    <tr><td>一次予防・高リスク（DM/CKD/PAD）</td><td><span class="tag t-md">&lt;120 mg/dL</span></td><td>&lt;150 mg/dL</td></tr>
+    <tr><td>一次予防・中リスク（久山町スコア 2〜9%）</td><td><span class="tag t-ld">&lt;140 mg/dL</span></td><td>&lt;170 mg/dL</td></tr>
+    <tr><td>一次予防・低リスク（久山町スコア &lt;2%）</td><td><span class="tag t-ok">&lt;160 mg/dL</span></td><td>&lt;190 mg/dL</td></tr></table>
+    <p class="rn" style="margin-top:8px">※二次予防の超高リスク：ACS・DM合併・CAD再発・多枝/多部位病変・FH合併<br>※LDL目標未達の場合は生活習慣改善＋スタチン（±エゼチミブ・PCSK9阻害薬）で追加低下を図る<br>（日本動脈硬化学会 動脈硬化性疾患予防ガイドライン2022年版）</p>
   </div>
 </div>
 
@@ -1295,26 +1314,46 @@ function calcHisayama(){
 }
 function calcSuita(){calcHisayama();}
 
-// ===== LDL 目標値 =====
-function ldlToggle(){
-  const cad=radio('ldl-cad')==='yes';
-  document.getElementById('ldl-secondary').style.display=cad?'block':'none';
-  document.getElementById('ldl-primary').style.display=cad?'none':'block';
+// ===== LDL管理目標フローチャート（JAS 2022） =====
+function ldl2Toggle(){
+  const sec=(radio('ldl2-cad')==='yes')||(radio('ldl2-str')==='yes');
+  document.getElementById('ldl2-sec').style.display=sec?'block':'none';
+  document.getElementById('ldl2-pri').style.display=sec?'none':'block';
 }
+function ldlToggle(){ldl2Toggle();}
 function calcLDL(){
-  const cad=radio('ldl-cad')==='yes';
+  const cad=radio('ldl2-cad')==='yes';
+  const str=radio('ldl2-str')==='yes';
+  const sec=cad||str;
   let cls,rv,ri,rn;
-  if(cad){
-    const vhigh=isChk('ldl-acs')||isChk('ldl-dm2')||isChk('ldl-rec');
-    if(vhigh){cls='ng';rv='<70 mg/dL';ri='二次予防・超高リスク';rn='ACS・糖尿病合併・冠動脈疾患再発に該当。\n高強度スタチン±エゼチミブを検討。';}
-    else{cls='wn';rv='<100 mg/dL';ri='二次予防（通常）';rn='スタチン療法を継続・強化。LDL達成状況を定期確認。';}
+  if(sec){
+    const vhigh=isChk('ldl2-acs')||isChk('ldl2-dm')||isChk('ldl2-rec')||isChk('ldl2-poly')||isChk('ldl2-fh');
+    const reason=[];
+    if(isChk('ldl2-acs'))reason.push('ACS');
+    if(isChk('ldl2-dm'))reason.push('DM合併');
+    if(isChk('ldl2-rec'))reason.push('CAD再発');
+    if(isChk('ldl2-poly'))reason.push('多枝/多部位病変');
+    if(isChk('ldl2-fh'))reason.push('FH合併');
+    const basis=cad?'冠動脈疾患既往':'アテローム血栓性脳梗塞既往';
+    if(vhigh){
+      cls='ng';rv='<70 mg/dL';ri='二次予防・超高リスク';
+      rn=`${basis}（二次予防）＋超高リスク条件：${reason.join('・')}\nnon-HDL目標：<100 mg/dL\n高強度スタチン（ロスバスタチン20mg等）±エゼチミブ±PCSK9阻害薬を検討。`;
+    } else {
+      cls='wn';rv='<100 mg/dL';ri='二次予防（通常）';
+      rn=`${basis}（二次予防）。超高リスク条件に該当なし。\nnon-HDL目標：<130 mg/dL\n中〜高強度スタチンにより目標達成を目指す。`;
+    }
   } else {
-    const dm=isChk('ldl-dm1'),ckd=isChk('ldl-ckd');
-    let cnt=0;
-    ['ldl-age','ldl-smk','ldl-htn','ldl-hdl','ldl-fhx','ldl-dm1','ldl-ckd'].forEach(id=>{if(isChk(id))cnt++;});
-    if(dm||ckd||cnt>=3){cls='wn';rv='<120 mg/dL';ri='一次予防・高リスク';rn=`リスク因子${cnt}個（DM:${dm?'あり':'なし'} / CKD:${ckd?'あり':'なし'}）\n積極的な生活習慣改善＋薬物療法を検討。`;}
-    else if(cnt>=1){cls='ok';rv='<140 mg/dL';ri='一次予防・中リスク';rn=`リスク因子${cnt}個。生活習慣改善を優先。`;}
-    else{cls='ok';rv='<160 mg/dL';ri='一次予防・低リスク';rn='リスク因子なし。食事・運動習慣の維持を。';}
+    const pdm=isChk('ldl2-pdm'),ckd=isChk('ldl2-ckd'),pad=isChk('ldl2-pad');
+    const hiRisk=pdm||ckd||pad;
+    if(hiRisk){
+      const r=[];
+      if(pdm)r.push('DM');if(ckd)r.push('CKD');if(pad)r.push('PAD');
+      cls='wn';rv='<120 mg/dL';ri='一次予防・高リスク（DM/CKD/PAD）';
+      rn=`高リスク条件：${r.join('・')}\nnon-HDL目標：<150 mg/dL\n生活習慣改善＋スタチン療法を積極的に検討。`;
+    } else {
+      cls='inf';rv='久山町スコアで評価';ri='一次予防・絶対的高リスクなし';
+      rn='DM・CKD・PADいずれも該当なし。\n「脂質異常症」タブの久山町スコアで10年ASCVD発症リスクを算出してください。\n低リスク(<2%)→LDL<160 / 中リスク(2-9%)→LDL<140 / 高リスク(≥10%)→LDL<120 mg/dL';
+    }
   }
   setRC('ldl-rc',cls,rv,ri,rn);
 }
