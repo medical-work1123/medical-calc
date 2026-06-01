@@ -1015,6 +1015,52 @@ input[type=number]:focus{outline:none;border-color:var(--p);box-shadow:0 0 0 3px
   </div>
 </div>
 
+<!-- ===== RPI ===== -->
+<div id="tab-rpi" class="section">
+  <div class="card">
+    <div class="card-title">RPI 計算<span class="badge">Reticulocyte Production Index</span></div>
+    <div class="formula-box">
+      正式式（♂）: Ret(%) × Ht/45 ÷ (3.25 − 0.05 × Ht)<br>
+      正式式（♀）: Ret(%) × Ht/40 ÷ (3.00 − 0.05 × Ht)<br>
+      近似式（共通）: Ret(%) × Ht² ÷ 2,000
+    </div>
+    <div class="form-row">
+      <div class="field"><label>網状赤血球（Ret）</label><div class="input-wrap"><input type="number" id="rpi-ret" placeholder="1.5" min="0.1" max="30" inputmode="decimal"><span class="unit">%</span></div></div>
+      <div class="field"><label>ヘマトクリット（Ht）</label><div class="input-wrap"><input type="number" id="rpi-ht" placeholder="35" min="1" max="65" inputmode="decimal"><span class="unit">%</span></div></div>
+    </div>
+    <div class="field"><label>性別</label>
+      <div class="radio-group" style="margin-top:5px">
+        <label class="rbtn sel" id="rpi-m"><input type="radio" name="rpi-sex" value="male" checked onchange="rsel('rpi-m','rpi-f')">男性（基準 Ht 45%）</label>
+        <label class="rbtn" id="rpi-f"><input type="radio" name="rpi-sex" value="female" onchange="rsel('rpi-f','rpi-m')">女性（基準 Ht 40%）</label>
+      </div>
+    </div>
+    <div class="err" id="rpi-err">Ret と Ht を正しく入力してください。</div>
+    <button class="calc-btn" onclick="calcRPI()">計算する</button>
+    <button class="reset-btn" onclick="rst('rpi')">リセット</button>
+    <div class="multi-rc" id="rpi-multi">
+      <div class="rc" id="rpi-exact-rc"><div class="rl">正式 RPI</div><div class="rv" id="rpi-exact-rv"></div><div class="ri" id="rpi-exact-ri"></div><div class="rn" id="rpi-exact-rn"></div></div>
+      <div class="rc" id="rpi-approx-rc"><div class="rl">近似 RPI</div><div class="rv" id="rpi-approx-rv"></div><div class="ri" id="rpi-approx-ri"></div></div>
+    </div>
+    <div class="rn" id="rpi-note" style="margin-top:8px;display:none"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">RPI の解釈</div>
+    <table class="ref-table">
+      <tr><th>RPI</th><th>骨髄反応</th><th>考えられる原因</th></tr>
+      <tr><td>&lt; 2</td><td><span class="tag t-bl">低産生性</span></td><td>鉄欠乏・ビタミン欠乏・慢性疾患・再生不良性貧血など</td></tr>
+      <tr><td>2 〜 3</td><td><span class="tag t-ld">境界域</span></td><td>複合原因の可能性。追加精査を検討</td></tr>
+      <tr><td>&gt; 3</td><td><span class="tag t-ok">高産生性</span></td><td>溶血性貧血・出血後（骨髄が適切に反応）</td></tr>
+    </table>
+    <div class="divider"></div>
+    <table class="ref-table">
+      <tr><th>性別</th><th>成熟補正係数の分母</th><th>Htが低いほど…</th></tr>
+      <tr><td>男性</td><td>3.25 − 0.05 × Ht</td><td>網状赤血球の骨髄滞在時間が延び、末梢での成熟時間が長くなる</td></tr>
+      <tr><td>女性</td><td>3.00 − 0.05 × Ht</td><td>（同上）</td></tr>
+    </table>
+    <p class="rn" style="margin-top:8px">※正式式の成熟補正係数：Ht45→1.0日、Ht35→1.5日、Ht25→2.0日、Ht15→2.5日<br>※近似式は正式式と比較的近い値を示すが、Htが低いほど誤差が大きくなる。</p>
+  </div>
+</div>
+
 </main>
 <script>
 const CATS={
@@ -1022,7 +1068,7 @@ const CATS={
   liver:{label:'肝臓',calcs:[{id:'meld',label:'MELD'},{id:'mdf',label:'MDF'},{id:'gahs',label:'GAHS'},{id:'jas',label:'JAS'}]},
   diabetes:{label:'糖尿病',calcs:[{id:'bmi',label:'BMI'},{id:'homa',label:'HOMA-IR/β'},{id:'cpr',label:'CPRindex'}]},
   lipid:{label:'脂質異常症',calcs:[{id:'suita',label:'久山町スコア'},{id:'ldl',label:'LDL管理目標'}]},
-  electrolyte:{label:'電解質',calcs:[{id:'ag',label:'Anion Gap'},{id:'ca',label:'補正Ca'},{id:'osm',label:'血漿浸透圧'},{id:'corrna',label:'補正Na'}]},
+  electrolyte:{label:'電解質',calcs:[{id:'ag',label:'Anion Gap'},{id:'ca',label:'補正Ca'},{id:'osm',label:'血漿浸透圧'},{id:'corrna',label:'補正Na'},{id:'rpi',label:'RPI'}]},
   infection:{label:'感染症',calcs:[{id:'centor',label:'Centorスコア'},{id:'sinusitis',label:'急性鼻副鼻腔炎'},{id:'adrop',label:'A-DROP'},{id:'pntype',label:'肺炎鑑別'},{id:'qsofa',label:'qSOFA'},{id:'sofa',label:'SOFA'},{id:'sirs',label:'SIRS'}]},
   panc_bili:{label:'膵・胆道',calcs:[{id:'panc',label:'急性膵炎重症度'},{id:'cholecyst-dx',label:'胆嚢炎診断'},{id:'cholang-dx',label:'胆管炎診断'},{id:'cholecyst-sev',label:'胆嚢炎重症度'},{id:'cholang-sev',label:'胆管炎重症度'}]}
 };
@@ -1584,6 +1630,30 @@ function calcCholangSev(){
   else if(g2){cls='wn';ri='Grade II（中等症）';rn='早期胆道ドレナージ（ERCP）が推奨。\n適切な抗菌薬投与と全身管理を行う。';}
   else{cls='ok';ri='Grade I（軽症）';rn='抗菌薬投与で初期治療を行う。\n初期治療に反応しない場合は早期ドレナージを検討。';}
   setRC('chan-sev-rc',cls,g3?'Grade III':g2?'Grade II':'Grade I',ri,rn);
+}
+
+// ===== RPI =====
+function calcRPI(){
+  const ret=v('rpi-ret'),ht=v('rpi-ht');
+  if(!ok(ret)||!ok(ht)||ht>65){err('rpi-err',true);document.getElementById('rpi-multi').classList.remove('show');document.getElementById('rpi-note').style.display='none';return;}
+  err('rpi-err',false);
+  const male=radio('rpi-sex')==='male';
+  const baseHt=male?45:40;
+  const denomBase=male?3.25:3.00;
+  const denom=denomBase-0.05*ht;
+  if(denom<=0.1){err('rpi-err',true,'Htが高すぎて正式式が計算できません（男性は Ht<65、女性は Ht<60 の範囲で使用）');document.getElementById('rpi-multi').classList.remove('show');return;}
+  const rpiE=(ret*(ht/baseHt))/denom;
+  const rpiA=ret*ht*ht/2000;
+  function rpiCls(x){return x<2?'inf':x<=3?'wn':'ok';}
+  function rpiLabel(x){return x<2?'低産生性（< 2）':x<=3?'境界域（2〜3）':'高産生性（> 3）';}
+  function rpiNote(x){return x<2?'骨髄反応不十分。鉄欠乏・ビタミン欠乏・慢性疾患・再生不良性貧血などを考慮。':x<=3?'骨髄の反応は部分的。原因検索を継続。':'骨髄が適切に反応している。溶血性貧血または急性出血後を考慮。';}
+  setRC('rpi-exact-rc',rpiCls(rpiE),rpiE.toFixed(2),rpiLabel(rpiE),rpiNote(rpiE));
+  setRC('rpi-approx-rc',rpiCls(rpiA),rpiA.toFixed(2),rpiLabel(rpiA),null);
+  document.getElementById('rpi-multi').classList.add('show');
+  const note=document.getElementById('rpi-note');
+  const matTime=denom.toFixed(2);
+  note.textContent=`成熟補正係数（${male?'♂':'♀'}）: ${matTime} 日 ／ 正式 RPI ${rpiE.toFixed(2)} vs 近似 RPI ${rpiA.toFixed(2)}`;
+  note.style.display='block';
 }
 
 // Enter key
