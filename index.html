@@ -258,50 +258,55 @@ input[type=number]:focus{outline:none;border-color:var(--p);box-shadow:0 0 0 3px
 
 <div id="tab-jas" class="section">
   <div class="card">
-    <div class="card-title">JAS 診断スコア<span class="badge">アルコール性肝炎</span></div>
-    <div class="formula-box">日本肝臓学会 アルコール性肝炎診断基準（必須3項目＋参考項目）</div>
-    <div class="sh">飲酒歴（必須）</div>
+    <div class="card-title">JAS スコア<span class="badge">アルコール性肝炎 重症度</span></div>
+    <div class="formula-box">アルコール医学生物学研究会（JASBRA）アルコール性肝炎重症度スコア<br>6項目の合計点で重症度を判定（≤7点：軽症 / 8〜9点：中等症 / ≥10点：重症）</div>
     <div class="form-row">
-      <div class="field"><label>飲酒量</label><div class="input-wrap"><input type="number" id="jas-alc" placeholder="80" min="0" max="500" inputmode="decimal"><span class="unit">g/日</span></div></div>
-      <div class="field"><label>飲酒継続年数</label><div class="input-wrap"><input type="number" id="jas-yr" placeholder="10" min="0" max="80" inputmode="numeric"><span class="unit">年</span></div></div>
-    </div>
-    <div class="field" style="margin-bottom:10px"><label>性別</label>
-      <div class="radio-group" style="margin-top:5px">
-        <label class="rbtn sel" id="jas-m"><input type="radio" name="jas-sex" value="male" checked onchange="rsel('jas-m','jas-f')">男性（基準≥60g）</label>
-        <label class="rbtn" id="jas-f"><input type="radio" name="jas-sex" value="female" onchange="rsel('jas-f','jas-m')">女性（基準≥40g）</label>
-      </div>
-    </div>
-    <div class="sh">肝酵素（必須）</div>
-    <div class="form-row">
-      <div class="field"><label>AST</label><div class="input-wrap"><input type="number" id="jas-ast" placeholder="120" min="0" max="5000" inputmode="numeric"><span class="unit">IU/L</span></div></div>
-      <div class="field"><label>ALT</label><div class="input-wrap"><input type="number" id="jas-alt" placeholder="55" min="0" max="3000" inputmode="numeric"><span class="unit">IU/L</span></div></div>
-    </div>
-    <div class="sh">参考検査値</div>
-    <div class="form-row">
-      <div class="field"><label>総ビリルビン</label><div class="input-wrap"><input type="number" id="jas-bil" placeholder="3.5" min="0" max="50" inputmode="decimal"><span class="unit">mg/dL</span></div></div>
-      <div class="field"><label>WBC</label><div class="input-wrap"><input type="number" id="jas-wbc" placeholder="14000" min="0" max="100000" inputmode="numeric"><span class="unit">/μL</span></div></div>
+      <div class="field"><label>WBC</label><div class="input-wrap"><input type="number" id="jas-wbc" placeholder="12000" min="0" max="100000" inputmode="numeric"><span class="unit">/μL</span></div></div>
+      <div class="field"><label>血清クレアチニン</label><div class="input-wrap"><input type="number" id="jas-cr" placeholder="1.0" min="0" max="30" inputmode="decimal"><span class="unit">mg/dL</span></div></div>
     </div>
     <div class="form-row">
-      <div class="field"><label>γ-GTP</label><div class="input-wrap"><input type="number" id="jas-ggt" placeholder="150" min="0" max="5000" inputmode="numeric"><span class="unit">IU/L</span></div></div>
-      <div class="field"><label>MCV</label><div class="input-wrap"><input type="number" id="jas-mcv" placeholder="102" min="50" max="150" inputmode="numeric"><span class="unit">fL</span></div></div>
+      <div class="field"><label>PT（INR）</label><div class="input-wrap"><input type="number" id="jas-inr" placeholder="1.5" min="0" max="20" inputmode="decimal"><span class="unit">—</span></div></div>
+      <div class="field"><label>総ビリルビン</label><div class="input-wrap"><input type="number" id="jas-bil" placeholder="5.0" min="0" max="100" inputmode="decimal"><span class="unit">mg/dL</span></div></div>
     </div>
-    <div class="sh">症状・所見（参考）</div>
-    <label class="chk-item" id="jas-fever-btn" onclick="toggleChk('jas-fever-btn')"><input type="checkbox" id="jas-fever"><div class="chk-box">✓</div><span class="chk-lbl">発熱（≥38°C）</span></label>
-    <label class="chk-item" id="jas-pain-btn" onclick="toggleChk('jas-pain-btn')"><input type="checkbox" id="jas-pain"><div class="chk-box">✓</div><span class="chk-lbl">右季肋部痛・肝圧痛</span></label>
-    <label class="chk-item" id="jas-hep-btn" onclick="toggleChk('jas-hep-btn')"><input type="checkbox" id="jas-hep"><div class="chk-box">✓</div><span class="chk-lbl">肝腫大</span></label>
-    <div class="err" id="jas-err">飲酒量・年数・AST・ALT を入力してください。</div>
-    <button class="calc-btn" onclick="calcJAS()">診断基準を確認</button>
+    <div class="form-row s1">
+      <div class="field"><label>年齢</label><div class="input-wrap"><input type="number" id="jas-age" placeholder="55" min="0" max="120" inputmode="numeric"><span class="unit">歳</span></div></div>
+    </div>
+    <div class="sh">消化管出血 または DIC の合併</div>
+    <label class="chk-item" id="jas-bleed-btn" onclick="toggleChk('jas-bleed-btn')"><input type="checkbox" id="jas-bleed"><div class="chk-box">✓</div><span class="chk-lbl">消化管出血 または DIC あり（+2点）</span></label>
+    <div class="err" id="jas-err">WBC・クレアチニン・INR・総ビリルビン・年齢を入力してください。</div>
+    <button class="calc-btn" onclick="calcJAS()">重症度を計算</button>
     <button class="reset-btn" onclick="rst('jas')">リセット</button>
-    <div class="rc" id="jas-rc"><div class="rl">JAS 判定</div><div class="rv" id="jas-rv"></div><div class="ri" id="jas-ri"></div><div class="rn" id="jas-rn"></div></div>
+    <div class="rc" id="jas-rc"><div class="rl">JAS スコア</div><div class="rv" id="jas-rv"></div><div class="ri" id="jas-ri"></div><div class="rn" id="jas-rn"></div></div>
   </div>
   <div class="card">
-    <div class="card-title">アルコール性肝炎 診断基準（JSH）</div>
-    <table class="ref-table"><tr><th colspan="2">必須条件（全3項目が必要）</th></tr>
-    <tr><td>①飲酒歴</td><td>男性≥60g/日 または 女性≥40g/日 を5年以上</td></tr>
-    <tr><td>②酵素パターン</td><td>AST&gt;ALT かつ AST/ALT比≥2</td></tr>
-    <tr><td>③ALT上限</td><td>ALT≤300 IU/L</td></tr>
-    <tr><th colspan="2">参考条件（3項目以上で確定）</th></tr>
-    <tr><td colspan="2">発熱・右季肋部痛・黄疸(T-Bil≥2)・白血球増多(≥12000)・GGT高値・MCV高値(≥100)・肝腫大</td></tr></table>
+    <div class="card-title">JAS スコア 採点基準（JASBRA）</div>
+    <table class="ref-table">
+      <tr><th>項目</th><th>値</th><th>点数</th></tr>
+      <tr><td rowspan="3">WBC（/μL）</td><td>&lt; 10,000</td><td>1点</td></tr>
+      <tr><td>10,000 〜 19,999</td><td>2点</td></tr>
+      <tr><td>≥ 20,000</td><td>3点</td></tr>
+      <tr><td rowspan="3">クレアチニン（mg/dL）</td><td>≤ 1.5</td><td>1点</td></tr>
+      <tr><td>1.5 超〜 3 未満</td><td>2点</td></tr>
+      <tr><td>≥ 3</td><td>3点</td></tr>
+      <tr><td rowspan="3">PT（INR）</td><td>≤ 1.8</td><td>1点</td></tr>
+      <tr><td>1.8 超〜 2.0 未満</td><td>2点</td></tr>
+      <tr><td>≥ 2.0</td><td>3点</td></tr>
+      <tr><td rowspan="3">総ビリルビン（mg/dL）</td><td>&lt; 5</td><td>1点</td></tr>
+      <tr><td>5 〜 9.9</td><td>2点</td></tr>
+      <tr><td>≥ 10</td><td>3点</td></tr>
+      <tr><td rowspan="2">消化管出血 / DIC</td><td>なし</td><td>0点</td></tr>
+      <tr><td>あり</td><td>2点</td></tr>
+      <tr><td rowspan="2">年齢（歳）</td><td>&lt; 50</td><td>0点</td></tr>
+      <tr><td>≥ 50</td><td>1点</td></tr>
+    </table>
+    <div class="divider"></div>
+    <table class="ref-table">
+      <tr><th>合計スコア</th><th>重症度</th><th>死亡率（目安）</th></tr>
+      <tr><td>≤ 7点</td><td><span class="tag t-ok">軽症</span></td><td>低い</td></tr>
+      <tr><td>8 〜 9点</td><td><span class="tag t-ld">中等症</span></td><td>約15%</td></tr>
+      <tr><td>≥ 10点</td><td><span class="tag t-dg">重症</span></td><td>約52%</td></tr>
+    </table>
+    <p class="rn" style="margin-top:8px">※出典：アルコール医学生物学研究会（JASBRA）<br>※重症（≥10点）は積極的な治療介入が必要。中等症（8〜9点）も重症化に注意。</p>
   </div>
 </div>
 
@@ -1173,40 +1178,29 @@ function calcGAHS(){
 
 // ===== JAS =====
 function calcJAS(){
-  const alc=v('jas-alc'),yr=v('jas-yr'),ast=v('jas-ast'),alt=v('jas-alt');
-  if(isNaN(alc)||isNaN(yr)||!ok(ast)||!ok(alt)){err('jas-err',true);hideRC('jas-rc');return;}
+  const wbc=v('jas-wbc'),cr=v('jas-cr'),inr=v('jas-inr'),bil=v('jas-bil'),age=v('jas-age');
+  if(isNaN(wbc)||isNaN(cr)||isNaN(inr)||isNaN(bil)||isNaN(age)){err('jas-err',true);hideRC('jas-rc');return;}
   err('jas-err',false);
-  const female=radio('jas-sex')==='female';
-  const alcThresh=female?40:60;
-  const bil=v('jas-bil'),wbc=v('jas-wbc'),ggt=v('jas-ggt'),mcv=v('jas-mcv');
-  // Required criteria
-  const r1=alc>=alcThresh&&yr>=5;
-  const r2=ast>alt&&ast/alt>=2;
-  const r3=alt<=300&&alt>0;
-  const reqMet=r1&&r2&&r3;
-  // Supporting criteria
-  let sup=0,supDetails=[];
-  if(isChk('jas-fever')){sup++;supDetails.push('発熱');}
-  if(isChk('jas-pain')){sup++;supDetails.push('腹痛');}
-  if(isChk('jas-hep')){sup++;supDetails.push('肝腫大');}
-  if(!isNaN(bil)&&bil>=2){sup++;supDetails.push('黄疸');}
-  if(!isNaN(wbc)&&wbc>=12000){sup++;supDetails.push('白血球増多');}
-  if(!isNaN(ggt)){const ggtThresh=female?30:50;if(ggt>=ggtThresh){sup++;supDetails.push('GGT高値');}}
-  if(!isNaN(mcv)&&mcv>=100){sup++;supDetails.push('MCV高値');}
-  const ratio=ok(ast)&&ok(alt)?(ast/alt).toFixed(2):'—';
+  const wp=wbc<10000?1:wbc<20000?2:3;
+  const cp=cr<=1.5?1:cr<3?2:3;
+  const ip=inr<=1.8?1:inr<2.0?2:3;
+  const bp=bil<5?1:bil<10?2:3;
+  const bleed=isChk('jas-bleed')?2:0;
+  const ap=age<50?0:1;
+  const sc=wp+cp+ip+bp+bleed+ap;
   let cls,ri,rn;
-  if(!reqMet){
-    cls='inf';
-    ri='必須条件を充足せず';
-    rn=`必須①飲酒歴: ${r1?'✓':'✗（'+alc+'g/日×'+yr+'年、基準'+alcThresh+'g以上×5年以上）'}\n必須②AST/ALT比≥2 かつ AST>ALT: ${r2?'✓':'✗（比='+ratio+'）'}\n必須③ALT≤300: ${r3?'✓':'✗（ALT='+alt+'）'}`;
-  } else if(sup>=3){
-    cls='ng';ri='アルコール性肝炎（確定）';
-    rn=`必須3項目 充足 ✓\n参考条件 ${sup}/7 項目該当（${supDetails.join('・')}）\n${sup>=3?'→ 確定診断基準を満たします':''}`;
+  const detail=`内訳：WBC ${wp}点 / Cr ${cp}点 / INR ${ip}点 / Bil ${bp}点 / 出血DIC ${bleed}点 / 年齢 ${ap}点`;
+  if(sc<=7){
+    cls='ok';ri='軽症（≤7点）';
+    rn=detail+'\n禁酒・栄養療法を基本とした支持療法。';
+  } else if(sc<=9){
+    cls='wn';ri='中等症（8〜9点）';
+    rn=detail+'\n重症（≥10点）への移行に注意。慎重な経過観察を。';
   } else {
-    cls='wn';ri='アルコール性肝炎（疑い）';
-    rn=`必須3項目 充足 ✓\n参考条件 ${sup}/7 項目（${supDetails.length?supDetails.join('・'):'該当なし'}）\n→ 参考条件3項目未満のため「疑い」。他疾患を除外しつつ経過観察。`;
+    cls='ng';ri='重症（≥10点）';
+    rn=detail+'\n積極的な治療介入が必要。ステロイド療法の適応を検討（MDF・GAHSも参照）。';
   }
-  setRC('jas-rc',cls,reqMet?`参考${sup}/7`:'必須条件×',ri,rn);
+  setRC('jas-rc',cls,sc+' 点',ri,rn);
 }
 
 // ===== BMI =====
