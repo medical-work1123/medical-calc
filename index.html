@@ -88,6 +88,7 @@ input[type=number]:focus{outline:none;border-color:var(--p);box-shadow:0 0 0 3px
   <button onclick="selectCat('diabetes',this)">糖尿病</button>
   <button onclick="selectCat('lipid',this)">脂質異常症</button>
   <button onclick="selectCat('electrolyte',this)">電解質</button>
+  <button onclick="selectCat('blood',this)">血液</button>
   <button onclick="selectCat('infection',this)">感染症</button>
   <button onclick="selectCat('panc_bili',this)">膵・胆道</button>
 </nav>
@@ -1068,7 +1069,8 @@ const CATS={
   liver:{label:'肝臓',calcs:[{id:'meld',label:'MELD'},{id:'mdf',label:'MDF'},{id:'gahs',label:'GAHS'},{id:'jas',label:'JAS'}]},
   diabetes:{label:'糖尿病',calcs:[{id:'bmi',label:'BMI'},{id:'homa',label:'HOMA-IR/β'},{id:'cpr',label:'CPRindex'}]},
   lipid:{label:'脂質異常症',calcs:[{id:'suita',label:'久山町スコア'},{id:'ldl',label:'LDL管理目標'}]},
-  electrolyte:{label:'電解質',calcs:[{id:'ag',label:'Anion Gap'},{id:'ca',label:'補正Ca'},{id:'osm',label:'血漿浸透圧'},{id:'corrna',label:'補正Na'},{id:'rpi',label:'RPI'}]},
+  electrolyte:{label:'電解質',calcs:[{id:'ag',label:'Anion Gap'},{id:'ca',label:'補正Ca'},{id:'osm',label:'血漿浸透圧'},{id:'corrna',label:'補正Na'}]},
+  blood:{label:'血液',calcs:[{id:'rpi',label:'RPI'}]},
   infection:{label:'感染症',calcs:[{id:'centor',label:'Centorスコア'},{id:'sinusitis',label:'急性鼻副鼻腔炎'},{id:'adrop',label:'A-DROP'},{id:'pntype',label:'肺炎鑑別'},{id:'qsofa',label:'qSOFA'},{id:'sofa',label:'SOFA'},{id:'sirs',label:'SIRS'}]},
   panc_bili:{label:'膵・胆道',calcs:[{id:'panc',label:'急性膵炎重症度'},{id:'cholecyst-dx',label:'胆嚢炎診断'},{id:'cholang-dx',label:'胆管炎診断'},{id:'cholecyst-sev',label:'胆嚢炎重症度'},{id:'cholang-sev',label:'胆管炎重症度'}]}
 };
