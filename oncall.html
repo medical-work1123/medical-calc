@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>内科・呼吸器科 待機医師票</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans','Yu Gothic',sans-serif;background:#f1f5f9;color:#1e293b;min-height:100vh;padding-bottom:40px;}
+header{background:#1a6fb5;color:#fff;padding:14px 20px 12px;box-shadow:0 2px 8px rgba(26,111,181,.3);display:flex;align-items:center;gap:12px;}
+header a{color:rgba(255,255,255,.75);text-decoration:none;font-size:14px;}
+header a:hover{color:#fff;}
+header h1{font-size:20px;font-weight:700;}
+main{max-width:600px;margin:0 auto;padding:24px 16px;}
+.card{background:#fff;border-radius:16px;box-shadow:0 2px 12px rgba(0,0,0,.08);padding:24px;}
+.card-title{font-size:18px;font-weight:700;color:#1a6fb5;margin-bottom:6px;}
+.updated{font-size:12px;color:#64748b;margin-bottom:20px;}
+.entry{display:flex;align-items:center;padding:10px 0;border-bottom:1px solid #e2e8f0;}
+.entry:last-child{border-bottom:none;}
+.entry-date{width:130px;font-size:15px;font-weight:700;color:#1e293b;}
+.entry-doctor{font-size:17px;font-weight:800;color:#1a6fb5;}
+.empty{color:#64748b;font-size:14px;padding:20px 0;}
+.back{display:inline-block;margin-top:20px;padding:10px 20px;background:#1a6fb5;color:#fff;border-radius:10px;text-decoration:none;font-weight:700;}
+</style>
+</head>
+<body>
+<header>
+  <a href="index.html">← トップ</a>
+  <h1>🏥 内科・呼吸器科 待機医師票</h1>
+</header>
+<main>
+  <div class="card">
+    <div class="card-title" id="oncall-title">待機医師票</div>
+    <div class="updated" id="oncall-updated"></div>
+    <div id="oncall-list"></div>
+    <div class="empty" id="oncall-empty" style="display:none">データがまだ公開されていません。</div>
+  </div>
+  <a href="index.html" class="back">← トップに戻る</a>
+</main>
+<script>
+fetch('oncall.json?_='+Date.now())
+  .then(r=>r.ok?r.json():Promise.reject())
+  .then(d=>{
+    document.getElementById('oncall-title').textContent=d.title||'待機医師票';
+    document.getElementById('oncall-updated').textContent=d.updated?'更新日：'+d.updated:'';
+    const list=document.getElementById('oncall-list');
+    if(d.entries&&d.entries.length>0){
+      list.innerHTML=d.entries.map(e=>
+        `<div class="entry">
+          <span class="entry-date">${e.date}</span>
+          <span class="entry-doctor">${e.doctor}</span>
+         </div>`
+      ).join('');
+    }else{
+      document.getElementById('oncall-empty').style.display='block';
+    }
+  })
+  .catch(()=>{document.getElementById('oncall-empty').style.display='block';});
+</script>
+</body>
+</html>
