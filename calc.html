@@ -11,6 +11,20 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans','Yu Gothic',sa
 header{background:var(--p);color:#fff;padding:14px 20px 12px;box-shadow:0 2px 8px rgba(26,111,181,.3);}
 header h1{font-size:20px;font-weight:700;}
 header p{font-size:12px;opacity:.75;margin-top:2px;}
+.search-bar{position:relative;background:#154f8a;padding:8px 12px;}
+.search-wrap{position:relative;display:flex;align-items:center;max-width:680px;margin:0 auto;}
+.search-ico{position:absolute;left:12px;font-size:14px;pointer-events:none;opacity:.6;}
+#calc-search{width:100%;padding:10px 36px 10px 36px;border:none;border-radius:10px;font-size:15px;color:var(--tx);background:#fff;-webkit-appearance:none;appearance:none;}
+#calc-search:focus{outline:none;box-shadow:0 0 0 3px rgba(125,211,252,.5);}
+.search-clear{position:absolute;right:8px;width:26px;height:26px;border:none;background:var(--bg);color:var(--mu);border-radius:50%;font-size:18px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.search-results{position:absolute;left:0;right:0;top:100%;z-index:50;max-width:680px;margin:0 auto;background:#fff;border-radius:0 0 12px 12px;box-shadow:0 8px 24px rgba(0,0,0,.18);max-height:60vh;overflow-y:auto;display:none;}
+.search-results.show{display:block;}
+.sr-item{display:flex;align-items:baseline;gap:8px;padding:12px 16px;border-bottom:1px solid var(--bdr);cursor:pointer;}
+.sr-item:last-child{border-bottom:none;}
+.sr-item:hover,.sr-item.active{background:var(--pl);}
+.sr-name{font-size:15px;font-weight:700;color:var(--tx);}
+.sr-cat{font-size:12px;font-weight:600;color:var(--mu);margin-left:auto;background:var(--bg);padding:2px 8px;border-radius:99px;}
+.sr-empty{padding:16px;text-align:center;color:var(--mu);font-size:14px;}
 .cat-nav{display:flex;background:#154f8a;overflow-x:auto;-webkit-overflow-scrolling:touch;}
 .cat-nav button{flex:1;min-width:72px;padding:10px 6px;border:none;background:none;color:rgba(255,255,255,.65);font-size:13px;font-weight:700;cursor:pointer;border-bottom:3px solid transparent;transition:all .2s;white-space:nowrap;}
 .cat-nav button.active{color:#fff;border-bottom-color:#7dd3fc;background:rgba(255,255,255,.1);}
@@ -82,6 +96,14 @@ input[type=number]:focus{outline:none;border-color:var(--p);box-shadow:0 0 0 3px
   <h1>医療計算ツール</h1>
   <p>腎臓・肝臓・糖尿病・脂質異常症・電解質・感染症・膵・胆道</p>
 </header>
+<div class="search-bar">
+  <div class="search-wrap">
+    <span class="search-ico">🔍</span>
+    <input type="text" id="calc-search" placeholder="計算項目を検索（例：FIB-4、肝、Na…）" autocomplete="off" oninput="onSearch()" onfocus="onSearch()">
+    <button class="search-clear" id="search-clear" onclick="clearSearch()" style="display:none">×</button>
+  </div>
+  <div class="search-results" id="search-results"></div>
+</div>
 <nav class="cat-nav" id="cat-nav">
   <button onclick="selectCat('kidney',this)" class="active">腎臓</button>
   <button onclick="selectCat('liver',this)">肝臓</button>
@@ -319,6 +341,33 @@ input[type=number]:focus{outline:none;border-color:var(--p);box-shadow:0 0 0 3px
       <tr><td>≥ 10点</td><td><span class="tag t-dg">重症</span></td><td>約52%</td></tr>
     </table>
     <p class="rn" style="margin-top:8px">※出典：アルコール医学生物学研究会（JASBRA）<br>※重症（≥10点）は積極的な治療介入が必要。中等症（8〜9点）も重症化に注意。</p>
+  </div>
+</div>
+
+<div id="tab-fib4" class="section">
+  <div class="card">
+    <div class="card-title">FIB-4 Index<span class="badge">肝線維化マーカー</span></div>
+    <div class="formula-box">FIB-4 = 年齢 × AST / (血小板 × √ALT)<br>※血小板は万/μL（×10⁴/μL）で入力（内部で×10⁹/Lに換算）</div>
+    <div class="form-row s3">
+      <div class="field"><label>年齢</label><div class="input-wrap"><input type="number" id="fib4-age" placeholder="60" min="1" max="120" inputmode="numeric"><span class="unit">歳</span></div></div>
+      <div class="field"><label>AST</label><div class="input-wrap"><input type="number" id="fib4-ast" placeholder="40" min="1" max="5000" inputmode="decimal"><span class="unit">U/L</span></div></div>
+      <div class="field"><label>ALT</label><div class="input-wrap"><input type="number" id="fib4-alt" placeholder="35" min="1" max="5000" inputmode="decimal"><span class="unit">U/L</span></div></div>
+    </div>
+    <div class="form-row s1">
+      <div class="field"><label>血小板数</label><div class="input-wrap"><input type="number" id="fib4-plt" placeholder="20" min="0.1" max="200" inputmode="decimal"><span class="unit">万/μL</span></div></div>
+    </div>
+    <div class="err" id="fib4-err">すべての項目を正しく入力してください。</div>
+    <button class="calc-btn" onclick="calcFIB4()">計算する</button>
+    <button class="reset-btn" onclick="rst('fib4')">リセット</button>
+    <div class="rc" id="fib4-rc"><div class="rl">FIB-4 Index</div><div class="rv" id="fib4-rv"></div><div class="ri" id="fib4-ri"></div><div class="rn" id="fib4-rn"></div></div>
+  </div>
+  <div class="card">
+    <div class="card-title">FIB-4 の解釈（NAFLD/MASLD）</div>
+    <table class="ref-table"><tr><th>FIB-4</th><th>進行線維化リスク</th><th>方針</th></tr>
+    <tr><td>&lt;1.30</td><td><span class="tag t-ok">低リスク</span></td><td>進行線維化はほぼ除外</td></tr>
+    <tr><td>1.30〜2.67</td><td><span class="tag t-ld">中間</span></td><td>VCTE等の追加評価・専門医紹介を検討</td></tr>
+    <tr><td>≥2.67</td><td><span class="tag t-dg">高リスク</span></td><td>進行線維化の可能性大。専門医紹介</td></tr></table>
+    <p class="rn" style="margin-top:8px">※65歳以上では低値カットオフを2.0とする方が偽陽性を減らせるとされる。<br>※アルコール性・ウイルス性など病因により至適カットオフは異なる。</p>
   </div>
 </div>
 
@@ -1077,7 +1126,7 @@ input[type=number]:focus{outline:none;border-color:var(--p);box-shadow:0 0 0 3px
 <script>
 const CATS={
   kidney:{label:'腎臓',calcs:[{id:'ccr',label:'CCr（CG式）'},{id:'fena',label:'FENa'}]},
-  liver:{label:'肝臓',calcs:[{id:'meld',label:'MELD'},{id:'mdf',label:'MDF'},{id:'gahs',label:'GAHS'},{id:'jas',label:'JAS'}]},
+  liver:{label:'肝臓',calcs:[{id:'meld',label:'MELD'},{id:'mdf',label:'MDF'},{id:'gahs',label:'GAHS'},{id:'jas',label:'JAS'},{id:'fib4',label:'FIB-4'}]},
   diabetes:{label:'糖尿病',calcs:[{id:'bmi',label:'BMI'},{id:'homa',label:'HOMA-IR/β'},{id:'cpr',label:'CPRindex'}]},
   lipid:{label:'脂質異常症',calcs:[{id:'suita',label:'久山町スコア'},{id:'ldl',label:'LDL管理目標'}]},
   electrolyte:{label:'電解質',calcs:[{id:'ag',label:'Anion Gap'},{id:'ca',label:'補正Ca'},{id:'osm',label:'血漿浸透圧'},{id:'corrna',label:'補正Na'}]},
@@ -1113,6 +1162,94 @@ function showCalcId(id){
   document.getElementById('tab-'+id)?.classList.add('active');
 }
 renderSub('kidney');
+
+// ===== 検索 =====
+// 各計算項目の検索用キーワード（別名・日本語名・英語名など）
+const SEARCH_KW={
+  ccr:'CCr クレアチニンクリアランス Cockcroft Gault 腎機能 GFR 腎臓',
+  fena:'FENa ナトリウム排泄分画 腎前性 腎性 急性腎障害 AKI 腎臓',
+  meld:'MELD 末期肝疾患 肝移植 肝臓 予後',
+  mdf:'MDF Maddrey マドレー 判別関数 アルコール性肝炎 肝臓',
+  gahs:'GAHS グラスゴー アルコール性肝炎 肝臓 予後',
+  jas:'JAS 日本 アルコール性肝炎 重症度 肝臓',
+  fib4:'FIB-4 FIB4 ファイブフォー 肝線維化 線維化 NAFLD NASH MASLD AST ALT 血小板 肝臓',
+  bmi:'BMI 体格指数 肥満 やせ Body Mass Index 糖尿病 体重',
+  homa:'HOMA-IR HOMA-β インスリン抵抗性 膵β細胞 糖尿病',
+  cpr:'CPR インデックス Cペプチド インスリン分泌能 糖尿病',
+  suita:'吹田 久山町 動脈硬化 冠動脈疾患 リスク 脂質',
+  ldl:'LDL コレステロール 管理目標 脂質異常症 動脈硬化',
+  ag:'アニオンギャップ Anion Gap 代謝性アシドーシス 電解質',
+  ca:'補正カルシウム 補正Ca アルブミン 低カルシウム 電解質',
+  osm:'血漿浸透圧 オスモル 浸透圧ギャップ 電解質',
+  corrna:'補正ナトリウム 補正Na 高血糖 偽性低Na 電解質',
+  rpi:'RPI 網状赤血球 産生指数 reticulocyte 貧血 血液',
+  centor:'Centor センター 溶連菌 咽頭炎 扁桃炎 感染症',
+  sinusitis:'急性鼻副鼻腔炎 副鼻腔炎 感染症 抗菌薬',
+  adrop:'A-DROP 肺炎 重症度 市中肺炎 感染症',
+  pntype:'肺炎 鑑別 細菌性 非定型 マイコプラズマ 感染症',
+  qsofa:'qSOFA 敗血症 sepsis スクリーニング 感染症',
+  sofa:'SOFA 敗血症 sepsis 臓器障害 感染症',
+  sirs:'SIRS 全身性炎症反応症候群 敗血症 感染症',
+  panc:'急性膵炎 重症度 厚労省 予後因子 膵',
+  'cholecyst-dx':'急性胆嚢炎 診断 TG18 TG13 東京ガイドライン 胆道',
+  'cholang-dx':'急性胆管炎 診断 TG18 TG13 東京ガイドライン 胆道',
+  'cholecyst-sev':'急性胆嚢炎 重症度 TG18 胆道',
+  'cholang-sev':'急性胆管炎 重症度 TG18 胆道'
+};
+// フラットなインデックスを構築（待機医師票は検索対象外）
+const SEARCH_INDEX=[];
+Object.keys(CATS).forEach(catKey=>{
+  if(catKey==='oncall')return;
+  CATS[catKey].calcs.forEach(c=>{
+    SEARCH_INDEX.push({id:c.id,label:c.label,cat:catKey,catLabel:CATS[catKey].label,kw:(c.label+' '+(SEARCH_KW[c.id]||'')).toLowerCase()});
+  });
+});
+
+function onSearch(){
+  const q=document.getElementById('calc-search').value.trim().toLowerCase();
+  const box=document.getElementById('search-results');
+  document.getElementById('search-clear').style.display=q?'flex':'none';
+  if(!q){box.classList.remove('show');box.innerHTML='';return;}
+  const terms=q.split(/\s+/).filter(Boolean);
+  const hits=SEARCH_INDEX.filter(it=>terms.every(t=>it.kw.includes(t)));
+  if(hits.length===0){
+    box.innerHTML='<div class="sr-empty">該当する項目がありません</div>';
+  }else{
+    box.innerHTML=hits.map(it=>
+      `<div class="sr-item" onclick="gotoCalc('${it.cat}','${it.id}')"><span class="sr-name">${it.label}</span><span class="sr-cat">${it.catLabel}</span></div>`
+    ).join('');
+  }
+  box.classList.add('show');
+}
+function clearSearch(){
+  document.getElementById('calc-search').value='';
+  onSearch();
+  document.getElementById('calc-search').focus();
+}
+function gotoCalc(catKey,id){
+  // カテゴリタブを有効化
+  document.querySelectorAll('.cat-nav button').forEach(b=>{
+    b.classList.toggle('active',b.getAttribute('onclick')===`selectCat('${catKey}',this)`);
+  });
+  curCat=catKey;
+  renderSub(catKey);
+  // 該当のサブタブ・セクションを表示
+  const calcs=CATS[catKey].calcs;
+  const idx=calcs.findIndex(c=>c.id===id);
+  const btns=document.querySelectorAll('.sub-nav button');
+  btns.forEach((b,i)=>b.classList.toggle('active',i===idx));
+  showCalcId(id);
+  // 検索を閉じる
+  document.getElementById('search-results').classList.remove('show');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+// 検索ボックス外をクリックしたら結果を閉じる
+document.addEventListener('click',function(e){
+  if(!e.target.closest('.search-bar')){
+    document.getElementById('search-results').classList.remove('show');
+  }
+});
+
 // チェックボックスの合成クリックが親ラベルにバブリングして toggleChk が2回呼ばれるのを防ぐ
 document.querySelectorAll('.chk-item input[type=checkbox]').forEach(function(cb){
   cb.addEventListener('click',function(e){e.stopPropagation();});
@@ -1262,6 +1399,22 @@ function calcJAS(){
     rn=detail+'\n積極的な治療介入が必要。ステロイド療法の適応を検討（MDF・GAHSも参照）。';
   }
   setRC('jas-rc',cls,sc+' 点',ri,rn);
+}
+
+// ===== FIB-4 =====
+function calcFIB4(){
+  const age=v('fib4-age'),ast=v('fib4-ast'),alt=v('fib4-alt'),plt=v('fib4-plt');
+  if(!ok(age)||!ok(ast)||!ok(alt)||!ok(plt)||age>120){err('fib4-err',true);hideRC('fib4-rc');return;}
+  err('fib4-err',false);
+  const plt9=plt*10; // 万/μL(×10⁴/μL) → ×10⁹/L
+  const fib4=(age*ast)/(plt9*Math.sqrt(alt));
+  const lowCut=age>=65?2.0:1.30;
+  let cls,ri,rn;
+  if(fib4<lowCut){cls='ok';ri='低リスク（進行線維化はほぼ除外）';rn='経過観察。生活習慣改善・危険因子の管理を継続。';}
+  else if(fib4<2.67){cls='wn';ri='中間（判定保留）';rn='VCTE（FibroScan）等の追加評価や肝臓専門医への紹介を検討。';}
+  else{cls='ng';ri='高リスク（進行線維化の可能性大）';rn='肝臓専門医へ紹介。肝硬変・肝細胞癌のサーベイランスを検討。';}
+  if(age>=65)rn='65歳以上のため低値カットオフ2.0で判定。\n'+rn;
+  setRC('fib4-rc',cls,fib4.toFixed(2),ri,rn);
 }
 
 // ===== BMI =====
