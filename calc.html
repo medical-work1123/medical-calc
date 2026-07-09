@@ -94,7 +94,7 @@ input[type=number]:focus{outline:none;border-color:var(--p);box-shadow:0 0 0 3px
 <body>
 <header>
   <h1>医療計算ツール</h1>
-  <p>腎臓・肝臓・糖尿病・脂質異常症・電解質・感染症・膵・胆道</p>
+  <p>腎臓・肝臓・糖尿病・脂質異常症・電解質・感染症・膵・胆道・血栓</p>
 </header>
 <div class="search-bar">
   <div class="search-wrap">
@@ -113,6 +113,7 @@ input[type=number]:focus{outline:none;border-color:var(--p);box-shadow:0 0 0 3px
   <button onclick="selectCat('blood',this)">血液</button>
   <button onclick="selectCat('infection',this)">感染症</button>
   <button onclick="selectCat('panc_bili',this)">膵・胆道</button>
+  <button onclick="selectCat('thrombosis',this)">血栓・塞栓</button>
   <button onclick="selectCat('oncall',this)">🏥 待機医師票</button>
 </nav>
 <nav class="sub-nav" id="sub-nav"></nav>
@@ -371,6 +372,66 @@ input[type=number]:focus{outline:none;border-color:var(--p);box-shadow:0 0 0 3px
   </div>
 </div>
 
+<div id="tab-childpugh" class="section">
+  <div class="card">
+    <div class="card-title">Child-Pugh 分類<span class="badge">肝予備能・肝硬変重症度</span></div>
+    <div class="formula-box">5項目（脳症・腹水・T-Bil・Alb・PT）を各1〜3点で採点（合計5〜15点）<br>A：5〜6点／B：7〜9点／C：10〜15点</div>
+    <div class="field" style="margin-bottom:10px"><label>肝性脳症</label>
+      <div class="radio-group" style="margin-top:5px;flex-wrap:wrap">
+        <label class="rbtn sel" id="cp-enc1"><input type="radio" name="cp-enc" value="1" checked onchange="rselN(['cp-enc1','cp-enc2','cp-enc3'],0)">なし（1点）</label>
+        <label class="rbtn" id="cp-enc2"><input type="radio" name="cp-enc" value="2" onchange="rselN(['cp-enc1','cp-enc2','cp-enc3'],1)">軽度・GradeI〜II（2点）</label>
+        <label class="rbtn" id="cp-enc3"><input type="radio" name="cp-enc" value="3" onchange="rselN(['cp-enc1','cp-enc2','cp-enc3'],2)">昏睡・GradeIII〜IV（3点）</label>
+      </div>
+    </div>
+    <div class="field" style="margin-bottom:10px"><label>腹水</label>
+      <div class="radio-group" style="margin-top:5px;flex-wrap:wrap">
+        <label class="rbtn sel" id="cp-asc1"><input type="radio" name="cp-asc" value="1" checked onchange="rselN(['cp-asc1','cp-asc2','cp-asc3'],0)">なし（1点）</label>
+        <label class="rbtn" id="cp-asc2"><input type="radio" name="cp-asc" value="2" onchange="rselN(['cp-asc1','cp-asc2','cp-asc3'],1)">軽度・利尿薬で制御（2点）</label>
+        <label class="rbtn" id="cp-asc3"><input type="radio" name="cp-asc" value="3" onchange="rselN(['cp-asc1','cp-asc2','cp-asc3'],2)">中等度以上・治療抵抗性（3点）</label>
+      </div>
+    </div>
+    <div class="field" style="margin-bottom:10px"><label>血清ビリルビン（mg/dL）</label>
+      <div class="radio-group" style="margin-top:5px;flex-wrap:wrap">
+        <label class="rbtn sel" id="cp-bil1"><input type="radio" name="cp-bil" value="1" checked onchange="rselN(['cp-bil1','cp-bil2','cp-bil3'],0)">&lt;2.0（1点）</label>
+        <label class="rbtn" id="cp-bil2"><input type="radio" name="cp-bil" value="2" onchange="rselN(['cp-bil1','cp-bil2','cp-bil3'],1)">2.0〜3.0（2点）</label>
+        <label class="rbtn" id="cp-bil3"><input type="radio" name="cp-bil" value="3" onchange="rselN(['cp-bil1','cp-bil2','cp-bil3'],2)">&gt;3.0（3点）</label>
+      </div>
+    </div>
+    <div class="field" style="margin-bottom:10px"><label>血清アルブミン（g/dL）</label>
+      <div class="radio-group" style="margin-top:5px;flex-wrap:wrap">
+        <label class="rbtn sel" id="cp-alb1"><input type="radio" name="cp-alb" value="1" checked onchange="rselN(['cp-alb1','cp-alb2','cp-alb3'],0)">&gt;3.5（1点）</label>
+        <label class="rbtn" id="cp-alb2"><input type="radio" name="cp-alb" value="2" onchange="rselN(['cp-alb1','cp-alb2','cp-alb3'],1)">2.8〜3.5（2点）</label>
+        <label class="rbtn" id="cp-alb3"><input type="radio" name="cp-alb" value="3" onchange="rselN(['cp-alb1','cp-alb2','cp-alb3'],2)">&lt;2.8（3点）</label>
+      </div>
+    </div>
+    <div class="field" style="margin-bottom:10px"><label>PT活性（%）／ INR</label>
+      <div class="radio-group" style="margin-top:5px;flex-wrap:wrap">
+        <label class="rbtn sel" id="cp-pt1"><input type="radio" name="cp-pt" value="1" checked onchange="rselN(['cp-pt1','cp-pt2','cp-pt3'],0)">&gt;70%／INR&lt;1.7（1点）</label>
+        <label class="rbtn" id="cp-pt2"><input type="radio" name="cp-pt" value="2" onchange="rselN(['cp-pt1','cp-pt2','cp-pt3'],1)">40〜70%／INR1.7〜2.3（2点）</label>
+        <label class="rbtn" id="cp-pt3"><input type="radio" name="cp-pt" value="3" onchange="rselN(['cp-pt1','cp-pt2','cp-pt3'],2)">&lt;40%／INR&gt;2.3（3点）</label>
+      </div>
+    </div>
+    <button class="calc-btn" onclick="calcChildPugh()">計算する</button>
+    <button class="reset-btn" onclick="rst('cp')">リセット</button>
+    <div class="rc" id="cp-rc"><div class="rl">Child-Pugh</div><div class="rv" id="cp-rv"></div><div class="ri" id="cp-ri"></div><div class="rn" id="cp-rn"></div></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Child-Pugh 分類と予後</div>
+    <table class="ref-table"><tr><th>項目</th><th>1点</th><th>2点</th><th>3点</th></tr>
+    <tr><td>肝性脳症</td><td>なし</td><td>I〜II（軽度）</td><td>III〜IV（昏睡）</td></tr>
+    <tr><td>腹水</td><td>なし</td><td>軽度（制御可）</td><td>中等度以上</td></tr>
+    <tr><td>T-Bil (mg/dL)</td><td>&lt;2.0</td><td>2.0〜3.0</td><td>&gt;3.0</td></tr>
+    <tr><td>Alb (g/dL)</td><td>&gt;3.5</td><td>2.8〜3.5</td><td>&lt;2.8</td></tr>
+    <tr><td>PT活性 / INR</td><td>&gt;70% / &lt;1.7</td><td>40〜70% / 1.7〜2.3</td><td>&lt;40% / &gt;2.3</td></tr></table>
+    <div class="divider"></div>
+    <table class="ref-table"><tr><th>合計点</th><th>分類</th><th>1年生存率（目安）</th></tr>
+    <tr><td>5〜6点</td><td><span class="tag t-ok">Grade A</span></td><td>約100%</td></tr>
+    <tr><td>7〜9点</td><td><span class="tag t-ld">Grade B</span></td><td>約80%</td></tr>
+    <tr><td>10〜15点</td><td><span class="tag t-dg">Grade C</span></td><td>約45%</td></tr></table>
+    <p class="rn" style="margin-top:8px">※原発性胆汁性胆管炎（PBC）ではビリルビンのカットオフを1点&lt;4／2点4〜10／3点&gt;10 mg/dLとする変法もある。<br>※肝細胞癌の治療方針（切除・TACE等）や待機的手術の可否判定に用いられる。</p>
+  </div>
+</div>
+
 <!-- ========== 糖尿病 ========== -->
 <div id="tab-bmi" class="section">
   <div class="card">
@@ -469,12 +530,29 @@ input[type=number]:focus{outline:none;border-color:var(--p);box-shadow:0 0 0 3px
         <label class="rbtn" id="hs-f"><input type="radio" name="hs-sex" value="female" onchange="rsel('hs-f','hs-m')">女性</label>
       </div>
     </div>
-    <div class="form-row">
-      <div class="field"><label>収縮期血圧</label><div class="input-wrap"><input type="number" id="hs-sbp" placeholder="130" min="60" max="250" inputmode="numeric"><span class="unit">mmHg</span></div></div>
-      <div class="field"><label>LDL-コレステロール</label><div class="input-wrap"><input type="number" id="hs-ldl" placeholder="120" min="30" max="500" inputmode="numeric"><span class="unit">mg/dL</span></div></div>
+    <div class="field" style="margin-bottom:10px"><label>収縮期血圧（mmHg）</label>
+      <div class="radio-group" style="margin-top:5px;flex-wrap:wrap">
+        <label class="rbtn sel" id="hs-sbp0"><input type="radio" name="hs-sbp" value="0" checked onchange="rselN(['hs-sbp0','hs-sbp1','hs-sbp2','hs-sbp3','hs-sbp4'],0)">&lt;120（0点）</label>
+        <label class="rbtn" id="hs-sbp1"><input type="radio" name="hs-sbp" value="1" onchange="rselN(['hs-sbp0','hs-sbp1','hs-sbp2','hs-sbp3','hs-sbp4'],1)">120〜129（+1）</label>
+        <label class="rbtn" id="hs-sbp2"><input type="radio" name="hs-sbp" value="2" onchange="rselN(['hs-sbp0','hs-sbp1','hs-sbp2','hs-sbp3','hs-sbp4'],2)">130〜139（+2）</label>
+        <label class="rbtn" id="hs-sbp3"><input type="radio" name="hs-sbp" value="3" onchange="rselN(['hs-sbp0','hs-sbp1','hs-sbp2','hs-sbp3','hs-sbp4'],3)">140〜159（+3）</label>
+        <label class="rbtn" id="hs-sbp4"><input type="radio" name="hs-sbp" value="4" onchange="rselN(['hs-sbp0','hs-sbp1','hs-sbp2','hs-sbp3','hs-sbp4'],4)">≥160（+4）</label>
+      </div>
     </div>
-    <div class="form-row s1">
-      <div class="field"><label>HDL-コレステロール</label><div class="input-wrap"><input type="number" id="hs-hdl" placeholder="55" min="10" max="200" inputmode="numeric"><span class="unit">mg/dL</span></div></div>
+    <div class="field" style="margin-bottom:10px"><label>LDL-コレステロール（mg/dL）</label>
+      <div class="radio-group" style="margin-top:5px;flex-wrap:wrap">
+        <label class="rbtn sel" id="hs-ldl0"><input type="radio" name="hs-ldl" value="0" checked onchange="rselN(['hs-ldl0','hs-ldl1','hs-ldl2','hs-ldl3'],0)">&lt;120（0点）</label>
+        <label class="rbtn" id="hs-ldl1"><input type="radio" name="hs-ldl" value="1" onchange="rselN(['hs-ldl0','hs-ldl1','hs-ldl2','hs-ldl3'],1)">120〜139（+1）</label>
+        <label class="rbtn" id="hs-ldl2"><input type="radio" name="hs-ldl" value="2" onchange="rselN(['hs-ldl0','hs-ldl1','hs-ldl2','hs-ldl3'],2)">140〜159（+2）</label>
+        <label class="rbtn" id="hs-ldl3"><input type="radio" name="hs-ldl" value="3" onchange="rselN(['hs-ldl0','hs-ldl1','hs-ldl2','hs-ldl3'],3)">≥160（+3）</label>
+      </div>
+    </div>
+    <div class="field" style="margin-bottom:10px"><label>HDL-コレステロール（mg/dL）</label>
+      <div class="radio-group" style="margin-top:5px;flex-wrap:wrap">
+        <label class="rbtn sel" id="hs-hdl0"><input type="radio" name="hs-hdl" value="0" checked onchange="rselN(['hs-hdl0','hs-hdl1','hs-hdl2'],0)">≥60（0点）</label>
+        <label class="rbtn" id="hs-hdl1"><input type="radio" name="hs-hdl" value="1" onchange="rselN(['hs-hdl0','hs-hdl1','hs-hdl2'],1)">40〜59（+1）</label>
+        <label class="rbtn" id="hs-hdl2"><input type="radio" name="hs-hdl" value="2" onchange="rselN(['hs-hdl0','hs-hdl1','hs-hdl2'],2)">&lt;40（+2）</label>
+      </div>
     </div>
     <div class="field" style="margin-bottom:10px"><label>現在喫煙（+2点）</label>
       <div class="radio-group" style="margin-top:5px">
@@ -488,7 +566,6 @@ input[type=number]:focus{outline:none;border-color:var(--p);box-shadow:0 0 0 3px
         <label class="rbtn" id="hs-dm-y"><input type="radio" name="hs-dm" value="yes" onchange="rsel('hs-dm-y','hs-dm-n')">あり</label>
       </div>
     </div>
-    <div class="err" id="hs-err">収縮期血圧・LDL-C・HDL-Cを入力してください。</div>
     <button class="calc-btn" onclick="calcHisayama()">計算する</button>
     <button class="reset-btn" onclick="rst('hs')">リセット</button>
     <div class="rc" id="hs-rc"><div class="rl">久山町スコア</div><div class="rv" id="hs-rv"></div><div class="ri" id="hs-ri"></div><div class="rn" id="hs-rn"></div></div>
@@ -924,6 +1001,72 @@ input[type=number]:focus{outline:none;border-color:var(--p);box-shadow:0 0 0 3px
   </div>
 </div>
 
+<div id="tab-lrinec" class="section">
+  <div class="card">
+    <div class="card-title">LRINEC スコア<span class="badge">壊死性軟部組織感染症</span></div>
+    <div class="formula-box">Laboratory Risk Indicator for Necrotizing Fasciitis（6項目・合計0〜13点）<br>蜂窩織炎と壊死性筋膜炎の鑑別補助。単独では除外不可</div>
+    <div class="field" style="margin-bottom:10px"><label>CRP（mg/dL）</label>
+      <div class="radio-group" style="margin-top:5px;flex-wrap:wrap">
+        <label class="rbtn sel" id="lr-crp0"><input type="radio" name="lr-crp" value="0" checked onchange="rselN(['lr-crp0','lr-crp1'],0)">&lt;15（0点）</label>
+        <label class="rbtn" id="lr-crp1"><input type="radio" name="lr-crp" value="4" onchange="rselN(['lr-crp0','lr-crp1'],1)">≥15（+4）</label>
+      </div>
+    </div>
+    <div class="field" style="margin-bottom:10px"><label>白血球数（/μL）</label>
+      <div class="radio-group" style="margin-top:5px;flex-wrap:wrap">
+        <label class="rbtn sel" id="lr-wbc0"><input type="radio" name="lr-wbc" value="0" checked onchange="rselN(['lr-wbc0','lr-wbc1','lr-wbc2'],0)">&lt;15,000（0点）</label>
+        <label class="rbtn" id="lr-wbc1"><input type="radio" name="lr-wbc" value="1" onchange="rselN(['lr-wbc0','lr-wbc1','lr-wbc2'],1)">15,000〜25,000（+1）</label>
+        <label class="rbtn" id="lr-wbc2"><input type="radio" name="lr-wbc" value="2" onchange="rselN(['lr-wbc0','lr-wbc1','lr-wbc2'],2)">&gt;25,000（+2）</label>
+      </div>
+    </div>
+    <div class="field" style="margin-bottom:10px"><label>ヘモグロビン（g/dL）</label>
+      <div class="radio-group" style="margin-top:5px;flex-wrap:wrap">
+        <label class="rbtn sel" id="lr-hb0"><input type="radio" name="lr-hb" value="0" checked onchange="rselN(['lr-hb0','lr-hb1','lr-hb2'],0)">&gt;13.5（0点）</label>
+        <label class="rbtn" id="lr-hb1"><input type="radio" name="lr-hb" value="1" onchange="rselN(['lr-hb0','lr-hb1','lr-hb2'],1)">11〜13.5（+1）</label>
+        <label class="rbtn" id="lr-hb2"><input type="radio" name="lr-hb" value="2" onchange="rselN(['lr-hb0','lr-hb1','lr-hb2'],2)">&lt;11（+2）</label>
+      </div>
+    </div>
+    <div class="field" style="margin-bottom:10px"><label>血清ナトリウム（mmol/L）</label>
+      <div class="radio-group" style="margin-top:5px;flex-wrap:wrap">
+        <label class="rbtn sel" id="lr-na0"><input type="radio" name="lr-na" value="0" checked onchange="rselN(['lr-na0','lr-na1'],0)">≥135（0点）</label>
+        <label class="rbtn" id="lr-na1"><input type="radio" name="lr-na" value="2" onchange="rselN(['lr-na0','lr-na1'],1)">&lt;135（+2）</label>
+      </div>
+    </div>
+    <div class="field" style="margin-bottom:10px"><label>血清クレアチニン（mg/dL）</label>
+      <div class="radio-group" style="margin-top:5px;flex-wrap:wrap">
+        <label class="rbtn sel" id="lr-cr0"><input type="radio" name="lr-cr" value="0" checked onchange="rselN(['lr-cr0','lr-cr1'],0)">≤1.6（0点）</label>
+        <label class="rbtn" id="lr-cr1"><input type="radio" name="lr-cr" value="2" onchange="rselN(['lr-cr0','lr-cr1'],1)">&gt;1.6（+2）</label>
+      </div>
+    </div>
+    <div class="field" style="margin-bottom:10px"><label>血糖（mg/dL）</label>
+      <div class="radio-group" style="margin-top:5px;flex-wrap:wrap">
+        <label class="rbtn sel" id="lr-glu0"><input type="radio" name="lr-glu" value="0" checked onchange="rselN(['lr-glu0','lr-glu1'],0)">≤180（0点）</label>
+        <label class="rbtn" id="lr-glu1"><input type="radio" name="lr-glu" value="1" onchange="rselN(['lr-glu0','lr-glu1'],1)">&gt;180（+1）</label>
+      </div>
+    </div>
+    <button class="calc-btn" onclick="calcLRINEC()">計算する</button>
+    <button class="reset-btn" onclick="rst('lr')">リセット</button>
+    <div class="rc" id="lrinec-rc"><div class="rl">LRINEC</div><div class="rv" id="lrinec-rv"></div><div class="ri" id="lrinec-ri"></div><div class="rn" id="lrinec-rn"></div></div>
+  </div>
+  <div class="card">
+    <div class="card-title">LRINEC 配点とリスク層別</div>
+    <table class="ref-table"><tr><th>項目</th><th>基準</th><th>点数</th></tr>
+    <tr><td rowspan="1">CRP (mg/dL)</td><td>≥15</td><td>+4</td></tr>
+    <tr><td rowspan="2">WBC (/μL)</td><td>15,000〜25,000</td><td>+1</td></tr>
+    <tr><td>&gt;25,000</td><td>+2</td></tr>
+    <tr><td rowspan="2">Hb (g/dL)</td><td>11〜13.5</td><td>+1</td></tr>
+    <tr><td>&lt;11</td><td>+2</td></tr>
+    <tr><td>Na (mmol/L)</td><td>&lt;135</td><td>+2</td></tr>
+    <tr><td>Cr (mg/dL)</td><td>&gt;1.6</td><td>+2</td></tr>
+    <tr><td>血糖 (mg/dL)</td><td>&gt;180</td><td>+1</td></tr></table>
+    <div class="divider"></div>
+    <table class="ref-table"><tr><th>合計点</th><th>リスク</th><th>壊死性筋膜炎の確率</th></tr>
+    <tr><td>≤5</td><td><span class="tag t-ok">低リスク</span></td><td>&lt;50%</td></tr>
+    <tr><td>6〜7</td><td><span class="tag t-ld">中等度リスク</span></td><td>50〜75%</td></tr>
+    <tr><td>≥8</td><td><span class="tag t-dg">高リスク</span></td><td>&gt;75%</td></tr></table>
+    <p class="rn" style="margin-top:8px">※≥6で壊死性筋膜炎を強く疑い、緊急の外科的評価（試験切開・デブリドマン）を検討。<br>※スコアが低くても臨床的に疑わしければ除外してはならない（感度は限定的）。CRPは150 mg/L＝15 mg/dLが閾値。</p>
+  </div>
+</div>
+
 <!-- ========== 膵・胆道 ========== -->
 <div id="tab-panc" class="section">
   <div class="card">
@@ -1122,17 +1265,80 @@ input[type=number]:focus{outline:none;border-color:var(--p);box-shadow:0 0 0 3px
   </div>
 </div>
 
+<!-- ========== 血栓・塞栓 ========== -->
+<div id="tab-wells-pe" class="section">
+  <div class="card">
+    <div class="card-title">Wells スコア（肺塞栓症）<span class="badge">PE 臨床的可能性</span></div>
+    <div class="formula-box">急性肺塞栓症（PE）の検査前確率評価。該当項目にチェック（合計0〜12.5点）</div>
+    <label class="chk-item" id="wpe-dvt-btn" onclick="toggleChk('wpe-dvt-btn')"><input type="checkbox" id="wpe-dvt"><div class="chk-box">✓</div><span class="chk-lbl">DVTの臨床症状・徴候（下肢腫脹＋深部静脈に沿った圧痛）（+3）</span></label>
+    <label class="chk-item" id="wpe-alt-btn" onclick="toggleChk('wpe-alt-btn')"><input type="checkbox" id="wpe-alt"><div class="chk-box">✓</div><span class="chk-lbl">PEが他の診断より濃厚（代替診断の可能性がPEより低い）（+3）</span></label>
+    <label class="chk-item" id="wpe-hr-btn" onclick="toggleChk('wpe-hr-btn')"><input type="checkbox" id="wpe-hr"><div class="chk-box">✓</div><span class="chk-lbl">心拍数 &gt;100/分（+1.5）</span></label>
+    <label class="chk-item" id="wpe-imm-btn" onclick="toggleChk('wpe-imm-btn')"><input type="checkbox" id="wpe-imm"><div class="chk-box">✓</div><span class="chk-lbl">4週以内の手術、または3日以上の臥床（+1.5）</span></label>
+    <label class="chk-item" id="wpe-hx-btn" onclick="toggleChk('wpe-hx-btn')"><input type="checkbox" id="wpe-hx"><div class="chk-box">✓</div><span class="chk-lbl">DVT・PEの既往（+1.5）</span></label>
+    <label class="chk-item" id="wpe-hemo-btn" onclick="toggleChk('wpe-hemo-btn')"><input type="checkbox" id="wpe-hemo"><div class="chk-box">✓</div><span class="chk-lbl">喀血（+1）</span></label>
+    <label class="chk-item" id="wpe-ca-btn" onclick="toggleChk('wpe-ca-btn')"><input type="checkbox" id="wpe-ca"><div class="chk-box">✓</div><span class="chk-lbl">悪性腫瘍（治療中・6ヶ月以内・緩和治療）（+1）</span></label>
+    <button class="calc-btn" onclick="calcWellsPE()">計算する</button>
+    <button class="reset-btn" onclick="rst('wpe')">リセット</button>
+    <div class="rc" id="wells-pe-rc"><div class="rl">Wells（PE）</div><div class="rv" id="wells-pe-rv"></div><div class="ri" id="wells-pe-ri"></div><div class="rn" id="wells-pe-rn"></div></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Wells（PE）解釈</div>
+    <table class="ref-table"><tr><th>2分類（推奨）</th><th>合計点</th><th>方針</th></tr>
+    <tr><td><span class="tag t-ok">PE可能性低い</span></td><td>≤4点</td><td>D-dimer測定。陰性ならPE除外</td></tr>
+    <tr><td><span class="tag t-dg">PE可能性高い</span></td><td>&gt;4点（≥5）</td><td>造影CT肺動脈撮影（CTPA）を考慮</td></tr></table>
+    <div class="divider"></div>
+    <table class="ref-table"><tr><th>3分類</th><th>合計点</th><th>PE有病率</th></tr>
+    <tr><td><span class="tag t-ok">低確率</span></td><td>&lt;2点</td><td>約1.3〜3%</td></tr>
+    <tr><td><span class="tag t-ld">中確率</span></td><td>2〜6点</td><td>約16〜28%</td></tr>
+    <tr><td><span class="tag t-dg">高確率</span></td><td>&gt;6点</td><td>約38〜78%</td></tr></table>
+    <p class="rn" style="margin-top:8px">※血行動態不安定（ショック・低血圧）の場合はスコアによらず直ちに画像評価・治療を。<br>※D-dimerは年齢調整カットオフ（年齢×10 μg/L, 50歳超）の併用も有用。</p>
+  </div>
+</div>
+
+<div id="tab-wells-dvt" class="section">
+  <div class="card">
+    <div class="card-title">Wells スコア（深部静脈血栓症）<span class="badge">DVT 臨床的可能性</span></div>
+    <div class="formula-box">下肢DVTの検査前確率評価。該当項目にチェック（−2〜9点）</div>
+    <label class="chk-item" id="wdvt-ca-btn" onclick="toggleChk('wdvt-ca-btn')"><input type="checkbox" id="wdvt-ca"><div class="chk-box">✓</div><span class="chk-lbl">活動性の癌（治療中・6ヶ月以内・緩和治療）（+1）</span></label>
+    <label class="chk-item" id="wdvt-para-btn" onclick="toggleChk('wdvt-para-btn')"><input type="checkbox" id="wdvt-para"><div class="chk-box">✓</div><span class="chk-lbl">下肢の麻痺・不全麻痺、または最近のギプス固定（+1）</span></label>
+    <label class="chk-item" id="wdvt-imm-btn" onclick="toggleChk('wdvt-imm-btn')"><input type="checkbox" id="wdvt-imm"><div class="chk-box">✓</div><span class="chk-lbl">3日以上の臥床、または12週以内の大手術（+1）</span></label>
+    <label class="chk-item" id="wdvt-tend-btn" onclick="toggleChk('wdvt-tend-btn')"><input type="checkbox" id="wdvt-tend"><div class="chk-box">✓</div><span class="chk-lbl">深部静脈の走行に沿った限局性圧痛（+1）</span></label>
+    <label class="chk-item" id="wdvt-swell-btn" onclick="toggleChk('wdvt-swell-btn')"><input type="checkbox" id="wdvt-swell"><div class="chk-box">✓</div><span class="chk-lbl">下肢全体の腫脹（+1）</span></label>
+    <label class="chk-item" id="wdvt-calf-btn" onclick="toggleChk('wdvt-calf-btn')"><input type="checkbox" id="wdvt-calf"><div class="chk-box">✓</div><span class="chk-lbl">腓腹部周径の左右差 &gt;3cm（脛骨粗面下10cmで計測）（+1）</span></label>
+    <label class="chk-item" id="wdvt-edema-btn" onclick="toggleChk('wdvt-edema-btn')"><input type="checkbox" id="wdvt-edema"><div class="chk-box">✓</div><span class="chk-lbl">患肢に限局する圧痕性浮腫（+1）</span></label>
+    <label class="chk-item" id="wdvt-collat-btn" onclick="toggleChk('wdvt-collat-btn')"><input type="checkbox" id="wdvt-collat"><div class="chk-box">✓</div><span class="chk-lbl">表在側副静脈の怒張（非静脈瘤性）（+1）</span></label>
+    <label class="chk-item" id="wdvt-hx-btn" onclick="toggleChk('wdvt-hx-btn')"><input type="checkbox" id="wdvt-hx"><div class="chk-box">✓</div><span class="chk-lbl">DVTの既往（+1）</span></label>
+    <label class="chk-item" id="wdvt-alt-btn" onclick="toggleChk('wdvt-alt-btn')"><input type="checkbox" id="wdvt-alt"><div class="chk-box">✓</div><span class="chk-lbl">DVT以外の診断が同等以上に考えられる（−2）</span></label>
+    <button class="calc-btn" onclick="calcWellsDVT()">計算する</button>
+    <button class="reset-btn" onclick="rst('wdvt')">リセット</button>
+    <div class="rc" id="wells-dvt-rc"><div class="rl">Wells（DVT）</div><div class="rv" id="wells-dvt-rv"></div><div class="ri" id="wells-dvt-ri"></div><div class="rn" id="wells-dvt-rn"></div></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Wells（DVT）解釈</div>
+    <table class="ref-table"><tr><th>2分類（推奨）</th><th>合計点</th><th>方針</th></tr>
+    <tr><td><span class="tag t-ok">DVT可能性低い</span></td><td>≤1点</td><td>D-dimer測定。陰性ならDVT除外</td></tr>
+    <tr><td><span class="tag t-dg">DVT可能性高い</span></td><td>≥2点</td><td>下肢静脈エコー（圧迫超音波）を実施</td></tr></table>
+    <div class="divider"></div>
+    <table class="ref-table"><tr><th>3分類</th><th>合計点</th><th>DVT有病率</th></tr>
+    <tr><td><span class="tag t-ok">低確率</span></td><td>≤0点</td><td>約5%</td></tr>
+    <tr><td><span class="tag t-ld">中確率</span></td><td>1〜2点</td><td>約17%</td></tr>
+    <tr><td><span class="tag t-dg">高確率</span></td><td>≥3点</td><td>約53%</td></tr></table>
+    <p class="rn" style="margin-top:8px">※両下肢に症状がある場合は、より症状の強い側で評価する。<br>※D-dimer陰性＋低確率でDVTをほぼ除外できる。エコー陰性でも高確率例では1週間後の再検を検討。</p>
+  </div>
+</div>
+
 </main>
 <script>
 const CATS={
   kidney:{label:'腎臓',calcs:[{id:'ccr',label:'CCr（CG式）'},{id:'fena',label:'FENa'}]},
-  liver:{label:'肝臓',calcs:[{id:'meld',label:'MELD'},{id:'mdf',label:'MDF'},{id:'gahs',label:'GAHS'},{id:'jas',label:'JAS'},{id:'fib4',label:'FIB-4'}]},
+  liver:{label:'肝臓',calcs:[{id:'meld',label:'MELD'},{id:'mdf',label:'MDF'},{id:'gahs',label:'GAHS'},{id:'jas',label:'JAS'},{id:'fib4',label:'FIB-4'},{id:'childpugh',label:'Child-Pugh'}]},
   diabetes:{label:'糖尿病',calcs:[{id:'bmi',label:'BMI'},{id:'homa',label:'HOMA-IR/β'},{id:'cpr',label:'CPRindex'}]},
   lipid:{label:'脂質異常症',calcs:[{id:'suita',label:'久山町スコア'},{id:'ldl',label:'LDL管理目標'}]},
   electrolyte:{label:'電解質',calcs:[{id:'ag',label:'Anion Gap'},{id:'ca',label:'補正Ca'},{id:'osm',label:'血漿浸透圧'},{id:'corrna',label:'補正Na'}]},
   blood:{label:'血液',calcs:[{id:'rpi',label:'RPI'}]},
-  infection:{label:'感染症',calcs:[{id:'centor',label:'Centorスコア'},{id:'sinusitis',label:'急性鼻副鼻腔炎'},{id:'adrop',label:'A-DROP'},{id:'pntype',label:'肺炎鑑別'},{id:'qsofa',label:'qSOFA'},{id:'sofa',label:'SOFA'},{id:'sirs',label:'SIRS'}]},
+  infection:{label:'感染症',calcs:[{id:'centor',label:'Centorスコア'},{id:'sinusitis',label:'急性鼻副鼻腔炎'},{id:'adrop',label:'A-DROP'},{id:'pntype',label:'肺炎鑑別'},{id:'qsofa',label:'qSOFA'},{id:'sofa',label:'SOFA'},{id:'sirs',label:'SIRS'},{id:'lrinec',label:'LRINEC'}]},
   panc_bili:{label:'膵・胆道',calcs:[{id:'panc',label:'急性膵炎重症度'},{id:'cholecyst-dx',label:'胆嚢炎診断'},{id:'cholang-dx',label:'胆管炎診断'},{id:'cholecyst-sev',label:'胆嚢炎重症度'},{id:'cholang-sev',label:'胆管炎重症度'}]},
+  thrombosis:{label:'血栓・塞栓',calcs:[{id:'wells-pe',label:'Wells（肺塞栓）'},{id:'wells-dvt',label:'Wells（DVT）'}]},
   oncall:{label:'待機医師票',calcs:[{id:'oncall',label:'内科・呼吸器科 待機医師票'}]}
 };
 let curCat='kidney';
@@ -1173,6 +1379,10 @@ const SEARCH_KW={
   gahs:'GAHS グラスゴー アルコール性肝炎 肝臓 予後',
   jas:'JAS 日本 アルコール性肝炎 重症度 肝臓',
   fib4:'FIB-4 FIB4 ファイブフォー 肝線維化 線維化 NAFLD NASH MASLD AST ALT 血小板 肝臓',
+  childpugh:'Child-Pugh チャイルドピュー 肝硬変 肝予備能 肝機能 分類 腹水 脳症 ビリルビン アルブミン PT 肝臓',
+  lrinec:'LRINEC 壊死性筋膜炎 壊死性軟部組織感染症 necrotizing fasciitis 軟部組織 感染症 CRP',
+  'wells-pe':'Wells ウェルズ 肺塞栓 肺塞栓症 PE 肺血栓塞栓症 静脈血栓塞栓症 VTE 血栓',
+  'wells-dvt':'Wells ウェルズ 深部静脈血栓症 DVT 下肢 静脈血栓塞栓症 VTE 血栓',
   bmi:'BMI 体格指数 肥満 やせ Body Mass Index 糖尿病 体重',
   homa:'HOMA-IR HOMA-β インスリン抵抗性 膵β細胞 糖尿病',
   cpr:'CPR インデックス Cペプチド インスリン分泌能 糖尿病',
@@ -1417,6 +1627,76 @@ function calcFIB4(){
   setRC('fib4-rc',cls,fib4.toFixed(2),ri,rn);
 }
 
+// ===== Child-Pugh 分類 =====
+function calcChildPugh(){
+  const enc=parseInt(radio('cp-enc')||'1');
+  const asc=parseInt(radio('cp-asc')||'1');
+  const bil=parseInt(radio('cp-bil')||'1');
+  const alb=parseInt(radio('cp-alb')||'1');
+  const pt=parseInt(radio('cp-pt')||'1');
+  const sc=enc+asc+bil+alb+pt;
+  let cls,grade,ri,rn;
+  if(sc<=6){cls='ok';grade='A';ri='Grade A（代償性肝硬変）';rn='肝予備能は良好。1年生存率は約100%。待機的手術の耐術性も比較的良好。';}
+  else if(sc<=9){cls='wn';grade='B';ri='Grade B';rn='中等度の肝機能障害。1年生存率は約80%。侵襲的治療・手術の適応は慎重に判断。';}
+  else{cls='ng';grade='C';ri='Grade C（非代償性肝硬変）';rn='高度の肝機能障害。1年生存率は約45%。原則として待機的手術は非適応。肝移植の検討を。';}
+  setRC('cp-rc',cls,sc+' 点（Grade '+grade+'）',ri,`脳症${enc} 腹水${asc} T-Bil${bil} Alb${alb} PT${pt}\n${rn}`);
+}
+
+// ===== LRINEC スコア =====
+function calcLRINEC(){
+  const crp=parseInt(radio('lr-crp')||'0');
+  const wbc=parseInt(radio('lr-wbc')||'0');
+  const hb=parseInt(radio('lr-hb')||'0');
+  const na=parseInt(radio('lr-na')||'0');
+  const cr=parseInt(radio('lr-cr')||'0');
+  const glu=parseInt(radio('lr-glu')||'0');
+  const sc=crp+wbc+hb+na+cr+glu;
+  let cls,ri,rn;
+  if(sc<=5){cls='ok';ri='低リスク（壊死性筋膜炎の確率<50%）';rn='蜂窩織炎などの可能性が高いが、除外はできない。臨床経過を注意深く観察する。';}
+  else if(sc<=7){cls='wn';ri='中等度リスク（確率50〜75%）';rn='壊死性軟部組織感染症を疑う。外科への相談・追加評価（造影CT・試験切開）を検討。';}
+  else{cls='ng';ri='高リスク（確率>75%）';rn='壊死性筋膜炎の可能性が高い。緊急の外科的デブリドマンと広域抗菌薬投与を直ちに検討。';}
+  setRC('lrinec-rc',cls,sc+' 点 / 13点',ri,`CRP+${crp} WBC+${wbc} Hb+${hb} Na+${na} Cr+${cr} 血糖+${glu}\n${rn}`);
+}
+
+// ===== Wells スコア（肺塞栓症） =====
+function calcWellsPE(){
+  let sc=0;
+  if(isChk('wpe-dvt'))sc+=3;
+  if(isChk('wpe-alt'))sc+=3;
+  if(isChk('wpe-hr'))sc+=1.5;
+  if(isChk('wpe-imm'))sc+=1.5;
+  if(isChk('wpe-hx'))sc+=1.5;
+  if(isChk('wpe-hemo'))sc+=1;
+  if(isChk('wpe-ca'))sc+=1;
+  const two=sc>4?'PE可能性高い（>4点）':'PE可能性低い（≤4点）';
+  const three=sc<2?'低確率':(sc<=6?'中確率':'高確率');
+  let cls,rn;
+  if(sc<=4){cls='ok';rn=`3分類：${three}\nD-dimerを測定し、陰性であればPEを除外。陽性なら造影CT（CTPA）を検討。`;}
+  else{cls='ng';rn=`3分類：${three}\n造影CT肺動脈撮影（CTPA）を実施。D-dimerによる除外は不適。`;}
+  setRC('wells-pe-rc',cls,sc+' 点',two,rn);
+}
+
+// ===== Wells スコア（深部静脈血栓症） =====
+function calcWellsDVT(){
+  let sc=0;
+  if(isChk('wdvt-ca'))sc+=1;
+  if(isChk('wdvt-para'))sc+=1;
+  if(isChk('wdvt-imm'))sc+=1;
+  if(isChk('wdvt-tend'))sc+=1;
+  if(isChk('wdvt-swell'))sc+=1;
+  if(isChk('wdvt-calf'))sc+=1;
+  if(isChk('wdvt-edema'))sc+=1;
+  if(isChk('wdvt-collat'))sc+=1;
+  if(isChk('wdvt-hx'))sc+=1;
+  if(isChk('wdvt-alt'))sc-=2;
+  const two=sc>=2?'DVT可能性高い（≥2点）':'DVT可能性低い（≤1点）';
+  const three=sc<=0?'低確率':(sc<=2?'中確率':'高確率');
+  let cls,rn;
+  if(sc<2){cls='ok';rn=`3分類：${three}\nD-dimerを測定し、陰性であればDVTを除外。陽性なら下肢静脈エコーを実施。`;}
+  else{cls='ng';rn=`3分類：${three}\n下肢静脈エコー（圧迫超音波）を実施してDVTを評価。`;}
+  setRC('wells-dvt-rc',cls,sc+' 点',two,rn);
+}
+
 // ===== BMI =====
 function calcBMI(){
   const h=v('bmi-h'),w=v('bmi-w');
@@ -1477,25 +1757,20 @@ const HISAYAMA_TABLE={
   70:[3.4,3.9,4.5,5.2,6.0,6.9,7.9,9.1,10.4,11.9,13.6,15.5,17.7,20.2,22.9,25.9,29.3,33.0,37.0,41.1]
 };
 function calcHisayama(){
-  const sbp=v('hs-sbp'),ldlV=v('hs-ldl'),hdl=v('hs-hdl');
-  if(!ok(sbp)||!ok(ldlV)||!ok(hdl)){err('hs-err',true);hideRC('hs-rc');return;}
-  err('hs-err',false);
   const male=radio('hs-sex')==='male';
   const ageG=parseInt(radio('hs-age')||'40');
   const smk=radio('hs-smk')==='yes';
   const dm=radio('hs-dm')==='yes';
+  const sbpPts=parseInt(radio('hs-sbp')||'0');
+  const ldlPts=parseInt(radio('hs-ldl')||'0');
+  const hdlPts=parseInt(radio('hs-hdl')||'0');
   let sc=0;
   if(male)sc+=7;
-  // SBP
-  if(sbp<120)sc+=0;else if(sbp<130)sc+=1;else if(sbp<140)sc+=2;else if(sbp<160)sc+=3;else sc+=4;
-  // DM/glucose
-  if(dm)sc+=1;
-  // LDL-C
-  if(ldlV<120)sc+=0;else if(ldlV<140)sc+=1;else if(ldlV<160)sc+=2;else sc+=3;
-  // HDL-C
-  if(hdl>=60)sc+=0;else if(hdl>=40)sc+=1;else sc+=2;
-  // Smoking
-  if(smk)sc+=2;
+  sc+=sbpPts;      // 収縮期血圧
+  if(dm)sc+=1;     // 耐糖能異常・DM
+  sc+=ldlPts;      // LDL-C
+  sc+=hdlPts;      // HDL-C
+  if(smk)sc+=2;    // 喫煙
   const sc2=Math.min(sc,19);
   const estRisk=HISAYAMA_TABLE[ageG][sc2];
   // Risk classification by age group
@@ -1516,7 +1791,7 @@ function calcHisayama(){
     else{cls='ng';ri='高リスク（推定10年リスク≥10%）';ldlTarget='<120 mg/dL';}
   }
   const ageLabel=`${ageG}〜${ageG+9}歳`;
-  const detail=`性別(${male?'男+7':'女0'}) SBP(${sbp<120?0:sbp<130?1:sbp<140?2:sbp<160?3:4}点) DM(${dm?1:0}点) LDL(${ldlV<120?0:ldlV<140?1:ldlV<160?2:3}点) HDL(${hdl>=60?0:hdl>=40?1:2}点) 喫煙(${smk?2:0}点)`;
+  const detail=`性別(${male?'男+7':'女0'}) SBP(+${sbpPts}) DM(${dm?1:0}点) LDL(+${ldlPts}) HDL(+${hdlPts}) 喫煙(${smk?2:0}点)`;
   rn=`${ageLabel}　推定10年ASCVD発症リスク：${estRisk.toFixed(1)}%\n${detail}\nLDL管理目標：${ldlTarget}`;
   setRC('hs-rc',cls,sc2+' 点 / 19点',ri,rn);
 }
