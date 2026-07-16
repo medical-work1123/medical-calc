@@ -38,17 +38,22 @@ main{max-width:600px;margin:0 auto;padding:24px 16px;}
     </div>
     <div id="oncall-list"></div>
     <div class="empty" id="oncall-empty" style="display:none">データがまだ公開されていません。</div>
+    <button id="copy-btn" style="display:none;margin-top:18px;width:100%;padding:12px;font-size:16px;font-weight:700;color:#fff;background:#1a6fb5;border:none;border-radius:10px;cursor:pointer;">📋 この月をコピー</button>
   </div>
   <a href="index.html" class="back">← トップに戻る</a>
 </main>
 <script>
+let currentRec=null;
 function render(rec){
+  currentRec=rec;
   document.getElementById('oncall-title').textContent=(rec&&rec.title)||'待機医師票';
   document.getElementById('oncall-updated').textContent=(rec&&rec.updated)?'更新日：'+rec.updated:'';
   const list=document.getElementById('oncall-list');
   const empty=document.getElementById('oncall-empty');
+  const btn=document.getElementById('copy-btn');
   if(rec&&rec.entries&&rec.entries.length>0){
     empty.style.display='none';
+    btn.style.display='block';
     list.innerHTML=rec.entries.map(e=>
       `<div class="entry">
         <span class="entry-date">${e.date}</span>
@@ -57,8 +62,36 @@ function render(rec){
     ).join('');
   }else{
     list.innerHTML='';
+    btn.style.display='none';
     empty.style.display='block';
   }
+}
+function buildText(rec){
+  const lines=[rec.title||'待機医師票',''];
+  rec.entries.forEach(e=>lines.push(e.date+e.doctor));
+  return lines.join('\n');
+}
+document.getElementById('copy-btn').addEventListener('click',()=>{
+  if(!currentRec||!currentRec.entries)return;
+  const text=buildText(currentRec);
+  const btn=document.getElementById('copy-btn');
+  const done=()=>{
+    btn.textContent='✅ コピーしました';
+    btn.style.background='#27ae60';
+    setTimeout(()=>{btn.textContent='📋 この月をコピー';btn.style.background='#1a6fb5';},2000);
+  };
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(done).catch(()=>fallbackCopy(text,done));
+  }else{
+    fallbackCopy(text,done);
+  }
+});
+function fallbackCopy(text,done){
+  const ta=document.createElement('textarea');
+  ta.value=text;ta.style.position='fixed';ta.style.opacity='0';
+  document.body.appendChild(ta);ta.select();
+  try{document.execCommand('copy');done();}catch(e){alert('コピーできませんでした。');}
+  document.body.removeChild(ta);
 }
 fetch('oncall.json?_='+Date.now())
   .then(r=>r.ok?r.json():Promise.reject())
