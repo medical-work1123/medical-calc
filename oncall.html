@@ -32,27 +32,52 @@ main{max-width:600px;margin:0 auto;padding:24px 16px;}
   <div class="card">
     <div class="card-title" id="oncall-title">待機医師票</div>
     <div class="updated" id="oncall-updated"></div>
+    <div id="month-picker" style="display:none;margin-bottom:18px;">
+      <label for="month-select" style="font-size:14px;color:#475569;font-weight:700;margin-right:8px;">月を選択：</label>
+      <select id="month-select" style="font-size:15px;padding:6px 10px;border-radius:8px;border:1px solid #cbd5e1;background:#fff;"></select>
+    </div>
     <div id="oncall-list"></div>
     <div class="empty" id="oncall-empty" style="display:none">データがまだ公開されていません。</div>
   </div>
   <a href="index.html" class="back">← トップに戻る</a>
 </main>
 <script>
+function render(rec){
+  document.getElementById('oncall-title').textContent=(rec&&rec.title)||'待機医師票';
+  document.getElementById('oncall-updated').textContent=(rec&&rec.updated)?'更新日：'+rec.updated:'';
+  const list=document.getElementById('oncall-list');
+  const empty=document.getElementById('oncall-empty');
+  if(rec&&rec.entries&&rec.entries.length>0){
+    empty.style.display='none';
+    list.innerHTML=rec.entries.map(e=>
+      `<div class="entry">
+        <span class="entry-date">${e.date}</span>
+        <span class="entry-doctor">${e.doctor}</span>
+       </div>`
+    ).join('');
+  }else{
+    list.innerHTML='';
+    empty.style.display='block';
+  }
+}
 fetch('oncall.json?_='+Date.now())
   .then(r=>r.ok?r.json():Promise.reject())
   .then(d=>{
-    document.getElementById('oncall-title').textContent=d.title||'待機医師票';
-    document.getElementById('oncall-updated').textContent=d.updated?'更新日：'+d.updated:'';
-    const list=document.getElementById('oncall-list');
-    if(d.entries&&d.entries.length>0){
-      list.innerHTML=d.entries.map(e=>
-        `<div class="entry">
-          <span class="entry-date">${e.date}</span>
-          <span class="entry-doctor">${e.doctor}</span>
-         </div>`
-      ).join('');
+    const months=d.months;
+    if(months&&Object.keys(months).length>0){
+      const keys=Object.keys(months).sort().reverse();   // 新しい月が上
+      const sel=document.getElementById('month-select');
+      sel.innerHTML=keys.map(k=>{
+        const p=k.split('-');
+        return `<option value="${k}">${parseInt(p[0],10)}年${parseInt(p[1],10)}月</option>`;
+      }).join('');
+      const cur=(d.current&&months[d.current])?d.current:keys[0];
+      sel.value=cur;
+      document.getElementById('month-picker').style.display='block';
+      sel.addEventListener('change',()=>render(months[sel.value]));
+      render(months[cur]);
     }else{
-      document.getElementById('oncall-empty').style.display='block';
+      render(d);   // 旧・単月形式との互換
     }
   })
   .catch(()=>{document.getElementById('oncall-empty').style.display='block';});
